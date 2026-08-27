@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import QuestionInput from "./QuestionInput";
+import ObservationCard from "./ObservationCard";
 import Badge from "../common/Badge";
 import {
   activeQuestions,
@@ -17,7 +18,26 @@ import {
 import { engine } from "../../lib/ai/engine";
 import { answerToLabel, docName } from "../../lib/ai/rules";
 import { demoProfile, readProfile, saveProfile, setAnswer } from "../../lib/profile";
-import type { AnswerValue, Extraction, Profile, Question } from "../../lib/types";
+import {
+  analyze,
+  buildContrasts,
+  contrastFor,
+  applyDemoLedger,
+  emptyLedgerState,
+  observationFor,
+  readLedgerState,
+  saveLedgerState,
+  setResolution,
+} from "../../lib/ledger";
+import type {
+  AnswerValue,
+  Contrast,
+  Extraction,
+  LedgerState,
+  Profile,
+  Question,
+  Resolution,
+} from "../../lib/types";
 
 interface Bubble {
   id: string;
@@ -36,6 +56,7 @@ export default function InterviewShell() {
   const [freeText, setFreeText] = useState("");
   const [thinking, setThinking] = useState(false);
   const [jumpTo, setJumpTo] = useState<string | null>(null);
+  const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
   const streamRef = useRef<HTMLDivElement>(null);
   const askedRef = useRef<string | null>(null);
 
@@ -50,6 +71,7 @@ export default function InterviewShell() {
       if (d) {
         saveProfile(d);
         setProfile(d);
+        setLedgerState(applyDemoLedger(demo));
         const dq = query.get("q");
         if (dq) setJumpTo(dq);
         return;
@@ -61,9 +83,35 @@ export default function InterviewShell() {
       return;
     }
     setProfile(p);
+    setLedgerState(readLedgerState());
     const q = query.get("q");
     if (q) setJumpTo(q);
   }, [router]);
+
+  /* ── 관찰 (이력이 연동돼 있을 때만) ── */
+  const insight = useMemo(
+    () => (profile && ledgerState.ledger ? analyze(ledgerState.ledger, profile.track) : null),
+    [profile, ledgerState.ledger],
+  );
+
+  const contrasts = useMemo(
+    () =>
+      profile && insight && ledgerState.ledger
+        ? buildContrasts(profile, insight, ledgerState.ledger, ledgerState)
+        : [],
+    [profile, insight, ledgerState],
+  );
+
+  const resolveContrast = useCallback(
+    (c: Contrast, r: Resolution) => {
+      setLedgerState((s) => saveLedgerState(setResolution(s, c.qid, r)));
+      // Ledger 가 Profile 을 건드리는 유일한 경로.
+      if (r === "observed" && c.observedValue) {
+        setProfile((p) => (p ? saveProfile(setAnswer(p, c.qid, c.observedValue!)) : p));
+      }
+    },
+    [],
+  );
 
   const current: Question | null = useMemo(() => {
     if (!profile) return null;
@@ -360,8 +408,16 @@ export default function InterviewShell() {
         </div>
       </section>
 
-      {/* 우: 조항 피드 */}
+      {/* 우: 관측 카드 + 조항 피드 */}
       <aside className="iv-feed">
+        {current && insight && ledgerState.ledger && (
+          <ObservationCard
+            observation={observationFor(current.id, insight, ledgerState.ledger)}
+            contrast={contrastFor(contrasts, current.id)}
+            onResolve={resolveContrast}
+          />
+        )}
+
         <h4>작성 중인 조항</h4>
         {feed.length === 0 ? (
           <p className="feed-empty">

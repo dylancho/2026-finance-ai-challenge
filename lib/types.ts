@@ -312,3 +312,245 @@ export interface ScenarioResult {
   verdict: string[];
   gapCount: number;
 }
+
+/* ── 과거 금융이력 (Ledger) ────────────────────────────
+ * Profile 이 "선언"이라면 Ledger 는 "관찰"이다.
+ * 서로 덮어쓰지 않는다. 자세한 근거는
+ * docs/superpowers/specs/2026-08-27-ledger-axis-design.md §1 참조.
+ */
+
+export type LedgerSource = "synthetic" | "mydata";
+
+/** 성향 프리셋. 데모 시드를 의도대로 만들기 위해 쓴다. */
+export type LedgerPreset = "panic_seller" | "holder" | "cautious" | "spender";
+
+/** 한 달치 집계. 10년이면 120개. */
+export interface MonthRoll {
+  ym: string;
+  /** 고정비를 제외한 생활비 총액 (원) */
+  living: number;
+  /** 고정비 카테고리별 실제 납부액 */
+  fixed: Record<string, number>;
+  txnCount: number;
+  avgTxn: number;
+  /** 23~06시 거래 비율 0~1 */
+  nightRatio: number;
+  /** 그 달 처음 보는 수취인 수 */
+  newPayees: number;
+  /** 그 달 최대 1회 이체액 */
+  maxTransfer: number;
+  /** 고정비 연체 건수 */
+  latePayments: number;
+}
+
+export interface TradeEvent {
+  date: string;
+  kind: "buy" | "sell";
+  bucket: "equity" | "fund" | "bond";
+  amount: number;
+  /** 그 시점 시장 낙폭. 0 ~ -1. 매수는 0 */
+  marketDrawdown: number;
+  /** sell 일 때 보유분 중 매도 비중 0~1 */
+  portionSold?: number;
+  /** 낙폭 시작일로부터 경과일 */
+  daysFromDrawdownStart?: number;
+  /** 같은 시점 큰 지출이 있었으면 그 사유. 판정층이 맥락으로 쓴다. */
+  coincidingOutflow?: { label: string; amount: number };
+}
+
+export type IncidentType =
+  | "balance_error"
+  | "duplicate_transfer"
+  | "late_payment"
+  | "night_large"
+  | "new_payee_large"
+  | "unused_subscription";
+
+export interface Incident {
+  date: string;
+  type: IncidentType;
+  amount?: number;
+  note: string;
+}
+
+export interface DrawdownWindow {
+  start: string;
+  end: string;
+  /** 최대 낙폭. 음수 */
+  depth: number;
+  label: string;
+}
+
+export interface Ledger {
+  version: 1;
+  seed: string;
+  source: LedgerSource;
+  preset: LedgerPreset;
+  startYear: number;
+  years: number;
+  /** 베이스라인 산출에 쓸 앞 구간(년). 전체 평균을 쓰면 감지가 무뎌진다. */
+  baselineYears: number;
+  months: MonthRoll[];
+  trades: TradeEvent[];
+  incidents: Incident[];
+  drawdowns: DrawdownWindow[];
+  holdings: { equity: number; bond: number; cash: number };
+  generatedAt: number;
+}
+
+/* ── 성향 복제 결과 ───────────────────────────────────── */
+
+export interface BehaviorSelf {
+  livingMedian: number;
+  livingP90: number;
+  fixed: { key: string; label: string; amount: number; day: number }[];
+  seasonalPeak: { ym: string; amount: number; note: string } | null;
+  unusedSubscriptions: { label: string; amount: number; months: number }[];
+}
+
+export interface DrawdownReaction {
+  date: string;
+  label: string;
+  drawdown: number;
+  sold: boolean;
+  portionSold: number;
+  reactionDays: number;
+  coincidingOutflow?: { label: string; amount: number };
+}
+
+export interface DecisionSelf {
+  /** 0~1. 낙폭 대비 매도비중 회귀 기울기를 정규화한 값 */
+  riskAversion: number;
+  /** 매도가 일어난 낙폭들의 중앙값. 음수 */
+  realizedStopLoss: number;
+  /** 낙폭 이벤트 중 매도하지 않은 비율 0~1 */
+  holdRate: number;
+  /** 낙폭 시작 → 매도까지 평균 일수 */
+  reactionDays: number;
+  /** 최근 3년 평균 비중. 합 100 */
+  allocation: { equity: number; bond: number; cash: number };
+  reactions: DrawdownReaction[];
+}
+
+export interface Baseline {
+  txnPerMonth: number;
+  avgTxn: number;
+  nightRatio: number;
+  newPayeesPerMonth: number;
+  latePerYear: number;
+  maxTransfer: number;
+  /** 이 베이스라인이 산출된 구간 */
+  span: { from: string; to: string };
+}
+
+export interface Persona {
+  text: string;
+  source: "rule" | "llm";
+}
+
+export interface LedgerInsight {
+  behavior: BehaviorSelf;
+  /** daily · caregiver 트랙은 null */
+  decision: DecisionSelf | null;
+  baseline: Baseline;
+  persona: Persona | null;
+}
+
+/* ── 대조 ─────────────────────────────────────────────── */
+
+export type Agreement = "aligned" | "tension" | "contradiction";
+export type Resolution = "declared" | "observed" | "adjusted";
+
+export interface Contrast {
+  qid: string;
+  clause: ClauseRef;
+  title: string;
+  /** 인터뷰에서 말한 것 */
+  declared: string;
+  /** 이력에서 관찰된 것 */
+  observed: string;
+  agreement: Agreement;
+  reason: string;
+  evidence: { label: string; detail: string }[];
+  /** "이력대로" 를 골랐을 때 answers 에 쓸 값 */
+  observedValue?: AnswerValue;
+  resolution?: Resolution;
+  /** 판정층이 다시 쓴 해석. 없으면 reason 을 쓴다. */
+  interpretation?: { text: string; source: "rule" | "llm" };
+}
+
+/* ── 금융 바이오마커 ──────────────────────────────────── */
+
+export type BiomarkerBand = "normal" | "watch" | "alert";
+
+export interface BiomarkerSignal {
+  key: string;
+  label: string;
+  weight: number;
+  baseline: string;
+  observed: string;
+  /** 0~1. 베이스라인 대비 이탈도 */
+  deviation: number;
+}
+
+export interface BiomarkerPoint {
+  ym: string;
+  score: number;
+}
+
+export interface BiomarkerReading {
+  score: number;
+  band: BiomarkerBand;
+  series: BiomarkerPoint[];
+  signals: BiomarkerSignal[];
+}
+
+export type ProofKind = "diagnosis" | "ltci";
+
+export interface MedicalProof {
+  kind: ProofKind;
+  /** YYYY-MM-DD */
+  issuedAt: string;
+}
+
+/** 회의록 "논의 완료" — AI 경보 단독으로는 절대 발동하지 않는다. */
+export interface TriggerGate {
+  aiAlert: boolean;
+  aiScore: number;
+  proof: MedicalProof | null;
+  /** 발행 1개월 이내인가 */
+  proofFresh: boolean;
+  fired: boolean;
+  blockedBy: string[];
+}
+
+/* ── 30년 타임라인 ────────────────────────────────────── */
+
+export type ApprovalTier = 1 | 2 | 3;
+
+export interface TimelineAction {
+  label: string;
+  tier: ApprovalTier;
+  approver: string;
+  clause?: ClauseRef;
+}
+
+export interface TimelinePhase {
+  phase: 1 | 2 | 3;
+  title: string;
+  span: string;
+  caption: string;
+  state: "done" | "active" | "future" | "locked";
+  actions: TimelineAction[];
+  scenarioIds: string[];
+}
+
+/** localStorage['next.ledger.v1'] 에 저장되는 관찰 상태 전체 */
+export interface LedgerState {
+  version: 1;
+  ledger: Ledger | null;
+  /** 대조 해소 결과. qid → resolution */
+  resolutions: Record<string, Resolution>;
+  /** 트리거 게이트용 증빙. 없으면 AI 경보만으로는 발동하지 않는다. */
+  proof: MedicalProof | null;
+}

@@ -7,20 +7,45 @@ import TrustDoc from "./TrustDoc";
 import GuardianshipDoc from "./GuardianshipDoc";
 import ExpenseDoc from "./ExpenseDoc";
 import ConsultationModal from "./ConsultationModal";
+import ContrastPanel from "./ContrastPanel";
 import Badge from "../common/Badge";
 import { buildDesign, findGaps, readinessAxes } from "../../lib/design";
 import { TRACK_META } from "../../lib/questions";
-import { demoProfile, firstPerson, firstAmount, readProfile, saveProfile } from "../../lib/profile";
+import {
+  demoProfile,
+  firstPerson,
+  firstAmount,
+  readProfile,
+  saveProfile,
+  setAnswer,
+} from "../../lib/profile";
+import {
+  analyze,
+  buildContrasts,
+  applyDemoLedger,
+  narrate,
+  openContrasts,
+  readLedgerState,
+  ruleNarration,
+  saveLedgerState,
+  setResolution,
+  clearResolution,
+} from "../../lib/ledger";
 import { personLabel, won } from "../../lib/format";
-import type { Profile } from "../../lib/types";
+import type { Contrast, LedgerState, Profile, Resolution } from "../../lib/types";
+import { emptyLedgerState } from "../../lib/ledger";
 
-type TabKey = "trust" | "guardianship" | "expense" | "gaps";
+type TabKey = "trust" | "guardianship" | "expense" | "gaps" | "contrast";
 
 export default function PlanShell() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tab, setTab] = useState<TabKey>("expense");
   const [modal, setModal] = useState(false);
+  const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
+  const [interpretations, setInterpretations] = useState<
+    Record<string, { text: string; source: "rule" | "llm" }>
+  >({});
 
   useEffect(() => {
     const demo = new URLSearchParams(window.location.search).get("demo");
@@ -29,6 +54,7 @@ export default function PlanShell() {
       if (d) {
         saveProfile(d);
         setProfile(d);
+        setLedgerState(applyDemoLedger(demo));
         return;
       }
     }
@@ -38,6 +64,7 @@ export default function PlanShell() {
       return;
     }
     setProfile(p);
+    setLedgerState(readLedgerState());
   }, [router]);
 
   const design = useMemo(() => (profile ? buildDesign(profile) : null), [profile]);
@@ -46,10 +73,53 @@ export default function PlanShell() {
     [profile, design],
   );
 
+  const insight = useMemo(
+    () => (profile && ledgerState.ledger ? analyze(ledgerState.ledger, profile.track) : null),
+    [profile, ledgerState.ledger],
+  );
+
+  const contrasts = useMemo(
+    () =>
+      profile && insight && ledgerState.ledger
+        ? buildContrasts(profile, insight, ledgerState.ledger, ledgerState)
+        : [],
+    [profile, insight, ledgerState],
+  );
+
+  /* 판정층. 해소 버튼을 누를 때마다 다시 부르지 않도록 이력·트랙에만 반응한다. */
+  useEffect(() => {
+    if (!profile || !insight || !ledgerState.ledger) return;
+    let alive = true;
+    const base = buildContrasts(profile, insight, ledgerState.ledger);
+    setInterpretations(ruleNarration(insight, base).interpretations);
+    narrate(insight, base, profile.track).then((r) => {
+      if (alive) setInterpretations(r.interpretations);
+    });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [insight, profile?.track]);
+
   useEffect(() => {
     if (!design) return;
     setTab(design.trust ? "trust" : design.guardianship ? "guardianship" : "expense");
   }, [design]);
+
+  const resolve = (c: Contrast, r: Resolution) => {
+    setLedgerState((s) => saveLedgerState(setResolution(s, c.qid, r)));
+    // "이력대로" 를 고른 경우에만 선언(Profile)을 갱신한다.
+    // 이것이 Ledger 가 Profile 을 건드리는 유일한 경로다.
+    if (r === "observed" && c.observedValue && profile) {
+      const next = setAnswer(profile, c.qid, c.observedValue);
+      saveProfile(next);
+      setProfile(next);
+    }
+  };
+
+  const undo = (c: Contrast) => {
+    setLedgerState((s) => saveLedgerState(clearResolution(s, c.qid)));
+  };
 
   if (!profile || !profile.track || !design) {
     return (
@@ -95,6 +165,11 @@ export default function PlanShell() {
     });
   tabs.push({ key: "expense", label: "지출설계서", n: `${design.expense.completeness}%` });
   tabs.push({ key: "gaps", label: "공백 목록", n: `${gaps.length}` });
+  tabs.push({
+    key: "contrast",
+    label: "이력 대조",
+    n: ledgerState.ledger ? `${openContrasts(contrasts).length}` : "—",
+  });
 
   return (
     <div className="shell-wide">
@@ -183,6 +258,14 @@ export default function PlanShell() {
               </>
             )}
           </div>
+        )}
+        {tab === "contrast" && (
+          <ContrastPanel
+            contrasts={contrasts}
+            interpretations={interpretations}
+            onResolve={resolve}
+            onUndo={undo}
+          />
         )}
       </div>
 

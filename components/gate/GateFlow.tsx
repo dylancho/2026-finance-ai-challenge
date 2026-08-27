@@ -97,7 +97,9 @@ export default function GateFlow() {
       transcript: base.track === track ? base.transcript : [],
     };
     saveProfile(next);
-    router.push("/interview");
+    // 이력 연동은 게이트 뒤에 온다. 트랙을 알아야 무엇을 뽑을지 정할 수 있고,
+    // caregiver 의 "대리인은 대상자 마이데이터를 열 수 없다" 안내도 거기서 나온다.
+    router.push("/ledger");
   }
 
   const who = subject === "family" ? relation || "그분" : "본인";

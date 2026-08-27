@@ -3,15 +3,29 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Timeline from "./Timeline";
 import { buildDesign, runScenario, scenariosFor } from "../../lib/design";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import { docName } from "../../lib/ai/rules";
-import type { Profile } from "../../lib/types";
+import {
+  analyze,
+  buildTimeline,
+  applyDemoLedger,
+  emptyLedgerState,
+  evaluateTrigger,
+  readBiomarker,
+  readLedgerState,
+  saveLedgerState,
+  setProof,
+} from "../../lib/ledger";
+import type { LedgerState, MedicalProof, Profile } from "../../lib/types";
 
 export default function SimulationShell() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
+  const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
+  const [phase, setPhase] = useState<1 | 2 | 3>(1);
 
   useEffect(() => {
     const demo = new URLSearchParams(window.location.search).get("demo");
@@ -20,6 +34,7 @@ export default function SimulationShell() {
       if (d) {
         saveProfile(d);
         setProfile(d);
+        setLedgerState(applyDemoLedger(demo));
         return;
       }
     }
@@ -29,15 +44,54 @@ export default function SimulationShell() {
       return;
     }
     setProfile(p);
+    setLedgerState(readLedgerState());
   }, [router]);
 
   const scenarios = useMemo(() => (profile ? scenariosFor(profile) : []), [profile]);
 
-  useEffect(() => {
-    if (!picked && scenarios.length) setPicked(scenarios[0].id);
-  }, [scenarios, picked]);
-
   const design = useMemo(() => (profile ? buildDesign(profile) : null), [profile]);
+
+  /* ── 30년 축 ── */
+  const insight = useMemo(
+    () => (profile && ledgerState.ledger ? analyze(ledgerState.ledger, profile.track) : null),
+    [profile, ledgerState.ledger],
+  );
+
+  const reading = useMemo(
+    () => (ledgerState.ledger ? readBiomarker(ledgerState.ledger) : null),
+    [ledgerState.ledger],
+  );
+
+  const gate = useMemo(
+    () => (reading ? evaluateTrigger(reading, ledgerState.proof) : null),
+    [reading, ledgerState.proof],
+  );
+
+  const phases = useMemo(
+    () =>
+      profile && design
+        ? buildTimeline({ profile, design, ledger: ledgerState.ledger, insight, gate })
+        : [],
+    [profile, design, ledgerState.ledger, insight, gate],
+  );
+
+  /* 선택된 Phase 안의 시나리오만 고른다. 새 시나리오를 만들지 않는다. */
+  const visible = useMemo(() => {
+    if (!phases.length) return scenarios;
+    const ids = new Set(phases.find((p) => p.phase === phase)?.scenarioIds ?? []);
+    const hit = scenarios.filter((s) => ids.has(s.id));
+    return hit.length ? hit : scenarios;
+  }, [phases, phase, scenarios]);
+
+  useEffect(() => {
+    if (visible.length && !visible.some((s) => s.id === picked)) {
+      setPicked(visible[0].id);
+    }
+  }, [visible, picked]);
+
+  const attachProof = (p: MedicalProof | null) => {
+    setLedgerState((s) => saveLedgerState(setProof(s, p)));
+  };
   const result = useMemo(
     () => (profile && design && picked ? runScenario(profile, design, picked) : null),
     [profile, design, picked],
@@ -64,8 +118,19 @@ export default function SimulationShell() {
         도달하면 그 자리에서 멈추고, 무엇이 비었는지 알려드립니다.
       </p>
 
+      {phases.length > 0 && (
+        <Timeline
+          phases={phases}
+          reading={reading}
+          gate={gate}
+          active={phase}
+          onPick={setPhase}
+          onProof={attachProof}
+        />
+      )}
+
       <div className="sim-picker">
-        {scenarios.map((s) => (
+        {visible.map((s) => (
           <button
             key={s.id}
             className="sim-card"

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR, DM_Mono } from "next/font/google";
+import { AuthProvider } from "../components/auth/AuthProvider";
 import "./globals.css";
 
 // 빌드 시점에 내려받아 자체 호스팅한다.
@@ -29,7 +30,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko" className={`${notoKr.variable} ${dmMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
