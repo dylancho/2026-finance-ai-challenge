@@ -4,10 +4,10 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
 
-const CATEGORIES: { label: string; icon: typeof Wallet }[] = [
-  { label: "일상 관리", icon: Wallet },
-  { label: "자산·투자 관리", icon: TrendingUp },
-  { label: "상속 준비", icon: ScrollText },
+const CATEGORIES: { label: string; icon: typeof Wallet; track: string }[] = [
+  { label: "일상 관리", icon: Wallet, track: "daily" },
+  { label: "자산·투자 관리", icon: TrendingUp, track: "investment" },
+  { label: "상속 준비", icon: ScrollText, track: "estate" },
 ];
 
 /** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
@@ -63,8 +63,8 @@ export default function Home() {
           </div>
 
           <div className="category-row">
-            {CATEGORIES.map(({ label, icon: Icon }) => (
-              <StartLink className="btn outline category-btn" key={label}>
+            {CATEGORIES.map(({ label, icon: Icon, track }) => (
+              <StartLink className="btn outline category-btn" track={track} key={label}>
                 {label}
                 <Icon className="category-icon" strokeWidth={1.5} aria-hidden="true" />
               </StartLink>
@@ -74,7 +74,7 @@ export default function Home() {
           <ol className="stage-list">
             {STAGES.map((s, i) => (
               <li className="stage-item" key={s.title}>
-                <div className="stage-num mono">{String(i + 1).padStart(2, "0")}</div>
+                <div className="stage-num">{String(i + 1).padStart(2, "0")}</div>
                 <div className="stage-body">
                   <h3>{s.title}</h3>
                   <ul className="stage-sub">
