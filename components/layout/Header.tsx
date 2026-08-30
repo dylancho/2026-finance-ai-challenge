@@ -22,10 +22,10 @@ export default function Header() {
             (session.signedIn ? (
               <>
                 <Link href="/start" className="hide-sm">
-                  설계 시작
+                  시작하기
                 </Link>
                 <Link href="/plan">내 설계서</Link>
-                <Link href="/simulation">시뮬레이션</Link>
+                <Link href="/simulation">미리보기</Link>
                 <button className="nav-signout" onClick={signOut}>
                   로그아웃
                 </button>
