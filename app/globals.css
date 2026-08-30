@@ -401,6 +401,12 @@ ul {
   font-size: 16px;
 }
 
+.category-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 
 
 
