@@ -168,8 +168,10 @@ export default function GateFlow() {
           <div className="gate-step">STEP 2 / 2 · 의사능력</div>
           <h1>지금 상태를 알려주세요</h1>
           <p className="gate-lede">
-            이 답변에 따라 어떤 제도가 가능한지가 달라집니다. 신탁계약과 임의후견계약은 본인의
-            의사능력을 전제로 하기 때문에, 시점을 놓치면 선택지가 법정후견으로 좁아집니다.
+            이 답변에 따라 어떤 제도가 가능한지가 달라집니다.
+            <br />
+            신탁계약과 임의후견계약은 본인의 의사능력을 전제로 하기 때문에, 시점을 놓치면
+            선택지가 법정후견으로 좁아집니다.
           </p>
 
           <div className="gate-subq">
