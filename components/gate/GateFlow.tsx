@@ -122,9 +122,7 @@ export default function GateFlow() {
           <div className="gate-step">STEP 1 / 3 · 준비할 내용 선택</div>
           <h1>무엇을 미리 준비해둘까요?</h1>
           <p className="gate-lede">
-            앞으로 판단이나 결정이 어려워질 때를 대비해,
-            <br />
-            지금 정해두고 싶은 내용을 선택해주세요.
+            앞으로 판단이나 결정이 어려워질 때를 대비해, 지금 정해두고 싶은 내용을 선택해주세요.
             <br />
             선택한 내용에 필요한 질문만 차례로 안내해드릴게요.
           </p>
