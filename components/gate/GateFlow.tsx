@@ -132,7 +132,7 @@ export default function GateFlow() {
     <div className="gate shell-wide">
       {step === 0 && (
         <div className="fade-in gate-center">
-          <div className="gate-step">STEP 1 / 2 · 준비할 내용 선택</div>
+          <div className="gate-step">STEP 1 / 2</div>
           <h1>무엇을 미리 준비해둘까요?</h1>
           <p className="gate-lede">
             앞으로 판단이나 결정이 어려워질 때를 대비해, 지금 정해두고 싶은 내용을 선택해주세요.
@@ -165,7 +165,7 @@ export default function GateFlow() {
 
       {step === 1 && (
         <div className="fade-in gate-center">
-          <div className="gate-step">STEP 2 / 2 · 의사능력</div>
+          <div className="gate-step">STEP 2 / 2</div>
           <h1>지금 상태를 알려주세요</h1>
           <p className="gate-lede">
             이 답변에 따라 어떤 제도가 가능한지가 달라집니다.
