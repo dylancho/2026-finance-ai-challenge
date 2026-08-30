@@ -51,8 +51,9 @@ export default function Home() {
         </section>
 
         <section className="section" id="service">
-          <div className="eyebrow">What NEXT does</div>
-          <p className="section-lede">지금 필요한 것부터 하나씩 안내해드릴게요.</p>
+          <div className="eyebrow" style={{ textAlign: "center" }}>
+            What NEXT does
+          </div>
 
           <div className="category-row">
             <StartLink className="btn outline">생활비 관리</StartLink>
