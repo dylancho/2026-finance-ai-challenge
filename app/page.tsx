@@ -52,7 +52,7 @@ export default function Home() {
 
         <section className="section" id="service">
           <div className="eyebrow" style={{ textAlign: "center" }}>
-            What NEXT does
+            NEXT supports
           </div>
 
           <div className="category-row">
