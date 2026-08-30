@@ -400,8 +400,13 @@ ul {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   margin: 18px 0 8px;
+}
+
+.category-row .btn {
+  padding: 16px 28px;
+  font-size: 16px;
 }
 
 
