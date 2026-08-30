@@ -529,6 +529,17 @@ ul {
   text-align: left;
 }
 
+.gate-subq {
+  margin-top: 40px;
+}
+
+.gate-subq-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 16px;
+}
+
 .gate-card {
   text-align: left;
   background: var(--paper);

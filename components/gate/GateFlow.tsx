@@ -47,30 +47,45 @@ const CATEGORIES: {
   },
 ];
 
-const CAPACITIES: {
+// 2026-08-31 피드백: 의사능력(의학적 상태)과 금융 사고 발생 여부(사건)는
+// 서로 다른 축이라 겹칠 수 있다 — 배타적인 카드 4개 대신 두 질문으로 나눈다.
+// 저장되는 Capacity 값 자체(full/declining/diagnosed/incident)는 그대로 두고,
+// UI에서만 두 질문으로 나눠 받은 뒤 finish()에서 하나로 합친다.
+const CAPACITY_LEVELS: {
   value: Capacity;
   title: string;
   desc: string;
 }[] = [
   {
     value: "full",
-    title: "네, 스스로 판단하고 계약할 수 있습니다",
-    desc: "은행 업무를 직접 보고, 계약서 내용을 이해하고 서명할 수 있는 상태입니다.",
+    title: "네, 스스로 판단하고 결정할 수 있습니다",
+    desc: "금융 업무와 계약 내용을 이해하고, 본인의 뜻에 따라 직접 결정할 수 있습니다.",
   },
   {
     value: "declining",
-    title: "최근 기억이나 판단에 어려움이 보입니다",
-    desc: "아직 가능하지만 예전 같지는 않습니다. 준비할 수 있는 시간이 줄고 있는 단계입니다.",
+    title: "최근 기억이나 판단이 예전과 다르게 느껴집니다",
+    desc: "아직 직접 결정할 수 있지만, 기억력이나 판단력의 변화를 느끼고 있어 미리 준비하고 싶습니다.",
   },
   {
     value: "diagnosed",
-    title: "치매 등 진단을 받으셨습니다",
-    desc: "의료기관에서 인지장애나 치매 진단을 받은 상태입니다.",
+    title: "인지장애·치매 등을 진단받았습니다",
+    desc: "진단을 받은 상태이며, 현재 가능한 범위 안에서 미리 준비할 방법을 확인하고 싶습니다.",
+  },
+];
+
+const INCIDENT_OPTIONS: {
+  value: boolean;
+  title: string;
+  desc?: string;
+}[] = [
+  {
+    value: false,
+    title: "아니요",
   },
   {
-    value: "incident",
-    title: "이미 금융 사고나 계좌 문제가 발생했습니다",
-    desc: "사기 피해, 설명되지 않는 이체, 계좌 접근 불가 등이 실제로 벌어졌습니다.",
+    value: true,
+    title: "이미 금융 문제나 피해가 발생했습니다",
+    desc: "사기 피해, 설명하기 어려운 이체, 계좌 접근 문제 등 실제 금융 문제가 발생했습니다.",
   },
 ];
 
@@ -78,15 +93,20 @@ export default function GateFlow() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [track, setTrack] = useState<Track | null>(null);
-  const [capacity, setCapacity] = useState<Capacity | null>(null);
+  const [capacityLevel, setCapacityLevel] = useState<Capacity | null>(null);
+  const [hasIncident, setHasIncident] = useState<boolean | null>(null);
 
   function pickTrack(t: Track) {
     setTrack(t);
     setStep(1);
   }
 
-  function finish(cap: Capacity) {
-    if (!track) return;
+  function finish() {
+    if (!track || !capacityLevel || hasIncident === null) return;
+    // 사고 발생 여부가 의사능력 축보다 더 즉각적인 개입이 필요한 신호라
+    // 우선한다 — 둘 다 blocking 취급은 동일해서 어느 쪽이 저장돼도 하위
+    // 설계서 로직(diagnosed/incident를 항상 같이 검사)에는 차이가 없다.
+    const cap: Capacity = hasIncident ? "incident" : capacityLevel;
     const base: Profile = { ...emptyProfile(), ...readProfileSafely() };
     const next: Profile = {
       ...base,
@@ -105,7 +125,8 @@ export default function GateFlow() {
     router.push("/ledger");
   }
 
-  const blocking = capacity === "diagnosed" || capacity === "incident";
+  const blocking = capacityLevel === "diagnosed" || hasIncident === true;
+  const canFinish = !!capacityLevel && hasIncident !== null;
 
   return (
     <div className="gate shell-wide">
@@ -143,26 +164,46 @@ export default function GateFlow() {
       )}
 
       {step === 1 && (
-        <div className="fade-in">
+        <div className="fade-in gate-center">
           <div className="gate-step">STEP 2 / 2 · 의사능력</div>
-          <h1>지금 본인은 금융 결정을 스스로 하실 수 있나요?</h1>
+          <h1>지금 상태를 알려주세요</h1>
           <p className="gate-lede">
-            이 질문이 어떤 제도가 가능한지를 결정합니다. 신탁계약과 임의후견계약은 본인의
+            이 답변에 따라 어떤 제도가 가능한지가 달라집니다. 신탁계약과 임의후견계약은 본인의
             의사능력을 전제로 하기 때문에, 시점을 놓치면 선택지가 법정후견으로 좁아집니다.
           </p>
 
-          <div className="gate-cards">
-            {CAPACITIES.map((c) => (
-              <button
-                key={c.value}
-                className="gate-card"
-                aria-pressed={capacity === c.value}
-                onClick={() => setCapacity(c.value)}
-              >
-                <span className="t">{c.title}</span>
-                <span className="d">{c.desc}</span>
-              </button>
-            ))}
+          <div className="gate-subq">
+            <h2 className="gate-subq-title">1. 지금 스스로 금융 결정을 할 수 있나요?</h2>
+            <div className="gate-cards stacked">
+              {CAPACITY_LEVELS.map((c) => (
+                <button
+                  key={c.value}
+                  className="gate-card"
+                  aria-pressed={capacityLevel === c.value}
+                  onClick={() => setCapacityLevel(c.value)}
+                >
+                  <span className="t">{c.title}</span>
+                  <span className="d">{c.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="gate-subq">
+            <h2 className="gate-subq-title">2. 이미 금융 문제가 발생했나요?</h2>
+            <div className="gate-cards stacked">
+              {INCIDENT_OPTIONS.map((o) => (
+                <button
+                  key={String(o.value)}
+                  className="gate-card"
+                  aria-pressed={hasIncident === o.value}
+                  onClick={() => setHasIncident(o.value)}
+                >
+                  <span className="t">{o.title}</span>
+                  {o.desc && <span className="d">{o.desc}</span>}
+                </button>
+              ))}
+            </div>
           </div>
 
           {blocking && (
@@ -179,7 +220,7 @@ export default function GateFlow() {
             </div>
           )}
 
-          {capacity === "declining" && (
+          {capacityLevel === "declining" && !blocking && (
             <div className="gate-warn fade-in">
               <h4>시간이 많지 않을 수 있습니다</h4>
               <p>
@@ -193,11 +234,7 @@ export default function GateFlow() {
             <button className="btn ghost" onClick={() => setStep(0)}>
               ← 이전
             </button>
-            <button
-              className="btn"
-              disabled={!capacity}
-              onClick={() => capacity && finish(capacity)}
-            >
+            <button className="btn" disabled={!canFinish} onClick={finish}>
               {blocking ? "가능한 경로로 설계 시작" : "설계 시작"}
             </button>
           </div>
