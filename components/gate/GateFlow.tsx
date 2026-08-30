@@ -2,42 +2,50 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Wallet, TrendingUp, ScrollText } from "lucide-react";
 import Badge from "../common/Badge";
-import { TRACK_META } from "../../lib/questions";
 import { emptyProfile, readProfile, saveProfile } from "../../lib/profile";
 import type { Capacity, Profile, Subject, Track } from "../../lib/types";
 
 // 2026-08-30 회의 결정: 설문 카테고리를 일상대리 / 투자 / 상속 3개로 확정.
 // "future"(미래 판단력 저하 대비)와 "caregiver"(가족 대신 준비)는 메인 시나리오에서
 // 제외하고 추후 검토로 보류 — 코드는 남기고 게이트 선택지에서만 뺀다.
-const PURPOSES: {
-  track: Track;
+// 홈 화면 카테고리 버튼(일상 관리/자산·투자 관리/상속 준비)과 같은 아이콘·순서를 쓴다.
+const CATEGORIES: {
+  track: Track | "investment";
+  icon: typeof Wallet;
   title: string;
   desc: string;
+  meta: string;
+  enabled: boolean;
 }[] = [
   {
     track: "daily",
-    title: "일상 지출과 공과금이 문제없이 나가게 하고 싶어요",
-    desc: "자동이체가 밀리지 않고, 큰돈이 한 번에 빠져나가지 않도록. 8문항이면 끝납니다.",
+    icon: Wallet,
+    title: "일상에 필요한 돈 관리를 미리 정해두고 싶어요",
+    desc: "생활비, 공과금, 정기결제처럼 일상에 필요한 돈을 어떻게 관리할지 미리 정해둘 수 있어요.",
+    meta: "약 8문항 · 2~3분",
+    enabled: true,
+  },
+  {
+    // 투자 트랙: 질문·선택지 설계가 아직 진행 중 (담당 이지수). 선택은 열어두되
+    // 인터뷰로 보내지 않고 준비 중 안내만 보여준다.
+    track: "investment",
+    icon: TrendingUp,
+    title: "내 자산을 어떻게 관리할지 미리 정해두고 싶어요",
+    desc: "예금이나 주식 등 보유한 자산을 언제 유지하고 처분할지, 나만의 관리 원칙을 미리 정해둘 수 있어요.",
+    meta: "질문 설계 중",
+    enabled: false,
   },
   {
     track: "estate",
-    title: "남길 재산을 어떻게 물려줄지 정하고 싶어요",
-    desc: "누구에게 무엇을, 어떤 순서로. 유류분까지 함께 검토합니다. 16문항.",
+    icon: ScrollText,
+    title: "내 재산을 어떻게 남길지 미리 정해두고 싶어요",
+    desc: "누구에게 무엇을 남길지부터 나누는 방법과 순서까지, 내 뜻을 하나씩 정리해둘 수 있어요.",
+    meta: "약 16문항 · 5~10분",
+    enabled: true,
   },
 ];
-
-// 투자 트랙: 질문·선택지 설계가 아직 진행 중 (담당 이지수). 선택은 가능하게 열어두되
-// 인터뷰로 보내지 않고 준비 중 안내만 보여준다.
-const PURPOSE_SOON: {
-  track: "investment";
-  title: string;
-  desc: string;
-} = {
-  track: "investment",
-  title: "투자 자산을 대신 판단해주길 바라요",
-  desc: "매매·리밸런싱 원칙을 미리 정해둡니다. 질문 설계 중입니다.",
-};
 
 const RELATIONS = ["부모님", "배우자", "조부모", "형제자매", "그 외 친족"];
 
@@ -111,38 +119,33 @@ export default function GateFlow() {
     <div className="gate shell-wide">
       {step === 0 && (
         <div className="fade-in">
-          <div className="gate-step">STEP 1 / 3 · 목적</div>
-          <h1>오늘은 무엇을 준비하러 오셨나요?</h1>
+          <div className="gate-step">STEP 1 / 3 · 준비할 내용 선택</div>
+          <h1>무엇을 미리 준비해둘까요?</h1>
           <p className="gate-lede">
-            목적에 따라 질문과 산출물이 완전히 달라집니다. 공과금 관리만 필요하시다면 신탁이나
-            후견 이야기는 꺼내지 않습니다.
+            앞으로 판단이나 결정이 어려워질 때를 대비해,
+            <br />
+            지금 정해두고 싶은 내용을 선택해주세요.
+            <br />
+            선택한 내용에 필요한 질문만 차례로 안내해드릴게요.
           </p>
-          <div className="gate-cards">
-            {PURPOSES.map((p) => (
+          <div className="gate-cards triple">
+            {CATEGORIES.map((c) => (
               <button
-                key={p.track}
+                key={c.track}
                 className="gate-card"
-                onClick={() => pickTrack(p.track)}
-                aria-pressed={track === p.track}
+                disabled={!c.enabled}
+                aria-disabled={!c.enabled}
+                onClick={() => c.enabled && pickTrack(c.track as Track)}
+                aria-pressed={track === c.track}
               >
-                <span className="t">{p.title}</span>
-                <span className="d">{p.desc}</span>
-                <span className="docs">
-                  {TRACK_META[p.track].docs.map((d) => (
-                    <Badge key={d} tone="info">
-                      {d}
-                    </Badge>
-                  ))}
+                <c.icon className="gate-card-icon" strokeWidth={1.5} aria-hidden="true" />
+                <span className="t">{c.title}</span>
+                <span className="d">{c.desc}</span>
+                <span className="meta">
+                  {c.enabled ? c.meta : <Badge tone="warn">{c.meta}</Badge>}
                 </span>
               </button>
             ))}
-            <button className="gate-card" disabled aria-disabled="true">
-              <span className="t">{PURPOSE_SOON.title}</span>
-              <span className="d">{PURPOSE_SOON.desc}</span>
-              <span className="docs">
-                <Badge tone="warn">준비 중</Badge>
-              </span>
-            </button>
           </div>
         </div>
       )}
