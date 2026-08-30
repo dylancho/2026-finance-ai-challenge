@@ -4,24 +4,31 @@ import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
 
 /** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
-const STAGES: { title: string; items: string[] }[] = [
+const STAGES: { title: string; items: React.ReactNode[] }[] = [
   {
-    title: "지금의 나를 기록해요",
+    title: "내 생각을 알려주세요",
     items: [
-      "지난 소비와 투자 습관을 보고, 평소의 나를 기록해둡니다",
-      "\"주식은 급하게 팔지 마세요\" 같은 말을, 실제로 지킬 수 있는 약속으로 바꿔둡니다",
-      "말과 행동이 어긋나는 순간, 어느 쪽을 따를지 미리 정해둡니다",
+      "평소 돈을 어떻게 쓰고 관리해왔는지 살펴보고, 앞으로도 지키고 싶은 원칙을 정해요",
+      <>
+        예를 들어 "주식은 급하게 팔지 않기",{" "}
+        <strong>"매달 생활비는 이 정도로 유지하기"</strong>처럼 내 뜻을 구체적으로
+        남길 수 있어요
+      </>,
     ],
   },
   {
-    title: "문서로 남겨요",
-    items: ["이 약속들을 문서 3가지(자산 관리, 생활비, 돌봄)로 정리해둡니다"],
+    title: "내 뜻을 문서로 남겨요",
+    items: [
+      "정한 내용을 자산 관리, 생활비, 돌봄에 대한 문서로 정리해드려요",
+      "아직 정하지 않은 내용도 함께 확인하며, 더 준비해야 할 부분을 쉽게 알려드려요",
+    ],
   },
   {
-    title: "필요할 때만 움직여요",
+    title: "필요할 때, 정해둔 대로 도움을 받아요",
     items: [
-      "평소와 다른 움직임이 보이면 알려드립니다. 진단은 아닙니다",
-      "실제 진단서가 확인되기 전까지는 아무것도 바뀌지 않습니다",
+      "평소와 다른 금융 활동이 나타나면 확인할 수 있도록 알려드려요",
+      "다만 서비스가 치매나 판단 능력을 진단하지는 않아요",
+      "진단서 등 필요한 확인을 거친 뒤에만, 미리 정해둔 내용에 따라 도움을 받을 수 있어요",
     ],
   },
 ];
@@ -33,13 +40,11 @@ export default function Home() {
       <main className="shell-wide">
         <section className="hero">
           <div className="eyebrow">AI Future Financial Decision Service</div>
-          <h1>
-            내가 결정할 수 없을 때를 위해,
-            <br />
-            지금의 내가 결정합니다.
-          </h1>
+          <h1>앞으로를 위해, 지금 내 뜻을 남겨두세요</h1>
           <p className="hero-sub">
-            AI가 오늘의 나와 대화해 미래의 나를 위한 금융 의사결정을 설계합니다.
+            나중에 기억하거나 판단하기 어려워지더라도
+            <br />
+            내 돈과 생활이 내가 원하는 방식대로 이어질 수 있도록 미리 준비할 수 있어요.
           </p>
           <div className="hero-actions">
             <StartLink>무엇을 준비할지 고르기</StartLink>
@@ -51,11 +56,10 @@ export default function Home() {
 
         <section className="section" id="service">
           <div className="eyebrow">What NEXT does</div>
-          <h2>지금의 판단을 기록해, 미래의 결정으로 잇습니다.</h2>
           <p className="section-lede">
-            목적을 먼저 묻고 갈래를 나눕니다. 일상 지출 관리만 필요하면 신탁이나 후견
-            이야기는 꺼내지 않습니다. 목적에 따라 세 갈래 중 하나로 안내하고, 아래
-            세 단계로 이어집니다.
+            생활비 관리, 자산·투자 관리, 상속 준비 중
+            <br />
+            지금 필요한 것부터 하나씩 안내해드릴게요.
           </p>
 
           <ol className="stage-list">
@@ -65,8 +69,8 @@ export default function Home() {
                 <div className="stage-body">
                   <h3>{s.title}</h3>
                   <ul className="stage-sub">
-                    {s.items.map((text) => (
-                      <li key={text}>{text}</li>
+                    {s.items.map((node, idx) => (
+                      <li key={idx}>{node}</li>
                     ))}
                   </ul>
                 </div>
