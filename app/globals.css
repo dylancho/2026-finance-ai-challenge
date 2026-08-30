@@ -392,6 +392,13 @@ ul {
   font-size: 15.5px;
 }
 
+.category-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 22px 0 8px;
+}
+
 
 
 

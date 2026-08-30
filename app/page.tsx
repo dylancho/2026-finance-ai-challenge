@@ -4,16 +4,12 @@ import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
 
 /** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
-const STAGES: { title: string; items: React.ReactNode[] }[] = [
+const STAGES: { title: string; items: string[] }[] = [
   {
     title: "내 생각을 알려주세요",
     items: [
       "평소 돈을 어떻게 쓰고 관리해왔는지 살펴보고, 앞으로도 지키고 싶은 원칙을 정해요",
-      <>
-        예를 들어 "주식은 급하게 팔지 않기",{" "}
-        <strong>"매달 생활비는 이 정도로 유지하기"</strong>처럼 내 뜻을 구체적으로
-        남길 수 있어요
-      </>,
+      "예를 들어 \"주식은 급하게 팔지 않기\", \"매달 생활비는 이 정도로 유지하기\"처럼 내 뜻을 구체적으로 남길 수 있어요",
     ],
   },
   {
@@ -56,11 +52,13 @@ export default function Home() {
 
         <section className="section" id="service">
           <div className="eyebrow">What NEXT does</div>
-          <p className="section-lede">
-            생활비 관리, 자산·투자 관리, 상속 준비 중
-            <br />
-            지금 필요한 것부터 하나씩 안내해드릴게요.
-          </p>
+          <p className="section-lede">지금 필요한 것부터 하나씩 안내해드릴게요.</p>
+
+          <div className="category-row">
+            <StartLink className="btn outline">생활비 관리</StartLink>
+            <StartLink className="btn outline">자산·투자 관리</StartLink>
+            <StartLink className="btn outline">상속 준비</StartLink>
+          </div>
 
           <ol className="stage-list">
             {STAGES.map((s, i) => (
@@ -69,8 +67,8 @@ export default function Home() {
                 <div className="stage-body">
                   <h3>{s.title}</h3>
                   <ul className="stage-sub">
-                    {s.items.map((node, idx) => (
-                      <li key={idx}>{node}</li>
+                    {s.items.map((text) => (
+                      <li key={text}>{text}</li>
                     ))}
                   </ul>
                 </div>
