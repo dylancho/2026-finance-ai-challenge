@@ -74,7 +74,7 @@ export default function Home() {
           <ol className="stage-list">
             {STAGES.map((s, i) => (
               <li className="stage-item" key={s.title}>
-                <div className="stage-num mono">{String(i + 1).padStart(2, "0")}</div>
+                <div className="stage-num">{String(i + 1).padStart(2, "0")}</div>
                 <div className="stage-body">
                   <h3>{s.title}</h3>
                   <ul className="stage-sub">

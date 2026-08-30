@@ -2904,6 +2904,8 @@ table.data tfoot td {
 }
 
 .stage-num {
+  font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
+  font-variant-numeric: tabular-nums;
   font-size: 30px;
   font-weight: 500;
   color: var(--line);
