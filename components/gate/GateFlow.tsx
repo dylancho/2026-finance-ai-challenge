@@ -7,6 +7,9 @@ import { TRACK_META } from "../../lib/questions";
 import { emptyProfile, readProfile, saveProfile } from "../../lib/profile";
 import type { Capacity, Profile, Subject, Track } from "../../lib/types";
 
+// 2026-08-30 회의 결정: 설문 카테고리를 일상대리 / 투자 / 상속 3개로 확정.
+// "future"(미래 판단력 저하 대비)와 "caregiver"(가족 대신 준비)는 메인 시나리오에서
+// 제외하고 추후 검토로 보류 — 코드는 남기고 게이트 선택지에서만 뺀다.
 const PURPOSES: {
   track: Track;
   title: string;
@@ -18,21 +21,23 @@ const PURPOSES: {
     desc: "자동이체가 밀리지 않고, 큰돈이 한 번에 빠져나가지 않도록. 8문항이면 끝납니다.",
   },
   {
-    track: "future",
-    title: "나중에 판단이 어려워질 때를 대비하고 싶어요",
-    desc: "치매·사고에 대비해 누가 무엇을 어디까지 결정할지 지금 정해둡니다. 22문항.",
-  },
-  {
-    track: "caregiver",
-    title: "부모님이나 가족을 대신해 알아보고 있어요",
-    desc: "지금 그분의 상태에서 무엇이 가능하고 무엇이 어려운지부터 확인합니다. 14문항.",
-  },
-  {
     track: "estate",
     title: "남길 재산을 어떻게 물려줄지 정하고 싶어요",
     desc: "누구에게 무엇을, 어떤 순서로. 유류분까지 함께 검토합니다. 16문항.",
   },
 ];
+
+// 투자 트랙: 질문·선택지 설계가 아직 진행 중 (담당 이지수). 선택은 가능하게 열어두되
+// 인터뷰로 보내지 않고 준비 중 안내만 보여준다.
+const PURPOSE_SOON: {
+  track: "investment";
+  title: string;
+  desc: string;
+} = {
+  track: "investment",
+  title: "투자 자산을 대신 판단해주길 바라요",
+  desc: "매매·리밸런싱 원칙을 미리 정해둡니다. 질문 설계 중입니다.",
+};
 
 const RELATIONS = ["부모님", "배우자", "조부모", "형제자매", "그 외 친족"];
 
@@ -73,9 +78,7 @@ export default function GateFlow() {
 
   function pickTrack(t: Track) {
     setTrack(t);
-    if (t === "caregiver") {
-      setSubject("family");
-    } else if (t === "daily" || t === "estate") {
+    if (t === "daily" || t === "estate") {
       setSubject("self");
     } else {
       setSubject(null);
@@ -97,8 +100,7 @@ export default function GateFlow() {
       transcript: base.track === track ? base.transcript : [],
     };
     saveProfile(next);
-    // 이력 연동은 게이트 뒤에 온다. 트랙을 알아야 무엇을 뽑을지 정할 수 있고,
-    // caregiver 의 "대리인은 대상자 마이데이터를 열 수 없다" 안내도 거기서 나온다.
+    // 이력 연동은 게이트 뒤에 온다. 트랙을 알아야 무엇을 뽑을지 정할 수 있다.
     router.push("/ledger");
   }
 
@@ -134,6 +136,13 @@ export default function GateFlow() {
                 </span>
               </button>
             ))}
+            <button className="gate-card" disabled aria-disabled="true">
+              <span className="t">{PURPOSE_SOON.title}</span>
+              <span className="d">{PURPOSE_SOON.desc}</span>
+              <span className="docs">
+                <Badge tone="warn">준비 중</Badge>
+              </span>
+            </button>
           </div>
         </div>
       )}
@@ -143,40 +152,36 @@ export default function GateFlow() {
           <div className="gate-step">STEP 2 / 3 · 대상</div>
           <h1>이 설계는 누구를 위한 것인가요?</h1>
           <p className="gate-lede">
-            {track === "caregiver"
-              ? "가족을 대신해 알아보시는 경우입니다. 대상자와의 관계를 알려주세요."
-              : "본인을 위한 것인지, 가족을 대신한 것인지에 따라 가능한 제도가 달라집니다."}
+            본인을 위한 것인지, 가족을 대신한 것인지에 따라 가능한 제도가 달라집니다.
           </p>
 
-          {track !== "caregiver" && (
-            <div className="gate-cards tight">
-              <button
-                className="gate-card"
-                aria-pressed={subject === "self"}
-                onClick={() => {
-                  setSubject("self");
-                  setRelation("");
-                }}
-              >
-                <span className="t">본인을 위한 설계입니다</span>
-                <span className="d">
-                  내가 결정할 수 없게 될 때를 대비해 지금의 내가 정해둡니다.
-                </span>
-              </button>
-              <button
-                className="gate-card"
-                aria-pressed={subject === "family"}
-                onClick={() => setSubject("family")}
-              >
-                <span className="t">가족을 위한 설계입니다</span>
-                <span className="d">
-                  부모님이나 배우자를 대신해 준비합니다. 대상자의 동의가 필요할 수 있습니다.
-                </span>
-              </button>
-            </div>
-          )}
+          <div className="gate-cards tight">
+            <button
+              className="gate-card"
+              aria-pressed={subject === "self"}
+              onClick={() => {
+                setSubject("self");
+                setRelation("");
+              }}
+            >
+              <span className="t">본인을 위한 설계입니다</span>
+              <span className="d">
+                내가 결정할 수 없게 될 때를 대비해 지금의 내가 정해둡니다.
+              </span>
+            </button>
+            <button
+              className="gate-card"
+              aria-pressed={subject === "family"}
+              onClick={() => setSubject("family")}
+            >
+              <span className="t">가족을 위한 설계입니다</span>
+              <span className="d">
+                부모님이나 배우자를 대신해 준비합니다. 대상자의 동의가 필요할 수 있습니다.
+              </span>
+            </button>
+          </div>
 
-          {(subject === "family" || track === "caregiver") && (
+          {subject === "family" && (
             <>
               <p className="gate-lede" style={{ marginTop: 26, marginBottom: 10 }}>
                 대상자와의 관계
