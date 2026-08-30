@@ -80,8 +80,12 @@ export default function Home() {
 
         <section className="cta-band">
           <div>
-            <h2>미래를 예측하는 대신, 미래의 결정을 준비하세요.</h2>
-            <p>짧으면 2분, 길어도 10분입니다. 목적에 따라 질문의 수가 달라집니다.</p>
+            <h2>미래를 예측하는 대신, 내 뜻을 미리 준비하세요.</h2>
+            <p>
+              필요한 내용만 차근차근 여쭤볼게요.
+              <br />
+              약 2~10분이면 준비할 수 있어요.
+            </p>
           </div>
           <StartLink>시작하기</StartLink>
         </section>
