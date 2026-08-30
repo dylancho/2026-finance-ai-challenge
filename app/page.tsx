@@ -65,8 +65,8 @@ export default function Home() {
           <div className="category-row">
             {CATEGORIES.map(({ label, icon: Icon }) => (
               <StartLink className="btn outline category-btn" key={label}>
-                <Icon className="category-icon" strokeWidth={1.5} aria-hidden="true" />
                 {label}
+                <Icon className="category-icon" strokeWidth={1.5} aria-hidden="true" />
               </StartLink>
             ))}
           </div>
