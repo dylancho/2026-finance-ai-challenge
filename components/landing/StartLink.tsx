@@ -14,11 +14,16 @@ import { useAuth } from "../auth/AuthProvider";
 interface Props {
   className?: string;
   children: React.ReactNode;
+  /** 홈 화면 카테고리 버튼에서 넘어올 때, 게이트 STEP 1(카테고리 선택)을
+   *  건너뛰고 바로 STEP 2(의사능력)로 가기 위한 트랙 값. */
+  track?: string;
 }
 
-export default function StartLink({ className = "btn", children }: Props) {
+export default function StartLink({ className = "btn", children, track }: Props) {
   const { session, ready } = useAuth();
-  const href = ready && session.signedIn ? "/start" : "/login?next=%2Fstart";
+  const startPath = track ? `/start?track=${encodeURIComponent(track)}` : "/start";
+  const href =
+    ready && session.signedIn ? startPath : `/login?next=${encodeURIComponent(startPath)}`;
 
   return (
     <Link href={href} className={className}>

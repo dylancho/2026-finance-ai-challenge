@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Wallet, TrendingUp, ScrollText } from "lucide-react";
 import Badge from "../common/Badge";
@@ -91,8 +91,16 @@ const INCIDENT_OPTIONS: {
 
 export default function GateFlow() {
   const router = useRouter();
-  const [step, setStep] = useState(0);
-  const [track, setTrack] = useState<Track | null>(null);
+  const searchParams = useSearchParams();
+  // 홈 화면 카테고리 버튼(일상 관리/자산·투자 관리/상속 준비)에서 트랙을 미리
+  // 정하고 왔으면 STEP 1(카테고리 선택)을 건너뛰고 바로 STEP 2로 간다.
+  const preselected = CATEGORIES.find(
+    (c) => c.enabled && c.track === searchParams.get("track"),
+  );
+  const [step, setStep] = useState(preselected ? 1 : 0);
+  const [track, setTrack] = useState<Track | null>(
+    preselected ? (preselected.track as Track) : null,
+  );
   const [capacityLevel, setCapacityLevel] = useState<Capacity | null>(null);
   const [hasIncident, setHasIncident] = useState<boolean | null>(null);
 
