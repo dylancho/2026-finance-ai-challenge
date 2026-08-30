@@ -128,7 +128,7 @@ export default function GateFlow() {
             <br />
             선택한 내용에 필요한 질문만 차례로 안내해드릴게요.
           </p>
-          <div className="gate-cards triple">
+          <div className="gate-cards stacked">
             {CATEGORIES.map((c) => (
               <button
                 key={c.track}

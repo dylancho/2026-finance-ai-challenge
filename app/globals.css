@@ -511,8 +511,9 @@ ul {
   max-width: 760px;
 }
 
-.gate-cards.triple {
-  grid-template-columns: repeat(3, 1fr);
+.gate-cards.stacked {
+  grid-template-columns: 1fr;
+  max-width: 640px;
 }
 
 .gate-card {
