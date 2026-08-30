@@ -401,6 +401,18 @@ ul {
   font-size: 16px;
 }
 
+.category-btn {
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 28px;
+}
+
+.category-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 
 
 
@@ -494,9 +506,38 @@ ul {
   gap: 14px;
 }
 
-.gate-cards.tight {
-  grid-template-columns: repeat(2, 1fr);
-  max-width: 760px;
+.gate-cards.stacked {
+  grid-template-columns: 1fr;
+  max-width: 640px;
+}
+
+.gate-center {
+  text-align: center;
+}
+
+.gate-center .gate-lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gate-center .gate-cards {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gate-center .gate-card {
+  text-align: left;
+}
+
+.gate-subq {
+  margin-top: 40px;
+}
+
+.gate-subq-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 16px;
 }
 
 .gate-card {
@@ -551,6 +592,32 @@ ul {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
+}
+
+.gate-card-side {
+  flex-direction: row;
+  align-items: center;
+  gap: 28px;
+}
+
+.gate-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gate-card-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+.gate-card .meta {
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint);
 }
 
 .gate-warn {

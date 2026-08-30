@@ -1,7 +1,14 @@
 import Link from "next/link";
+import { Wallet, TrendingUp, ScrollText } from "lucide-react";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
+
+const CATEGORIES: { label: string; icon: typeof Wallet }[] = [
+  { label: "일상 관리", icon: Wallet },
+  { label: "자산·투자 관리", icon: TrendingUp },
+  { label: "상속 준비", icon: ScrollText },
+];
 
 /** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
 const STAGES: { title: string; items: string[] }[] = [
@@ -56,9 +63,12 @@ export default function Home() {
           </div>
 
           <div className="category-row">
-            <StartLink className="btn outline">일상 관리</StartLink>
-            <StartLink className="btn outline">자산·투자 관리</StartLink>
-            <StartLink className="btn outline">상속 준비</StartLink>
+            {CATEGORIES.map(({ label, icon: Icon }) => (
+              <StartLink className="btn outline category-btn" key={label}>
+                {label}
+                <Icon className="category-icon" strokeWidth={1.5} aria-hidden="true" />
+              </StartLink>
+            ))}
           </div>
 
           <ol className="stage-list">
