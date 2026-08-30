@@ -43,9 +43,9 @@ export default function Home() {
             내 돈과 생활이 내가 원하는 방식대로 이어질 수 있도록 미리 준비할 수 있어요.
           </p>
           <div className="hero-actions">
-            <StartLink>무엇을 준비할지 고르기</StartLink>
+            <StartLink>시작하기</StartLink>
             <Link href="/plan?demo=B" className="btn outline">
-              완성된 설계서 예시 보기
+              예시 보기
             </Link>
           </div>
         </section>
