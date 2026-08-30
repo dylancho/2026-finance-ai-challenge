@@ -4,42 +4,28 @@ import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
 
 /** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
-const SERVICES: { step: string; title: string; body: string; note: string }[] = [
+const STAGES: { title: string; items: string[] }[] = [
   {
-    step: "01",
-    title: "10년 금융 이력을 읽어 기준선을 만듭니다",
-    body: "카드 결제, 이체, 공과금 납부 주기, 하락장에서의 매매를 읽어 '가장 건강할 때의 판단 기준'을 세웁니다. 실효 손절선, 위험 회피도, 월 생활비 중앙값처럼 숫자로 남습니다.",
-    note: "Phase 1 · 베이스라인",
+    title: "내 생각을 알려주세요",
+    items: [
+      "평소 돈을 어떻게 쓰고 관리해왔는지 살펴보고, 앞으로도 지키고 싶은 원칙을 정해요",
+      "예를 들어 \"주식은 급하게 팔지 않기\", \"매달 생활비는 이 정도로 유지하기\"처럼 내 뜻을 구체적으로 남길 수 있어요",
+    ],
   },
   {
-    step: "02",
-    title: "대화로 미래의 원칙을 정합니다",
-    body: "목적에 따라 8~22문항. \"주식은 급하게 팔지 마세요\" 같은 말을 그대로 받아, 신탁설계서 제7조 운용지침 같은 조항으로 바꿉니다.",
-    note: "AI 의사결정 인터뷰",
+    title: "내 뜻을 문서로 남겨요",
+    items: [
+      "정한 내용을 자산 관리, 생활비, 돌봄에 대한 문서로 정리해드려요",
+      "아직 정하지 않은 내용도 함께 확인하며, 더 준비해야 할 부분을 쉽게 알려드려요",
+    ],
   },
   {
-    step: "03",
-    title: "말한 것과 실제로 한 것을 맞대어 봅니다",
-    body: "\"팔지 않겠다\"고 하셨는데 하락 구간마다 매도한 이력이 있다면, 그 조항이 실제로 어느 쪽으로 작동할지 지금 정해야 합니다. 이 대조가 NEXT의 핵심입니다.",
-    note: "선언 vs 행동",
-  },
-  {
-    step: "04",
-    title: "조항 수준의 설계서 3종을 만듭니다",
-    body: "신탁설계서·후견설계서·지출설계서. 문단이 아니라 조항입니다. 비어 있는 칸은 비어 있다고 표시하고, 그 공백이 나중에 어디서 문제가 되는지 알려드립니다.",
-    note: "신탁 · 후견 · 지출",
-  },
-  {
-    step: "05",
-    title: "평소와 달라진 지점을 감지합니다",
-    body: "잔액 확인 반복, 중복 이체, 공과금 연체, 심야 고액 거래. 기준선에서 벌어지면 알립니다. 다만 이것은 진단이 아니며, 판정은 의료기관의 몫입니다.",
-    note: "금융 바이오마커",
-  },
-  {
-    step: "06",
-    title: "사람이 확인해야 움직입니다",
-    body: "AI 경보만으로는 아무것도 바뀌지 않습니다. 최근 1개월 이내의 의사 진단서나 장기요양보험 등급 발행서가 함께 확인돼야 전환이 시작됩니다. 자산 처분은 법적 후견인의 승인을 거칩니다.",
-    note: "2조건 트리거 · 권한 3단계",
+    title: "필요할 때, 정해둔 대로 도움을 받아요",
+    items: [
+      "평소와 다른 금융 활동이 나타나면 확인할 수 있도록 알려드려요",
+      "다만 서비스가 치매나 판단 능력을 진단하지는 않아요",
+      "진단서 등 필요한 확인을 거친 뒤에만, 미리 정해둔 내용에 따라 도움을 받을 수 있어요",
+    ],
   },
 ];
 
@@ -50,39 +36,42 @@ export default function Home() {
       <main className="shell-wide">
         <section className="hero">
           <div className="eyebrow">AI Future Financial Decision Service</div>
-          <h1>
-            내가 결정할 수 없을 때를 위해,
-            <br />
-            지금의 내가 결정합니다.
-          </h1>
+          <h1>앞으로를 위해, 지금 내 뜻을 남겨두세요</h1>
           <p className="hero-sub">
-            AI가 오늘의 나와 대화해 미래의 나를 위한 금융 의사결정을 설계합니다.
+            나중에 기억하거나 판단하기 어려워지더라도
+            <br />
+            내 돈과 생활이 내가 원하는 방식대로 이어질 수 있도록 미리 준비할 수 있어요.
           </p>
           <div className="hero-actions">
-            <StartLink>무엇을 준비할지 고르기</StartLink>
+            <StartLink>시작하기</StartLink>
             <Link href="/plan?demo=B" className="btn outline">
-              완성된 설계서 예시 보기
+              예시 보기
             </Link>
           </div>
         </section>
 
         <section className="section" id="service">
-          <div className="eyebrow">What NEXT does</div>
-          <h2>지금의 판단을 기록해, 미래의 결정으로 잇습니다.</h2>
-          <p className="section-lede">
-            목적을 먼저 묻고 갈래를 나눕니다. 일상 지출 관리만 필요하시면 신탁이나 후견
-            이야기는 꺼내지 않습니다. 준비하시는 목적에 따라 네 갈래 중 하나로 안내하며,
-            아래 여섯 가지가 그 안에서 순서대로 이어집니다.
-          </p>
+          <div className="eyebrow" style={{ textAlign: "center" }}>
+            NEXT supports
+          </div>
 
-          <ol className="svc-list">
-            {SERVICES.map((s) => (
-              <li className="svc-item" key={s.step}>
-                <div className="svc-step mono">{s.step}</div>
-                <div className="svc-body">
-                  <div className="svc-note mono">{s.note}</div>
+          <div className="category-row">
+            <StartLink className="btn outline">일상 관리</StartLink>
+            <StartLink className="btn outline">자산·투자 관리</StartLink>
+            <StartLink className="btn outline">상속 준비</StartLink>
+          </div>
+
+          <ol className="stage-list">
+            {STAGES.map((s, i) => (
+              <li className="stage-item" key={s.title}>
+                <div className="stage-num mono">{String(i + 1).padStart(2, "0")}</div>
+                <div className="stage-body">
                   <h3>{s.title}</h3>
-                  <p>{s.body}</p>
+                  <ul className="stage-sub">
+                    {s.items.map((text) => (
+                      <li key={text}>{text}</li>
+                    ))}
+                  </ul>
                 </div>
               </li>
             ))}
@@ -91,8 +80,12 @@ export default function Home() {
 
         <section className="cta-band">
           <div>
-            <h2>미래를 예측하는 대신, 미래의 결정을 준비하세요.</h2>
-            <p>짧으면 2분, 길어도 10분입니다. 목적에 따라 질문의 수가 달라집니다.</p>
+            <h2>미래를 예측하는 대신, 내 뜻을 미리 준비하세요.</h2>
+            <p>
+              필요한 내용만 차근차근 여쭤볼게요.
+              <br />
+              약 2~10분이면 준비할 수 있어요.
+            </p>
           </div>
           <StartLink>시작하기</StartLink>
         </section>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR, DM_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { AuthProvider } from "../components/auth/AuthProvider";
 import "./globals.css";
 
@@ -19,6 +20,15 @@ const dmMono = DM_Mono({
   variable: "--font-dm-mono",
 });
 
+// Pretendard는 Google Fonts에 없어 npm 패키지(pretendard)의 가변 폰트 파일을
+// next/font/local로 자체 호스팅한다 — 위 두 폰트와 같은 이유(오프라인 데모).
+const pretendard = localFont({
+  src: "../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
+  weight: "45 920",
+  display: "swap",
+  variable: "--font-pretendard",
+});
+
 export const metadata: Metadata = {
   title: "NEXT | 미래 금융 의사결정 설계",
   description:
@@ -29,7 +39,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" className={`${notoKr.variable} ${dmMono.variable}`}>
+    <html lang="ko" className={`${notoKr.variable} ${dmMono.variable} ${pretendard.variable}`}>
       <body>
         <AuthProvider>{children}</AuthProvider>
       </body>

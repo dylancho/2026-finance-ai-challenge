@@ -12,10 +12,7 @@ export default function Header() {
     <header className="header">
       <div className="shell-wide header-inner">
         <Link href="/" aria-label="NEXT 홈">
-          <div className="brand">
-            NEXT
-            <small>당신의 다음 결정을 이어가다</small>
-          </div>
+          <div className="brand">NEXT</div>
         </Link>
 
         {/* ready 전에는 아무것도 렌더하지 않는다. 서버 렌더에는 세션이 없으므로
@@ -25,10 +22,10 @@ export default function Header() {
             (session.signedIn ? (
               <>
                 <Link href="/start" className="hide-sm">
-                  설계 시작
+                  시작하기
                 </Link>
                 <Link href="/plan">내 설계서</Link>
-                <Link href="/simulation">시뮬레이션</Link>
+                <Link href="/simulation">미리보기</Link>
                 <button className="nav-signout" onClick={signOut}>
                   로그아웃
                 </button>

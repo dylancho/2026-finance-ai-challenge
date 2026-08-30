@@ -127,20 +127,11 @@ ul {
 }
 
 .brand {
-  font-family: var(--mono);
+  font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
   font-size: 19px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.32em;
   color: var(--navy);
-}
-
-.brand small {
-  display: block;
-  font-family: inherit;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--faint);
-  margin-top: -2px;
 }
 
 .nav {
@@ -172,9 +163,9 @@ ul {
 /* ── 공통 요소 ────────────────────────────────── */
 
 .eyebrow {
-  font-family: var(--mono);
+  font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.16em;
   color: var(--blue);
   text-transform: uppercase;
@@ -330,7 +321,7 @@ ul {
 
 .hero {
   text-align: center;
-  padding: 108px 0 100px;
+  padding: 108px 0 56px;
   max-width: 920px;
   margin: 0 auto;
 }
@@ -381,6 +372,11 @@ ul {
   border-top: 1px solid var(--line);
 }
 
+#service {
+  padding-top: 44px;
+  padding-bottom: 40px;
+}
+
 .section h2 {
   font-size: clamp(24px, 3vw, 34px);
   margin: 14px 0 12px;
@@ -390,6 +386,19 @@ ul {
   color: var(--muted);
   max-width: 44em;
   font-size: 15.5px;
+}
+
+.category-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin: 18px 0 8px;
+}
+
+.category-row .btn {
+  padding: 16px 28px;
+  font-size: 16px;
 }
 
 
@@ -426,7 +435,7 @@ ul {
   justify-content: space-between;
   gap: 32px;
   flex-wrap: wrap;
-  margin: 72px 0 0;
+  margin: 40px 0 0;
 }
 
 .cta-band h2 {
@@ -511,6 +520,17 @@ ul {
 .gate-card[aria-pressed="true"] {
   border-color: var(--navy);
   box-shadow: 0 0 0 1px var(--navy);
+}
+
+.gate-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.gate-card:disabled:hover {
+  border-color: var(--line);
+  box-shadow: none;
+  transform: none;
 }
 
 .gate-card .t {
@@ -2800,14 +2820,14 @@ table.data tfoot td {
 }
 
 /* ── 서비스 목록 ── */
-.svc-list {
+.stage-list {
   list-style: none;
   padding: 0;
   margin: 38px 0 0;
   border-top: 1px solid var(--line);
 }
 
-.svc-item {
+.stage-item {
   display: grid;
   grid-template-columns: 84px 1fr;
   gap: 24px;
@@ -2816,7 +2836,7 @@ table.data tfoot td {
   align-items: start;
 }
 
-.svc-step {
+.stage-num {
   font-size: 30px;
   font-weight: 500;
   color: var(--line);
@@ -2824,30 +2844,44 @@ table.data tfoot td {
   padding-top: 2px;
 }
 
-.svc-item:hover .svc-step {
+.stage-item:hover .stage-num {
   color: var(--blue);
 }
 
-.svc-note {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  color: var(--blue);
-  text-transform: uppercase;
-}
-
-.svc-body h3 {
+.stage-body h3 {
   font-size: 19px;
   line-height: 1.5;
-  margin: 8px 0 10px;
+  margin: 0 0 10px;
   letter-spacing: -0.02em;
 }
 
-.svc-body p {
+.stage-sub {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: 52em;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stage-sub li {
+  position: relative;
+  padding-left: 16px;
   color: var(--muted);
   font-size: 14.5px;
   line-height: 1.85;
-  margin: 0;
-  max-width: 52em;
+}
+
+.stage-sub li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--faint);
 }
 
 /* ── 로그인 ── */
@@ -2915,11 +2949,11 @@ table.data tfoot td {
 }
 
 @media (max-width: 760px) {
-  .svc-item {
+  .stage-item {
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  .svc-step {
+  .stage-num {
     font-size: 22px;
   }
   .login-card {
