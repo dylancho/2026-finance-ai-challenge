@@ -383,6 +383,7 @@ ul {
 
 #service {
   padding-top: 44px;
+  padding-bottom: 40px;
 }
 
 .section h2 {
@@ -443,7 +444,7 @@ ul {
   justify-content: space-between;
   gap: 32px;
   flex-wrap: wrap;
-  margin: 72px 0 0;
+  margin: 40px 0 0;
 }
 
 .cta-band h2 {
