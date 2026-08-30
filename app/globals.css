@@ -129,7 +129,7 @@ ul {
 .brand {
   font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
   font-size: 19px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.32em;
   color: var(--navy);
 }
@@ -2907,7 +2907,7 @@ table.data tfoot td {
   font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
   font-variant-numeric: tabular-nums;
   font-size: 30px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--line);
   line-height: 1;
   padding-top: 2px;
