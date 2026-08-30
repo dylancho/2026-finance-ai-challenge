@@ -4,9 +4,8 @@ import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
 
 /** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
-const STAGES: { stage: string; title: string; items: string[] }[] = [
+const STAGES: { title: string; items: string[] }[] = [
   {
-    stage: "1단계",
     title: "지금의 나를 기록해요",
     items: [
       "지난 소비와 투자 습관을 보고, 평소의 나를 기록해둡니다",
@@ -15,12 +14,10 @@ const STAGES: { stage: string; title: string; items: string[] }[] = [
     ],
   },
   {
-    stage: "2단계",
     title: "문서로 남겨요",
     items: ["이 약속들을 문서 3가지(자산 관리, 생활비, 돌봄)로 정리해둡니다"],
   },
   {
-    stage: "3단계",
     title: "필요할 때만 움직여요",
     items: [
       "평소와 다른 움직임이 보이면 알려드립니다. 진단은 아닙니다",
@@ -63,10 +60,9 @@ export default function Home() {
 
           <ol className="stage-list">
             {STAGES.map((s, i) => (
-              <li className="stage-item" key={s.stage}>
+              <li className="stage-item" key={s.title}>
                 <div className="stage-num mono">{String(i + 1).padStart(2, "0")}</div>
                 <div className="stage-body">
-                  <div className="eyebrow">{s.stage}</div>
                   <h3>{s.title}</h3>
                   <ul className="stage-sub">
                     {s.items.map((text) => (
