@@ -506,14 +506,27 @@ ul {
   gap: 14px;
 }
 
-.gate-cards.tight {
-  grid-template-columns: repeat(2, 1fr);
-  max-width: 760px;
-}
-
 .gate-cards.stacked {
   grid-template-columns: 1fr;
   max-width: 640px;
+}
+
+.gate-center {
+  text-align: center;
+}
+
+.gate-center .gate-lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gate-center .gate-cards {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gate-center .gate-card {
+  text-align: left;
 }
 
 .gate-card {

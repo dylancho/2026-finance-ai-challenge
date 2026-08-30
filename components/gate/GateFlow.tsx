@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Wallet, TrendingUp, ScrollText } from "lucide-react";
 import Badge from "../common/Badge";
 import { emptyProfile, readProfile, saveProfile } from "../../lib/profile";
-import type { Capacity, Profile, Subject, Track } from "../../lib/types";
+import type { Capacity, Profile, Track } from "../../lib/types";
 
 // 2026-08-30 회의 결정: 설문 카테고리를 일상대리 / 투자 / 상속 3개로 확정.
 // "future"(미래 판단력 저하 대비)와 "caregiver"(가족 대신 준비)는 메인 시나리오에서
@@ -47,8 +47,6 @@ const CATEGORIES: {
   },
 ];
 
-const RELATIONS = ["부모님", "배우자", "조부모", "형제자매", "그 외 친족"];
-
 const CAPACITIES: {
   value: Capacity;
   title: string;
@@ -80,17 +78,10 @@ export default function GateFlow() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [track, setTrack] = useState<Track | null>(null);
-  const [subject, setSubject] = useState<Subject | null>(null);
-  const [relation, setRelation] = useState<string>("");
   const [capacity, setCapacity] = useState<Capacity | null>(null);
 
   function pickTrack(t: Track) {
     setTrack(t);
-    if (t === "daily" || t === "estate") {
-      setSubject("self");
-    } else {
-      setSubject(null);
-    }
     setStep(1);
   }
 
@@ -100,8 +91,10 @@ export default function GateFlow() {
     const next: Profile = {
       ...base,
       track,
-      subject: subject ?? "self",
-      subjectRelation: subject === "family" ? relation || "가족" : undefined,
+      // 서비스 대상을 고령층 당사자 본인으로 한정하기로 하면서 대상(본인/가족)
+      // 선택 STEP을 게이트에서 제거했다 (2026-08-31). subject는 항상 본인이다.
+      subject: "self",
+      subjectRelation: undefined,
       capacity: cap,
       // 트랙이 바뀌면 이전 트랙의 답변은 의미가 없다.
       answers: base.track === track ? base.answers : {},
@@ -112,14 +105,13 @@ export default function GateFlow() {
     router.push("/ledger");
   }
 
-  const who = subject === "family" ? relation || "그분" : "본인";
   const blocking = capacity === "diagnosed" || capacity === "incident";
 
   return (
     <div className="gate shell-wide">
       {step === 0 && (
-        <div className="fade-in">
-          <div className="gate-step">STEP 1 / 3 · 준비할 내용 선택</div>
+        <div className="fade-in gate-center">
+          <div className="gate-step">STEP 1 / 2 · 준비할 내용 선택</div>
           <h1>무엇을 미리 준비해둘까요?</h1>
           <p className="gate-lede">
             앞으로 판단이나 결정이 어려워질 때를 대비해, 지금 정해두고 싶은 내용을 선택해주세요.
@@ -152,79 +144,8 @@ export default function GateFlow() {
 
       {step === 1 && (
         <div className="fade-in">
-          <div className="gate-step">STEP 2 / 3 · 대상</div>
-          <h1>이 설계는 누구를 위한 것인가요?</h1>
-          <p className="gate-lede">
-            본인을 위한 것인지, 가족을 대신한 것인지에 따라 가능한 제도가 달라집니다.
-          </p>
-
-          <div className="gate-cards tight">
-            <button
-              className="gate-card"
-              aria-pressed={subject === "self"}
-              onClick={() => {
-                setSubject("self");
-                setRelation("");
-              }}
-            >
-              <span className="t">본인을 위한 설계입니다</span>
-              <span className="d">
-                내가 결정할 수 없게 될 때를 대비해 지금의 내가 정해둡니다.
-              </span>
-            </button>
-            <button
-              className="gate-card"
-              aria-pressed={subject === "family"}
-              onClick={() => setSubject("family")}
-            >
-              <span className="t">가족을 위한 설계입니다</span>
-              <span className="d">
-                부모님이나 배우자를 대신해 준비합니다. 대상자의 동의가 필요할 수 있습니다.
-              </span>
-            </button>
-          </div>
-
-          {subject === "family" && (
-            <>
-              <p className="gate-lede" style={{ marginTop: 26, marginBottom: 10 }}>
-                대상자와의 관계
-              </p>
-              <div className="relation-row">
-                {RELATIONS.map((r) => (
-                  <button
-                    key={r}
-                    className="chip-btn"
-                    aria-pressed={relation === r}
-                    onClick={() => setRelation(r)}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-
-          <div className="gate-nav">
-            <button className="btn ghost" onClick={() => setStep(0)}>
-              ← 목적 다시 고르기
-            </button>
-            <button
-              className="btn"
-              disabled={!subject || (subject === "family" && !relation)}
-              onClick={() => setStep(2)}
-            >
-              다음
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="fade-in">
-          <div className="gate-step">STEP 3 / 3 · 의사능력</div>
-          <h1>
-            지금 {who}은(는) 금융 결정을 스스로 하실 수 있나요?
-          </h1>
+          <div className="gate-step">STEP 2 / 2 · 의사능력</div>
+          <h1>지금 본인은 금융 결정을 스스로 하실 수 있나요?</h1>
           <p className="gate-lede">
             이 질문이 어떤 제도가 가능한지를 결정합니다. 신탁계약과 임의후견계약은 본인의
             의사능력을 전제로 하기 때문에, 시점을 놓치면 선택지가 법정후견으로 좁아집니다.
@@ -269,7 +190,7 @@ export default function GateFlow() {
           )}
 
           <div className="gate-nav">
-            <button className="btn ghost" onClick={() => setStep(1)}>
+            <button className="btn ghost" onClick={() => setStep(0)}>
               ← 이전
             </button>
             <button
