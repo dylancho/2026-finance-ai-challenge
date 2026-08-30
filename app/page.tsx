@@ -56,7 +56,7 @@ export default function Home() {
           </div>
 
           <div className="category-row">
-            <StartLink className="btn outline">생활비 관리</StartLink>
+            <StartLink className="btn outline">일상 관리</StartLink>
             <StartLink className="btn outline">자산·투자 관리</StartLink>
             <StartLink className="btn outline">상속 준비</StartLink>
           </div>
