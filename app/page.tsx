@@ -4,36 +4,28 @@ import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
 
 /** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
-const SERVICES: { step: string; title: string; body: string }[] = [
+const STAGES: { stage: string; title: string; items: string[] }[] = [
   {
-    step: "01",
-    title: "10년 금융 이력을 읽어 기준선을 만듭니다",
-    body: "카드 결제, 이체, 공과금 납부 주기, 하락장에서의 매매를 읽어 '가장 건강할 때의 판단 기준'을 세웁니다. 실효 손절선, 위험 회피도, 월 생활비 중앙값처럼 숫자로 남습니다.",
+    stage: "1단계",
+    title: "지금의 나를 기록해요",
+    items: [
+      "지난 소비와 투자 습관을 보고, \"평소의 나\"를 기록해둡니다",
+      "\"주식은 급하게 팔지 마세요\" 같은 말을 대화로 남기면, 나중에 실제로 지킬 수 있는 약속으로 바꿔둡니다",
+      "말과 행동이 다를 때도 있으니, 실제로 어떻게 할지 미리 정해둡니다",
+    ],
   },
   {
-    step: "02",
-    title: "대화로 미래의 원칙을 정합니다",
-    body: "\"주식은 급하게 팔지 마세요\" 같은 말을 그대로 받아, 신탁설계서 제7조 운용지침 같은 조항으로 바꿉니다.",
+    stage: "2단계",
+    title: "문서로 남겨요",
+    items: ["이 약속들을 문서 3가지(자산 관리, 생활비, 돌봄)로 정리해둡니다"],
   },
   {
-    step: "03",
-    title: "말한 것과 실제로 한 것을 맞대어 봅니다",
-    body: "\"팔지 않겠다\"고 하셨는데 하락 구간마다 매도한 이력이 있다면, 그 조항이 실제로 어느 쪽으로 작동할지 지금 정해야 합니다. 이 대조가 NEXT의 핵심입니다.",
-  },
-  {
-    step: "04",
-    title: "조항 수준의 설계서 3종을 만듭니다",
-    body: "신탁설계서·후견설계서·지출설계서. 문단이 아니라 조항입니다. 비어 있는 칸은 비어 있다고 표시하고, 그 공백이 나중에 어디서 문제가 되는지 알려드립니다.",
-  },
-  {
-    step: "05",
-    title: "평소와 달라진 지점을 감지합니다",
-    body: "잔액 확인 반복, 중복 이체, 공과금 연체, 심야 고액 거래. 기준선에서 벌어지면 알립니다. 다만 이것은 진단이 아니며, 판정은 의료기관의 몫입니다.",
-  },
-  {
-    step: "06",
-    title: "사람이 확인해야 움직입니다",
-    body: "AI 경보만으로는 아무것도 바뀌지 않습니다. 최근 1개월 이내의 의사 진단서나 장기요양보험 등급 발행서가 함께 확인돼야 전환이 시작됩니다. 자산 처분은 법적 후견인의 승인을 거칩니다.",
+    stage: "3단계",
+    title: "필요할 때만 움직여요",
+    items: [
+      "평소와 다른 움직임이 보이면 알려드려요 (진단은 아니에요)",
+      "실제 진단서가 확인되기 전까지는 아무것도 바뀌지 않아요",
+    ],
   },
 ];
 
@@ -66,16 +58,21 @@ export default function Home() {
           <p className="section-lede">
             목적을 먼저 묻고 갈래를 나눕니다. 일상 지출 관리만 필요하시면 신탁이나 후견
             이야기는 꺼내지 않습니다. 준비하시는 목적에 따라 세 갈래 중 하나로 안내하며,
-            아래 여섯 가지가 그 안에서 순서대로 이어집니다.
+            아래 세 단계가 그 안에서 순서대로 이어집니다.
           </p>
 
-          <ol className="svc-list">
-            {SERVICES.map((s) => (
-              <li className="svc-item" key={s.step}>
-                <div className="svc-step mono">{s.step}</div>
-                <div className="svc-body">
+          <ol className="stage-list">
+            {STAGES.map((s, i) => (
+              <li className="stage-item" key={s.stage}>
+                <div className="stage-num mono">{String(i + 1).padStart(2, "0")}</div>
+                <div className="stage-body">
+                  <div className="eyebrow">{s.stage}</div>
                   <h3>{s.title}</h3>
-                  <p>{s.body}</p>
+                  <ul className="stage-sub">
+                    {s.items.map((text) => (
+                      <li key={text}>{text}</li>
+                    ))}
+                  </ul>
                 </div>
               </li>
             ))}

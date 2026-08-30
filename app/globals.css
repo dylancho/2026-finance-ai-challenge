@@ -2811,14 +2811,14 @@ table.data tfoot td {
 }
 
 /* ── 서비스 목록 ── */
-.svc-list {
+.stage-list {
   list-style: none;
   padding: 0;
   margin: 38px 0 0;
   border-top: 1px solid var(--line);
 }
 
-.svc-item {
+.stage-item {
   display: grid;
   grid-template-columns: 84px 1fr;
   gap: 24px;
@@ -2827,7 +2827,7 @@ table.data tfoot td {
   align-items: start;
 }
 
-.svc-step {
+.stage-num {
   font-size: 30px;
   font-weight: 500;
   color: var(--line);
@@ -2835,30 +2835,44 @@ table.data tfoot td {
   padding-top: 2px;
 }
 
-.svc-item:hover .svc-step {
+.stage-item:hover .stage-num {
   color: var(--blue);
 }
 
-.svc-note {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  color: var(--blue);
-  text-transform: uppercase;
-}
-
-.svc-body h3 {
+.stage-body h3 {
   font-size: 19px;
   line-height: 1.5;
-  margin: 0 0 10px;
+  margin: 4px 0 10px;
   letter-spacing: -0.02em;
 }
 
-.svc-body p {
+.stage-sub {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: 52em;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stage-sub li {
+  position: relative;
+  padding-left: 16px;
   color: var(--muted);
   font-size: 14.5px;
   line-height: 1.85;
-  margin: 0;
-  max-width: 52em;
+}
+
+.stage-sub li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--faint);
 }
 
 /* ── 로그인 ── */
@@ -2926,11 +2940,11 @@ table.data tfoot td {
 }
 
 @media (max-width: 760px) {
-  .svc-item {
+  .stage-item {
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  .svc-step {
+  .stage-num {
     font-size: 22px;
   }
   .login-card {
