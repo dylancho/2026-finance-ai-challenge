@@ -130,17 +130,19 @@ export default function GateFlow() {
             {CATEGORIES.map((c) => (
               <button
                 key={c.track}
-                className="gate-card"
+                className="gate-card gate-card-side"
                 disabled={!c.enabled}
                 aria-disabled={!c.enabled}
                 onClick={() => c.enabled && pickTrack(c.track as Track)}
                 aria-pressed={track === c.track}
               >
                 <c.icon className="gate-card-icon" strokeWidth={1.5} aria-hidden="true" />
-                <span className="t">{c.title}</span>
-                <span className="d">{c.desc}</span>
-                <span className="meta">
-                  {c.enabled ? c.meta : <Badge tone="warn">{c.meta}</Badge>}
+                <span className="gate-card-text">
+                  <span className="t">{c.title}</span>
+                  <span className="d">{c.desc}</span>
+                  <span className="meta">
+                    {c.enabled ? c.meta : <Badge tone="warn">{c.meta}</Badge>}
+                  </span>
                 </span>
               </button>
             ))}
