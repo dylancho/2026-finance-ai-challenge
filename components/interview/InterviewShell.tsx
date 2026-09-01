@@ -10,7 +10,6 @@ import {
   activeQuestions,
   findQuestion,
   isAnswered,
-  nextQuestion,
   overallProgress,
   sectionProgress,
   TRACK_META,
@@ -56,6 +55,7 @@ export default function InterviewShell() {
   const [freeText, setFreeText] = useState("");
   const [thinking, setThinking] = useState(false);
   const [jumpTo, setJumpTo] = useState<string | null>(null);
+  const [skipped, setSkipped] = useState<Set<string>>(new Set());
   const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
   const streamRef = useRef<HTMLDivElement>(null);
   const askedRef = useRef<string | null>(null);
@@ -119,8 +119,12 @@ export default function InterviewShell() {
       const q = findQuestion(jumpTo);
       if (q && q.track === profile.track) return q;
     }
-    return nextQuestion(profile);
-  }, [profile, jumpTo]);
+    return (
+      activeQuestions(profile).find(
+        (q) => !isAnswered(profile, q.id) && !skipped.has(q.id),
+      ) ?? null
+    );
+  }, [profile, jumpTo, skipped]);
 
   /* ── 질문 제시 ── */
   useEffect(() => {
@@ -146,9 +150,27 @@ export default function InterviewShell() {
     });
   }, [bubbles, pending]);
 
+  /* ── 건너뛰기 ──
+   * 답으로 저장하지 않는다. optional 질문에 빈 답을 저장하면 isAnswered 가
+   * false 라 같은 질문이 계속 다시 나오고, gaps·조항 피드도 오염된다.
+   * 이 세션 동안만 기억하므로 새로고침하면 다시 물어본다. */
+  const skip = useCallback((q: Question) => {
+    setSkipped((prev) => new Set(prev).add(q.id));
+    setBubbles((prev) => [
+      ...prev,
+      { id: `s-${q.id}-${prev.length}`, role: "user", text: "건너뜀" },
+    ]);
+    setPending([]);
+    setJumpTo(null);
+  }, []);
+
   /* ── 답변 확정 ── */
   const commit = useCallback(
     (q: Question, value: AnswerValue, echo?: string) => {
+      if (q.optional && value.kind === "open" && !value.text.trim()) {
+        skip(q);
+        return;
+      }
       setProfile((prev) => {
         if (!prev) return prev;
         const next = saveProfile(setAnswer(prev, q.id, value));
@@ -176,7 +198,7 @@ export default function InterviewShell() {
       setPending([]);
       setJumpTo(null);
     },
-    [],
+    [skip],
   );
 
   /* ── 자유 입력 ── */
@@ -397,7 +419,7 @@ export default function InterviewShell() {
                   <button
                     className="btn ghost sm"
                     style={{ marginTop: 10 }}
-                    onClick={() => commit(current, { kind: "open", text: "" }, "건너뜀")}
+                    onClick={() => skip(current)}
                   >
                     이 질문 건너뛰기
                   </button>

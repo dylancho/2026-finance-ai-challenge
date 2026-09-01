@@ -83,17 +83,19 @@ function MultiInput({
   initial?: AnswerValue;
   onSubmit: (v: AnswerValue) => void;
 }) {
+  // defaults 는 화면의 초기 선택일 뿐이다. 제출하기 전에는 답으로 저장되지 않는다.
+  // 이력 대조에서 "이력대로"를 고르면 initial 이 생기므로 그쪽이 defaults 를 덮는다.
   const [values, setValues] = useState<string[]>(
-    initial?.kind === "multi" ? initial.values : [],
+    initial?.kind === "multi" ? initial.values : (q.defaults ?? []),
   );
   const [amounts, setAmounts] = useState<Record<string, number>>(
     initial?.kind === "multi" ? (initial.amounts ?? {}) : {},
   );
 
   useEffect(() => {
-    setValues(initial?.kind === "multi" ? initial.values : []);
+    setValues(initial?.kind === "multi" ? initial.values : (q.defaults ?? []));
     setAmounts(initial?.kind === "multi" ? (initial.amounts ?? {}) : {});
-  }, [q.id, initial]);
+  }, [q.id, q.defaults, initial]);
 
   function toggle(v: string) {
     setValues((prev) =>

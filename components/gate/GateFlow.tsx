@@ -24,7 +24,7 @@ const CATEGORIES: {
     icon: Wallet,
     title: "일상에 필요한 돈 관리를 미리 정해두고 싶어요",
     desc: "생활비, 공과금, 정기결제처럼 일상에 필요한 돈을 어떻게 관리할지 미리 정해둘 수 있어요.",
-    meta: "약 8문항 · 2~3분",
+    meta: "약 11문항 · 3분",
     enabled: true,
   },
   {

@@ -36,6 +36,8 @@ export interface Question {
   helper?: string;
   type: QuestionType;
   options?: Option[];
+  /** multi 타입의 초기 선택값. opt-out 질문(기본 전부 켬)에 쓴다. */
+  defaults?: string[];
   /** multi 에서 항목별 금액을 함께 받는다 */
   withAmount?: boolean;
   /** amount 파라미터 (원 단위) */

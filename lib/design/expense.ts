@@ -20,11 +20,13 @@ import {
 import { personLabel, won } from "../format";
 
 const ITEM_LABEL: Record<string, string> = {
-  utility: "전기·가스·수도·관리비",
+  utility: "전기·가스·수도",
   maintenance: "아파트 관리비",
   telecom: "통신비",
   insurance: "보험료",
-  rent: "월세·대출 이자",
+  rent: "월세",
+  loan: "대출 원리금·이자",
+  tax: "세금·사회보험",
   subscription: "정기 구독",
   care: "요양·간병비",
   support: "가족 정기 지원",
@@ -94,14 +96,15 @@ export function buildExpenseDesign(p: Profile): ExpenseDesign {
   /* ── 입력 수집 (트랙별로 다른 질문에서 같은 값을 끌어온다) ── */
   const living = firstAmount(p, "A02", "B07", "D09") ?? 0;
   const bump = amountOf(p, "B08") ?? 0;
-  const income = firstAmount(p, "B02", "C10") ?? 0;
+  const income = firstAmount(p, "B02", "C10", "A09") ?? 0;
   const perTxLimit = firstAmount(p, "A05", "B14");
   const soloLimit = amountOf(p, "B14");
   const cycle = choiceOf(p, "A03") ?? "monthly";
   const onFail = choiceOf(p, "A04") ?? "auto_cover";
   const bigSpend = choiceOf(p, "A08");
   const notifyPerson = firstPerson(p, "A07", "B12", "C07");
-  const supervisor = personOf(p, "B06") ?? personOf(p, "D12");
+  const supervisor =
+    personOf(p, "B06") ?? personOf(p, "D12") ?? personOf(p, "A11");
 
   const fixedKeys = firstMulti(p, "A01", "B10", "C09");
   const fixedAmounts =
@@ -208,12 +211,18 @@ export function buildExpenseDesign(p: Profile): ExpenseDesign {
   const forbidden = new Set(multiOf(p, "B15"));
   const urgent = new Set(multiOf(p, "C04"));
 
+  // 게이트 STEP 2 의 "이미 금융 문제나 피해가 발생했습니다"도 피해 이력으로 본다.
+  // C04 는 보류된 caregiver 트랙에만 있어서, 게이트 신호가 여기 닿지 않으면
+  // 트랙 A 에서는 긴급 상황이 설계서에 전혀 반영되지 않는다.
+  const incident = urgent.has("fraud") || p.capacity === "incident";
+
   const fraudRules: FraudRule[] = ALL_FRAUD_RULES.map((r) => {
     let active = chosen.has(r.key);
     if (r.key === "deposit_break" && forbidden.has("break_deposit")) active = true;
     if (r.key === "loan" && forbidden.has("loan")) active = true;
-    if (r.key === "burst" && (p.track !== "daily" || chosen.size > 0)) active = true;
-    if (urgent.has("fraud")) active = true; // 이미 피해가 있었다면 전부 켠다
+    // burst 는 A06 의 명시적 옵션이 됐다. 트랙 A 는 사용자의 선택을 그대로 따른다.
+    if (r.key === "burst" && p.track !== "daily") active = true;
+    if (incident) active = true; // 이미 피해가 있었다면 전부 켠다
     return { ...r, active };
   });
 
@@ -242,7 +251,9 @@ export function buildExpenseDesign(p: Profile): ExpenseDesign {
     ...amountsOf(p, "C08"),
     ...amountsOf(p, "D02"),
   };
-  const assets = Object.values(assetMap).reduce((a, b) => a + b, 0);
+  // A10 은 단일 amount 라 자산 맵에 합쳐지지 않는다. 따로 더한다.
+  const assets =
+    Object.values(assetMap).reduce((a, b) => a + b, 0) + (amountOf(p, "A10") ?? 0);
   const monthlyNet = Math.max(0, cashflow.net);
 
   const series: { year: number; balance: number }[] = [];
@@ -305,12 +316,17 @@ export function buildExpenseDesign(p: Profile): ExpenseDesign {
     });
   }
 
-  if (urgent.has("fraud")) {
+  if (incident) {
     flags.push({
       level: "critical",
       title: "이미 피해가 있었거나 의심되는 상황입니다",
-      body: "후견 절차와 별개로 지금 바로 할 수 있는 조치가 있습니다. 금융감독원 보이스피싱 지급정지 신청(1332), 카드사·은행의 안심차단 서비스, 대출 실행 차단 등록을 먼저 확인하세요.",
-      qid: "C04",
+      body:
+        p.track === "daily"
+          ? "지금 바로 할 수 있는 조치가 있습니다. 금융감독원 보이스피싱 지급정지 신청(1332), 카드사·은행의 안심차단 서비스, 대출 실행 차단 등록을 먼저 확인하세요."
+          : "후견 절차와 별개로 지금 바로 할 수 있는 조치가 있습니다. 금융감독원 보이스피싱 지급정지 신청(1332), 카드사·은행의 안심차단 서비스, 대출 실행 차단 등록을 먼저 확인하세요.",
+      // C04 로 되돌아가는 딥링크는 caregiver 트랙에서만 유효하다.
+      // 게이트가 출처인 경우 돌아갈 질문이 없으므로 qid 를 붙이지 않는다.
+      ...(urgent.has("fraud") ? { qid: "C04" } : {}),
     });
   }
 

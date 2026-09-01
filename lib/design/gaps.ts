@@ -23,9 +23,10 @@ const CONSEQUENCE: Record<string, { what: string; consequence: string; severity:
     severity: "high",
   },
   A06: {
-    what: "차단할 이상거래를 고르지 않았습니다",
-    consequence: "심야 고액 이체, 신규 계좌 송금, 대출 실행이 모두 그대로 통과합니다.",
-    severity: "high",
+    what: "차단할 이상거래를 확인하지 않았습니다",
+    consequence:
+      "기본 룰셋이 그대로 적용됩니다. 빼야 할 항목이 있는지 한 번은 확인하는 편이 좋습니다.",
+    severity: "medium",
   },
   A07: {
     what: "알림 받을 사람이 없습니다",
@@ -36,6 +37,12 @@ const CONSEQUENCE: Record<string, { what: string; consequence: string; severity:
     what: "갑작스러운 큰 지출의 처리 방식이 없습니다",
     consequence: "병원비가 발생했을 때 한도에 막혀 결제가 안 되거나, 반대로 아무 제한 없이 나갑니다.",
     severity: "medium",
+  },
+  A09: {
+    what: "월 수입이 없습니다",
+    consequence:
+      "나가는 돈과 비교할 기준이 없어 자산이 몇 년 유지되는지 계산할 수 없습니다.",
+    severity: "high",
   },
 
   /* Track B */

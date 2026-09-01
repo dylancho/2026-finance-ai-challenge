@@ -148,6 +148,9 @@ export const DEMO_PROFILES: Record<string, Profile> = {
       },
       A07: { kind: "person", people: [{ relation: "자녀", name: "김하나" }] },
       A08: { kind: "choice", value: "approve" },
+      A09: { kind: "amount", value: 1_500_000 },
+      A10: { kind: "amount", value: 200_000_000 },
+      A11: { kind: "person", people: [{ relation: "형제자매", name: "김정호" }] },
     },
   },
   B: {
