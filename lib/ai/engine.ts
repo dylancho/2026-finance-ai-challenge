@@ -3,7 +3,15 @@ import { acknowledge, ruleExtract } from "./rules";
 
 /** 룰 신뢰도가 이 값 미만이면 LLM 보강을 시도한다. */
 const LLM_THRESHOLD = 0.6;
-const LLM_TIMEOUT_MS = 2500;
+
+/**
+ * LLM 응답을 기다려 주는 시간.
+ *
+ * 2.5초로는 모델이 답을 낼 시간이 없어 매번 abort 되고, 화면에는 언제나
+ * "규칙 추출" 만 떴다. 사용자는 "해석하고 있습니다" 표시를 보며 기다리므로
+ * 몇 초는 견딜 수 있다 — 조용히 폴백되는 쪽이 더 나쁘다.
+ */
+const LLM_TIMEOUT_MS = 8000;
 
 export interface AIInterviewEngine {
   respond(input: string, q: Question, p: Profile): Promise<AIResult>;
