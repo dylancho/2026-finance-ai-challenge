@@ -108,9 +108,9 @@ export async function POST(req: Request) {
       // thinking 토큰이 이 한도를 같이 먹는다. 해설 3~5문장 + 항목별 해석이
       // 잘리지 않도록 여유를 둔다.
       max_tokens: 4000,
-      // 판단하는 자리이므로 추출층보다 사고를 더 준다. 다만 이 화면은 로딩
-      // 표시가 붙어 있어도 결국 사람이 기다리는 자리라 max 까지는 올리지 않는다.
-      output_config: { effort: "medium" },
+      // medium 은 실측 15초가 걸려 클라이언트 타임아웃을 넘겼다. /ledger 의
+      // 페르소나 카드는 사람이 로딩 표시를 보며 기다리는 자리라 그만큼은 못 준다.
+      output_config: { effort: "low" },
       system: SYSTEM,
       tools: [TOOL],
       tool_choice: { type: "tool", name: "record_narration" },
@@ -145,8 +145,9 @@ export async function POST(req: Request) {
   } catch (error) {
     // 판정층이 죽어도 화면은 룰 폴백으로 완주한다.
     if (error instanceof Anthropic.APIError) {
+      console.error("[ai/narrate] anthropic error", error.status, error.message);
       return NextResponse.json(
-        { reason: `api_${error.status}` },
+        { reason: `api_${error.status}`, detail: error.message?.slice(0, 300) },
         { status: 200 },
       );
     }

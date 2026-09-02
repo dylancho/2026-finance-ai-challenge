@@ -103,7 +103,10 @@ const EXTRACT_TOOL: Anthropic.Tool = {
       },
     },
   },
-  strict: true,
+  // strict 를 켜지 않는다. 이 스키마는 kind 로 갈라지는 합집합이라
+  // 어떤 경우에도 쓰이지 않는 속성이 남는데, strict 는 모든 속성이
+  // required 이기를 요구해 400 이 난다. 대신 아래 describe() 가 질문
+  // 타입과 맞지 않는 추출을 null 로 걸러낸다.
 };
 
 export async function POST(req: Request) {
@@ -204,8 +207,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ extracted: [], reason: "rate_limited" });
     }
     if (error instanceof Anthropic.APIError) {
+      // 조용히 폴백하면 무엇이 잘못됐는지 알 수 없다. 배포 로그에 남긴다.
+      console.error("[ai/parse] anthropic error", error.status, error.message);
       return NextResponse.json(
-        { extracted: [], reason: `api_${error.status}` },
+        { extracted: [], reason: `api_${error.status}`, detail: error.message?.slice(0, 300) },
         { status: 200 },
       );
     }

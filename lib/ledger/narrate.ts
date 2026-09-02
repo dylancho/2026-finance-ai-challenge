@@ -12,7 +12,14 @@ import { won } from "../format";
  * 데모가 죽지 않게 하는 보험이다. 구간 분류 수준의 문장만 나온다.
  */
 
-const TIMEOUT_MS = 12_000;
+/**
+ * 판정층을 기다려 주는 시간.
+ *
+ * 실측으로 Opus 는 effort medium 에서 15초가 걸려 12초 예산을 넘겼고, 그래서
+ * 화면에는 언제나 룰 문장만 남았다. effort 를 낮춰 응답을 당기고 예산에도
+ * 여유를 뒀다. 이 호출은 페이지 진입당 한 번이고 로딩 표시가 붙어 있다.
+ */
+const TIMEOUT_MS = 20_000;
 
 export interface NarrationResult {
   persona: Persona;
