@@ -217,9 +217,9 @@ export default function PlanShell() {
       <div className="fade-in" key={tab}>
         {tab === "trust" && design.trust && <TrustDoc design={design.trust} />}
         {tab === "guardianship" && design.guardianship && (
-          <GuardianshipDoc design={design.guardianship} />
+          <GuardianshipDoc design={design.guardianship} profile={profile} />
         )}
-        {tab === "expense" && <ExpenseDoc design={design.expense} />}
+        {tab === "expense" && <ExpenseDoc design={design.expense} profile={profile} />}
         {tab === "gaps" && (
           <div>
             {gaps.length === 0 ? (

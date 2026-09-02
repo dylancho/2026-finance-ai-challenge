@@ -3029,3 +3029,135 @@ table.data tfoot td {
     padding: 32px 24px 28px;
   }
 }
+
+/* ── 인터뷰: 앞뒤 이동 · 조항 수정 진입 ───────────── */
+
+/* 섹션 목록을 클릭 가능한 이동 버튼으로 바꾼다. li 의 색상 규칙은 그대로 상속받는다. */
+.iv-sections li {
+  display: block;
+  padding: 0;
+}
+
+.iv-sections .iv-sec {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 7px 0;
+  font-size: 13.5px;
+  color: inherit;
+  background: none;
+  border: 0;
+  text-align: left;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.iv-sections .iv-sec:hover {
+  background: var(--line-soft);
+}
+
+.iv-sections .iv-sec .nm {
+  flex: 1;
+}
+
+.iv-move {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.iv-move .btn.ghost:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.iv-editing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--warn);
+}
+
+.iv-hint {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: var(--faint);
+  line-height: 1.7;
+}
+
+/* 조항 피드 항목 = 그 조항을 만든 질문으로 가는 버튼 */
+button.feed-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--line);
+  border-radius: 0 6px 6px 0;
+  transition: background 0.15s ease;
+}
+
+button.feed-item.set {
+  border-left-color: var(--ok);
+}
+
+button.feed-item:hover {
+  background: var(--line-soft);
+}
+
+button.feed-item.here {
+  background: var(--blue-soft);
+  border-left-color: var(--blue);
+}
+
+button.feed-item .ref {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+button.feed-item .edit {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+button.feed-item:hover .edit,
+button.feed-item.here .edit {
+  opacity: 1;
+}
+
+/* 설계서: 이미 채워진 조항도 고치러 갈 수 있다 */
+.clause-edit {
+  margin-top: 10px;
+}
+
+.clause-edit a {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* 설계서 섹션 제목 옆의 "수정 →" 진입점 */
+.doc h4 .clause-jump {
+  margin-left: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--blue);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.doc h4 .clause-jump:hover {
+  text-decoration: underline;
+}

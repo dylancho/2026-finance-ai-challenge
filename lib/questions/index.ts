@@ -1,4 +1,4 @@
-import type { Profile, Question, Track } from "../types";
+import type { DocKey, Profile, Question, Track } from "../types";
 import { dailyQuestions } from "./daily";
 import { futureQuestions } from "./future";
 import { caregiverQuestions } from "./caregiver";
@@ -70,6 +70,38 @@ export function isAnswered(p: Profile, qid: string): boolean {
     case "open":
       return a.text.trim().length > 0;
   }
+}
+
+/**
+ * 어떤 문서의 어떤 조항을 채우는 질문들.
+ *
+ * 설계서에서 "이 조항 수정하기" 링크를 만들 때 쓴다. mapsTo 를 역으로 훑으므로
+ * 조항과 질문의 대응은 질문 은행 한 곳에서만 관리하면 된다.
+ */
+export function questionsForClause(
+  p: Profile,
+  doc: DocKey,
+  clause: string,
+  /** 한 조항이 여러 표로 나뉘어 그려질 때, 그 표에 해당하는 항목만 고르는 필터 */
+  match?: (label: string) => boolean,
+): Question[] {
+  return activeQuestions(p).filter((q) =>
+    q.mapsTo.some(
+      (r) => r.doc === doc && r.clause === clause && (!match || match(r.label)),
+    ),
+  );
+}
+
+/** 그 조항으로 진입할 때 먼저 물어야 할 질문. 비어 있는 것을 우선한다. */
+export function entryQuestionForClause(
+  p: Profile,
+  doc: DocKey,
+  clause: string,
+  match?: (label: string) => boolean,
+): Question | null {
+  const qs = questionsForClause(p, doc, clause, match);
+  if (!qs.length) return null;
+  return qs.find((q) => !isAnswered(p, q.id)) ?? qs[0];
 }
 
 export function findQuestion(qid: string): Question | undefined {

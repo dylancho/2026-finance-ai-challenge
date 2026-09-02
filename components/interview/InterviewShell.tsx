@@ -113,34 +113,83 @@ export default function InterviewShell() {
     [],
   );
 
+  /** showIf 를 통과한, 이 트랙의 질문 순서. 앞뒤 이동의 기준축이다. */
+  const activeList = useMemo(
+    () => (profile ? activeQuestions(profile) : []),
+    [profile],
+  );
+
   const current: Question | null = useMemo(() => {
     if (!profile) return null;
     if (jumpTo) {
+      const inActive = activeList.find((q) => q.id === jumpTo);
+      if (inActive) return inActive;
+      // showIf 로 빠진 질문에 딥링크로 들어온 경우까지는 허용한다.
       const q = findQuestion(jumpTo);
       if (q && q.track === profile.track) return q;
     }
     return (
-      activeQuestions(profile).find(
-        (q) => !isAnswered(profile, q.id) && !skipped.has(q.id),
-      ) ?? null
+      activeList.find((q) => !isAnswered(profile, q.id) && !skipped.has(q.id)) ?? null
     );
-  }, [profile, jumpTo, skipped]);
+  }, [profile, activeList, jumpTo, skipped]);
+
+  /* ── 앞뒤 이동 ──
+   * jumpTo 를 "지금 보고 있는 질문" 의 단일 오버라이드로 쓴다.
+   * jumpTo 가 비면 언제나 "답 안 한 첫 질문" 으로 돌아온다. 이것이 복귀 지점이다. */
+  const cursor = useMemo(
+    () => (current ? activeList.findIndex((q) => q.id === current.id) : -1),
+    [activeList, current],
+  );
+  const prevQuestion = cursor > 0 ? activeList[cursor - 1] : null;
+  const nextQuestion = cursor >= 0 ? activeList[cursor + 1] ?? null : null;
+
+  /** 이미 답한 질문을 보고 있으면 편집 모드다. */
+  const editing = !!current && !!profile && isAnswered(profile, current.id);
+
+  const goTo = useCallback((qid: string) => {
+    setJumpTo(qid);
+    setPending([]);
+    setFreeText("");
+  }, []);
+
+  /** 복귀 지점(답 안 한 첫 질문)으로 돌아간다. */
+  const resume = useCallback(() => {
+    setJumpTo(null);
+    setPending([]);
+    setFreeText("");
+  }, []);
+
+  const goToSection = useCallback(
+    (section: string) => {
+      if (!profile) return;
+      const inSection = activeList.filter((q) => q.section === section);
+      if (!inSection.length) return;
+      const target = inSection.find((q) => !isAnswered(profile, q.id)) ?? inSection[0];
+      goTo(target.id);
+    },
+    [activeList, profile, goTo],
+  );
 
   /* ── 질문 제시 ── */
   useEffect(() => {
     if (!current) return;
     if (askedRef.current === current.id) return;
     askedRef.current = current.id;
+    const revisit = !!profile && isAnswered(profile, current.id);
     setBubbles((prev) => [
       ...prev,
       {
         id: `q-${current.id}-${prev.length}`,
         role: "ai",
-        text: current.prompt,
-        helper: current.helper,
+        text: revisit ? `다시 여쭤보겠습니다. ${current.prompt}` : current.prompt,
+        helper: revisit
+          ? "이미 답하신 질문입니다. 새로 답하시면 해당 조항이 갱신됩니다."
+          : current.helper,
       },
     ]);
     setPending([]);
+    // profile 은 재질문 여부 판단에만 쓴다. askedRef 가 중복 추가를 막는다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current]);
 
   useEffect(() => {
@@ -171,9 +220,17 @@ export default function InterviewShell() {
         skip(q);
         return;
       }
+      const wasAnswered = !!profile && isAnswered(profile, q.id);
       setProfile((prev) => {
         if (!prev) return prev;
         const next = saveProfile(setAnswer(prev, q.id, value));
+        return next;
+      });
+      // 건너뛴 질문에 뒤늦게 답한 경우, 다시 건너뜀 상태로 남겨두지 않는다.
+      setSkipped((prev) => {
+        if (!prev.has(q.id)) return prev;
+        const next = new Set(prev);
+        next.delete(q.id);
         return next;
       });
       setBubbles((prev) => [
@@ -185,20 +242,24 @@ export default function InterviewShell() {
         },
       ]);
       const ref = q.mapsTo[0];
+      const verb = wasAnswered ? "갱신했습니다" : "반영했습니다";
       setBubbles((prev) => [
         ...prev,
         {
           id: `r-${q.id}-${prev.length}`,
           role: "ai",
           text: ref
-            ? `${docName(ref.doc)} ${ref.clause} ${ref.label}에 반영했습니다.`
-            : "기록했습니다.",
+            ? `${docName(ref.doc)} ${ref.clause} ${ref.label}을(를) ${verb}.`
+            : wasAnswered
+              ? "수정했습니다."
+              : "기록했습니다.",
         },
       ]);
       setPending([]);
+      // 편집을 마치면 복귀 지점(답 안 한 첫 질문)으로 돌아간다.
       setJumpTo(null);
     },
-    [skip],
+    [skip, profile],
   );
 
   /* ── 자유 입력 ── */
@@ -274,11 +335,18 @@ export default function InterviewShell() {
               key={s.section}
               className={s.complete ? "done" : s.active ? "active" : ""}
             >
-              <span className="dot" aria-hidden />
-              <span>{s.section}</span>
-              <span className="cnt">
-                {s.done}/{s.total}
-              </span>
+              <button
+                type="button"
+                className="iv-sec"
+                onClick={() => goToSection(s.section)}
+                title={`${s.section} 섹션으로 이동`}
+              >
+                <span className="dot" aria-hidden />
+                <span className="nm">{s.section}</span>
+                <span className="cnt">
+                  {s.done}/{s.total}
+                </span>
+              </button>
             </li>
           ))}
         </ul>
@@ -374,17 +442,60 @@ export default function InterviewShell() {
           )}
 
           {done ? (
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link href="/plan" className="btn">
-                설계서 확인하기
-              </Link>
-              <Link href="/simulation" className="btn outline">
-                시뮬레이션 돌려보기
-              </Link>
-            </div>
+            <>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <Link href="/plan" className="btn">
+                  설계서 확인하기
+                </Link>
+                <Link href="/simulation" className="btn outline">
+                  시뮬레이션 돌려보기
+                </Link>
+                {activeList.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn outline"
+                    onClick={() => goTo(activeList[activeList.length - 1].id)}
+                  >
+                    답변 다시 보기
+                  </button>
+                )}
+              </div>
+              <p className="iv-hint">
+                오른쪽 조항이나 왼쪽 섹션을 누르면 그 질문으로 돌아가 답을 고칠 수 있습니다.
+              </p>
+            </>
           ) : (
             current && (
               <>
+                <div className="iv-move">
+                  <button
+                    type="button"
+                    className="btn ghost sm"
+                    onClick={() => prevQuestion && goTo(prevQuestion.id)}
+                    disabled={!prevQuestion}
+                    title={prevQuestion ? `${prevQuestion.id} 로 돌아가기` : "첫 질문입니다"}
+                  >
+                    ← 이전 질문
+                  </button>
+                  {editing && (
+                    <>
+                      <button
+                        type="button"
+                        className="btn ghost sm"
+                        onClick={() => nextQuestion && goTo(nextQuestion.id)}
+                        disabled={!nextQuestion}
+                      >
+                        다음 질문 →
+                      </button>
+                      <span className="iv-editing">
+                        이미 답하신 질문입니다
+                        <button type="button" className="btn ghost sm" onClick={resume}>
+                          작성하던 곳으로 ↩
+                        </button>
+                      </span>
+                    </>
+                  )}
+                </div>
                 <QuestionInput
                   key={current.id}
                   question={current}
@@ -448,11 +559,20 @@ export default function InterviewShell() {
           </p>
         ) : (
           feed.map((f) => (
-            <div className="feed-item set" key={f.key}>
-              <div className="ref">{f.ref}</div>
+            <button
+              type="button"
+              className={`feed-item set${current?.id === f.qid ? " here" : ""}`}
+              key={f.key}
+              onClick={() => goTo(f.qid)}
+              title={`${f.qid} 질문으로 돌아가 이 조항을 고칩니다`}
+            >
+              <div className="ref">
+                {f.ref}
+                <span className="edit">수정 →</span>
+              </div>
               <div className="lab">{f.label}</div>
               <div className="val">{f.value}</div>
-            </div>
+            </button>
           ))
         )}
       </aside>

@@ -1,8 +1,9 @@
 import { FlagCard } from "./ClauseCard";
+import EditClauseLink from "./EditClauseLink";
 import Badge from "../common/Badge";
 import Disclaimer from "../common/Disclaimer";
 import { won, wonShort } from "../../lib/format";
-import type { ExpenseDesign } from "../../lib/types";
+import type { ExpenseDesign, Profile } from "../../lib/types";
 
 function Sustainability({ s }: { s: ExpenseDesign["sustainability"] }) {
   if (!s.series.length || s.assets <= 0) {
@@ -102,13 +103,21 @@ function Sustainability({ s }: { s: ExpenseDesign["sustainability"] }) {
   );
 }
 
-export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
+export default function ExpenseDoc({
+  design,
+  profile,
+}: {
+  design: ExpenseDesign;
+  profile: Profile;
+}) {
   const activeRules = design.fraudRules.filter((r) => r.active).length;
 
   return (
     <div className="doc">
       <div>
-        <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>§1. 3층 계좌 구조</h4>
+        <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>§1. 3층 계좌 구조
+          <EditClauseLink profile={profile} doc="expense" clause="§1" />
+        </h4>
         <div className="accounts">
           {design.accounts.map((a) => (
             <div className="account" key={a.n}>
@@ -128,7 +137,9 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           ))}
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§2. 자동이체 매트릭스</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§2. 자동이체 매트릭스
+          <EditClauseLink profile={profile} doc="expense" clause="§2" />
+        </h4>
         {design.transfers.length ? (
           <div className="table-wrap">
             <table className="data">
@@ -175,7 +186,9 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           </p>
         )}
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§3. 한도 정책</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§3. 한도 정책
+          <EditClauseLink profile={profile} doc="expense" clause="§3" />
+        </h4>
         <div className="table-wrap">
           <table className="data">
             <tbody>
@@ -197,6 +210,7 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           <span className="mono" style={{ fontSize: 12, color: "var(--faint)" }}>
             {activeRules}/{design.fraudRules.length} 활성
           </span>
+          <EditClauseLink profile={profile} doc="expense" clause="§4" />
         </h4>
         <div className="table-wrap">
           <table className="data">
@@ -227,7 +241,9 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           </table>
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§5. 승인·알림 체계</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§5. 승인·알림 체계
+          <EditClauseLink profile={profile} doc="expense" clause="§5" />
+        </h4>
         <div className="clause set">
           <ul className="clause-body">
             <li>① 통보 채널: {design.approval.channel}</li>
@@ -240,7 +256,9 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           </ul>
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§6. 지속가능성 추정</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§6. 지속가능성 추정
+          <EditClauseLink profile={profile} doc="expense" clause="§6" />
+        </h4>
         <div className="card" style={{ padding: "18px 20px" }}>
           <Sustainability s={design.sustainability} />
         </div>
