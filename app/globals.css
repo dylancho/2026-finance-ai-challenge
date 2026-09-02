@@ -3161,3 +3161,10 @@ button.feed-item.here .edit {
 .doc h4 .clause-jump:hover {
   text-decoration: underline;
 }
+
+/* 판정층이 오기 전, 룰 문장 아래 붙는 진행 표시 */
+.lg-read-pending {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--faint);
+}

@@ -16,6 +16,7 @@ import {
   emptyLedgerState,
   generateLedger,
   narrate,
+  rulePersona,
   readLedgerState,
   saveLedgerState,
   tracksInvestment,
@@ -80,6 +81,10 @@ export default function LedgerShell() {
   useEffect(() => {
     if (!insight || !profile) return;
     let alive = true;
+    // 룰 문장을 먼저 세운다. 판정층은 실측 15초가 걸려서, 기다리는 동안 화면을
+    // 비워두면 심사 중에 그 시간이 고스란히 빈 카드로 보인다. /plan 이 이미
+    // 쓰는 방식과 같다 — 규칙 기반 문장이 먼저 서고 AI 판정이 갈아끼운다.
+    setPersona(rulePersona(insight));
     setNarrating(true);
     narrate(insight, contrasts, profile.track)
       .then((r) => {
