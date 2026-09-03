@@ -3767,3 +3767,216 @@ table.data tfoot td {
     list-style: none;
   }
 }
+
+/* ── 집행 근거 게이팅 (시뮬레이션) ─────────────────────── */
+
+.node.noauthority:not(:last-child)::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--faint) 0 3px,
+    transparent 3px 9px
+  );
+}
+
+.node.noauthority .idx {
+  border-color: var(--faint);
+  background: var(--line-soft);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.node.noauthority .box {
+  background: #fbfbfc;
+  border-color: #dfe3ea;
+}
+
+.node.noauthority .box h4 {
+  color: var(--muted);
+}
+
+.node .cl.locked {
+  background: var(--line-soft);
+  border-color: var(--line);
+  opacity: 0.9;
+}
+
+.node .cl.locked .r {
+  color: var(--faint);
+}
+
+.node .cl.locked .r::before {
+  content: "🔒 ";
+}
+
+.node .cl.locked .l {
+  color: var(--muted);
+}
+
+.node .cl.locked .d {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
+.node .authmsg {
+  margin-top: 11px;
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: #46505f;
+  border-top: 1px dashed var(--line);
+  padding-top: 11px;
+}
+
+.node .authmsg b {
+  display: block;
+  color: var(--navy);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  margin-bottom: 3px;
+}
+
+.node .authmsg em {
+  display: block;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* 체결 상태 표시줄 */
+
+.au-bar {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  padding: 16px 18px;
+  margin: 26px 0 8px;
+  box-shadow: var(--shadow);
+}
+
+.au-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 13px;
+}
+
+.au-head .k {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.au-head .s {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.au-head .s.blocked {
+  color: var(--danger);
+}
+
+.au-head .s.ok {
+  color: var(--ok);
+}
+
+.au-link {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.au-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.au-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 10px 13px;
+  text-align: left;
+  flex: 1 1 240px;
+}
+
+.au-toggle:hover {
+  border-color: var(--faint);
+}
+
+.au-toggle .sw {
+  width: 34px;
+  height: 19px;
+  border-radius: 20px;
+  background: #cfd6e0;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.au-toggle .sw::after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2px;
+  left: 2px;
+  box-shadow: 0 1px 2px rgba(12, 28, 54, 0.25);
+  transition: left 0.15s;
+}
+
+.au-toggle.on {
+  border-color: #bfdfd0;
+  background: var(--ok-soft);
+}
+
+.au-toggle.on .sw {
+  background: var(--ok);
+}
+
+.au-toggle.on .sw::after {
+  left: 17px;
+}
+
+.au-toggle .tx {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.au-toggle .tx b {
+  font-size: 13px;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.au-toggle .tx em {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.au-note {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--faint);
+  line-height: 1.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-toggle .sw,
+  .au-toggle .sw::after {
+    transition: none;
+  }
+}

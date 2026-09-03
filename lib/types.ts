@@ -289,6 +289,17 @@ export interface ScenarioClause {
   ref: string;
   label: string;
   detail: string;
+  /** 집행 근거가 없어 잠긴 조항. applyAuthority() 가 표시한다. */
+  locked?: boolean;
+}
+
+/** 노드가 집행되지 못한 이유. status === "noauthority" 일 때만 있다. */
+export interface NodeAuthority {
+  reason: string;
+  instrumentName: string;
+  effectRule: string;
+  /** 잠긴 조항 참조 목록 */
+  refs: string[];
 }
 
 export interface ScenarioNode {
@@ -296,9 +307,15 @@ export interface ScenarioNode {
   title: string;
   detail: string;
   clauses: ScenarioClause[];
-  status: "ok" | "gap";
+  /**
+   * ok           집행됨
+   * gap          안 채운 칸 — 질문에 답하면 풀린다
+   * noauthority  채웠지만 집행 근거가 없는 칸 — 계약을 체결해야 풀린다
+   */
+  status: "ok" | "gap" | "noauthority";
   gapQid?: string;
   gapMessage?: string;
+  authority?: NodeAuthority;
 }
 
 export interface Scenario {
@@ -313,6 +330,8 @@ export interface ScenarioResult {
   nodes: ScenarioNode[];
   verdict: string[];
   gapCount: number;
+  /** applyAuthority() 를 거친 뒤에만 채워진다 */
+  blockedCount?: number;
 }
 
 /* ── 과거 금융이력 (Ledger) ────────────────────────────
