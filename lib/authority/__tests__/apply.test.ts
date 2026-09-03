@@ -8,7 +8,7 @@ import { applyAuthority } from "../apply";
 const run = (key: string, stages: AuthorityState["stages"] = {}) => {
   const p = DEMO_PROFILES[key];
   const design = buildDesign(p);
-  const insts = buildInstruments(p, design, { version: 1, stages, sentAt: null });
+  const insts = buildInstruments(p, design, { version: 1, stages, sentAt: null, sentTo: null });
   const scen = scenariosFor(p)[0];
   const base = runScenario(p, design, scen.id)!;
   return { base, out: applyAuthority(base, insts), insts };

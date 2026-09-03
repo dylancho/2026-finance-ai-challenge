@@ -379,3 +379,57 @@ describe("이상 탐지 → 의뢰서", () => {
     expect(d.proof).toEqual({ kind: "ltci", issuedAt: "2026-08-20" });
   });
 });
+
+describe("보호자에게 넘어가는 경로", () => {
+  const ledger = generateLedger("demo-B-panic", {
+    preset: "panic_seller",
+    decline: true,
+    declineFromYear: 8,
+  });
+  const reading = readBiomarker(ledger);
+  const fired = (key = "B") => {
+    const p = DEMO_PROFILES[key];
+    return buildReferral(p, buildDesign(p), {
+      now: NOW,
+      ledger,
+      reading,
+      gate: evaluateTrigger(
+        reading,
+        { kind: "diagnosis", issuedAt: "2026-08-20" },
+        new Date("2026-09-03T00:00:00Z"),
+      ),
+    });
+  };
+
+  it("본인이 집행 주체이면 보호자를 만들지 않는다", () => {
+    expect(make("B").guardian).toBeUndefined();
+  });
+
+  it("게이트가 발동하면 설문의 1차 관리자를 보호자로 세운다", () => {
+    const g = fired().guardian;
+    expect(g?.label).toContain("이수정");
+  });
+
+  it("보호자를 새로 묻지 않는다 — 설문 답변을 그대로 쓴다", () => {
+    // B12 배우자 이수정. 같은 사람을 두 번 묻는 화면을 만들지 않는다.
+    expect(fired().guardian?.qid).toBe("B12");
+  });
+
+  it("수신처 맨 앞에 보호자가 온다 — 실제로 들고 갈 사람이다", () => {
+    expect(fired().recipients[0]).toContain("보호자");
+    expect(fired().recipients).toContain("가정법원");
+  });
+
+  it("에스컬레이션은 지출설계서 승인 체계를 그대로 따른다", () => {
+    const p = DEMO_PROFILES.B;
+    const ap = buildDesign(p).expense.approval;
+    const g = fired().guardian!;
+    expect(g.escalateTo).toBe(ap.second);
+    expect(g.escalateHours).toBe(ap.escalateHours);
+    expect(g.channel).toBe(ap.channel);
+  });
+
+  it("이력이 없어 게이트가 없으면 보호자도 없다", () => {
+    expect(make("B").guardian).toBeUndefined();
+  });
+});

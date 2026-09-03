@@ -120,11 +120,14 @@ export default function ReferralShell() {
   const changeStage = (kind: InstrumentKind, stage: AuthorityStage) =>
     setAuth(saveAuthorityState(setStage(auth, kind, stage)));
 
+  const guardian = referral.guardian;
+
   const send = () => {
     const kinds = instruments
       .filter((i) => i.stage !== "unavailable")
       .map((i) => i.kind);
-    setAuth(saveAuthorityState(markSent(auth, kinds, Date.now())));
+    const to = name.trim() || guardian?.label || referral.recipients[0];
+    setAuth(saveAuthorityState(markSent(auth, kinds, Date.now(), to)));
     setSent(true);
   };
 
@@ -201,11 +204,36 @@ export default function ReferralShell() {
         <section>
           {sent ? (
             <div className="rf-sent">
-              <h2 className="rf-h2">의뢰서가 정리되었습니다</h2>
+              <h2 className="rf-h2">
+                {auth.sentTo ? `${auth.sentTo}께 전달되었습니다` : "의뢰서가 정리되었습니다"}
+              </h2>
               <p className="section-lede">
                 문서 상태가 <b>전달됨</b>으로 바뀌었습니다. 전달했다고 해서 계약이 되는 것은
                 아닙니다. 전문가가 검토한 뒤 정식 절차를 밟아야 효력이 생깁니다.
               </p>
+
+              {guardian ? (
+                <div className="rf-esc">
+                  <div className="row on">
+                    <span className="i">1</span>
+                    <span className="t">
+                      <b>보호자 {guardian.label}</b>
+                      <em>{guardian.channel}로 통보 · 방금 전달됨</em>
+                    </span>
+                  </div>
+                  <div className="row">
+                    <span className="i">2</span>
+                    <span className="t">
+                      <b>{guardian.escalateTo}</b>
+                      <em>{guardian.escalateHours}시간 안에 응답이 없으면 이쪽으로 넘어갑니다</em>
+                    </span>
+                  </div>
+                  <p className="note">
+                    지출설계서에 정해 둔 승인·에스컬레이션 체계를 그대로 따릅니다.
+                    이 화면은 데모이므로 실제 발송은 하지 않습니다.
+                  </p>
+                </div>
+              ) : null}
               <p className="attach" style={{ marginTop: 20 }}>
                 <b>데모 안내</b>
                 입력하신 내용은 어디로도 전송되지 않았습니다. 체결 상태는 이 브라우저에만
@@ -231,14 +259,19 @@ export default function ReferralShell() {
               <div className="rf-form">
                 <div className="field">
                   <label htmlFor="rf-name">
-                    {referral.executor === "보호자" ? "보호자 이름" : "이름"}
+                    {guardian ? "전달받을 보호자" : "이름"}
                   </label>
                   <input
                     id="rf-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="예: 김민수"
+                    placeholder={guardian ? guardian.label : "예: 김민수"}
                   />
+                  {guardian ? (
+                    <span className="rf-hint">
+                      설문에서 1차 관리자로 지정하신 분입니다. 비워두면 그대로 사용합니다.
+                    </span>
+                  ) : null}
                 </div>
                 <div className="field">
                   <label htmlFor="rf-to">전달 대상</label>
@@ -274,7 +307,11 @@ export default function ReferralShell() {
                 <button className="btn outline" onClick={() => setStep(2)}>
                   이전
                 </button>
-                <button className="btn" disabled={!name.trim()} onClick={send}>
+                <button
+                  className="btn"
+                  disabled={!name.trim() && !guardian}
+                  onClick={send}
+                >
                   전문가에게 전달
                 </button>
               </div>

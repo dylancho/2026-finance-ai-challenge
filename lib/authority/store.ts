@@ -10,7 +10,7 @@ import type { AuthorityStage, AuthorityState, InstrumentKind } from "../types";
 const KEY = "next.authority.v1";
 
 export function emptyAuthorityState(): AuthorityState {
-  return { version: 1, stages: {}, sentAt: null };
+  return { version: 1, stages: {}, sentAt: null, sentTo: null };
 }
 
 export function readAuthorityState(): AuthorityState {
@@ -64,8 +64,9 @@ export function markSent(
   s: AuthorityState,
   kinds: InstrumentKind[],
   now: number,
+  to: string,
 ): AuthorityState {
   const stages = { ...s.stages };
   for (const k of kinds) if ((stages[k] ?? "draft") === "draft") stages[k] = "sent";
-  return { ...s, stages, sentAt: now };
+  return { ...s, stages, sentAt: now, sentTo: to };
 }

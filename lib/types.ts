@@ -658,6 +658,8 @@ export interface AuthorityState {
    */
   stages: Partial<Record<InstrumentKind, AuthorityStage>>;
   sentAt: number | null;
+  /** 누구에게 전달했는지. 전달만 기록하고 실제 발송은 하지 않는다. */
+  sentTo: string | null;
 }
 
 export interface ExecutionCheck {

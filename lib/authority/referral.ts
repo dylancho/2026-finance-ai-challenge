@@ -17,6 +17,7 @@ import { findGaps } from "../design";
 import { trustContact } from "../ledger/analyze";
 import { bandLabel } from "../ledger/biomarker";
 import { personLabel, won } from "../format";
+import { firstPerson } from "../profile";
 import { actsAlone } from "./instruments";
 import { PETITIONERS, statutesForReferral } from "./statutes";
 
@@ -86,6 +87,16 @@ export interface ReferralDetection {
   blockedBy: string[];
 }
 
+/** 이 문서를 실제로 들고 갈 사람. 설문에서 이미 지정한 1차 관리자다. */
+export interface ReferralGuardian {
+  qid: string;
+  label: string;
+  /** 무응답 시 다음 차례 */
+  escalateTo: string;
+  escalateHours: number;
+  channel: string;
+}
+
 export interface Referral {
   mode: ReferralMode;
   docNo: string;
@@ -101,6 +112,8 @@ export interface Referral {
   directives: ReferralDirective[];
   open: Gap[];
   procedure: { label: string; value: string }[];
+  /** 보호자가 집행 주체일 때만 채워진다. */
+  guardian?: ReferralGuardian;
   /** 금융이력 이상 탐지 기록. 없으면 이 절을 싣지 않는다. */
   detection?: ReferralDetection;
   /** 참조 법령. 명문 근거가 있는 것만 싣는다. */
@@ -293,6 +306,25 @@ export function buildReferral(
 
   const petition = mode === "petition";
 
+  /**
+   * 전달받을 보호자.
+   *
+   * 새로 묻지 않는다. 1차 관리자는 설문에서 이미 지정했고, 에스컬레이션 체계는
+   * 지출설계서가 이미 짜 두었다. 같은 사람을 두 번 묻는 화면을 만들지 않는다.
+   */
+  const primary = firstPerson(p, "B12", "C07", "A07", "D11");
+  const ap = design.expense.approval;
+  const guardian: ReferralGuardian | undefined =
+    delegated && primary
+      ? {
+          qid: "B12",
+          label: personLabel(primary),
+          escalateTo: ap.second,
+          escalateHours: ap.escalateHours,
+          channel: ap.channel,
+        }
+      : undefined;
+
   const reading = opts.reading ?? null;
   const gate = opts.gate ?? null;
   const detection: ReferralDetection | undefined = reading
@@ -339,7 +371,13 @@ export function buildReferral(
       ? "본인이 판단할 수 있을 때 작성한 사전 의사 정리"
       : "본인 작성 설문에 기초한 사전 의사 정리 및 조항 초안",
     recipients: petition
-      ? ["가정법원", "후견인 후보자", "법무법인"]
+      ? [
+          // 이 문서를 실제로 들고 갈 사람이 맨 앞에 온다.
+          ...(guardian ? [`보호자 ${guardian.label}`] : []),
+          "가정법원",
+          "후견인 후보자",
+          "법무법인",
+        ]
       : [
           contact
             ? `${contact.recommended.name} WM·신탁부서`
@@ -347,6 +385,7 @@ export function buildReferral(
           "법무법인",
         ],
     executor: delegated ? "보호자" : "본인",
+    guardian,
     executorNote: !delegated
       ? undefined
       : `본인이 직접 절차를 밟기 어려운 상태입니다. 후견개시 심판은 ${PETITIONERS}가 청구할 수 있으며(민법 제9조·제12조·제14조의2), 본인 단독으로 한 행위는 나중에 효력이 다투어질 수 있습니다.`,

@@ -65,6 +65,7 @@ describe("buildInstruments", () => {
       version: 1,
       stages: { trust: "effective" },
       sentAt: null,
+      sentTo: null,
     };
     expect(instrumentOf(build("B", state), "trust")?.stage).toBe("effective");
   });
@@ -74,6 +75,7 @@ describe("buildInstruments", () => {
       version: 1,
       stages: { trust: "effective" },
       sentAt: null,
+      sentTo: null,
     };
     expect(instrumentOf(build("C", state), "trust")?.stage).toBe("unavailable");
   });
