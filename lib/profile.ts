@@ -10,6 +10,7 @@ export function emptyProfile(): Profile {
     capacity: null,
     answers: {},
     transcript: [],
+    chaptersCompleted: [],
     updatedAt: Date.now(),
   };
 }
@@ -122,11 +123,13 @@ export function firstPerson(p: Profile, ...qids: string[]) {
 /* ── 데모 프로필 ──────────────────────────────────── */
 
 export const DEMO_PROFILES: Record<string, Profile> = {
+  // A 는 통합 플로우의 "코어만 답한" 데모다. 선택 챕터는 하나도 선언하지 않았다.
   A: {
     ...emptyProfile(),
     track: "daily",
     subject: "self",
     capacity: "full",
+    chaptersCompleted: ["core"],
     answers: {
       A01: {
         kind: "multi",

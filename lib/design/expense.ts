@@ -3,6 +3,7 @@ import type {
   ExpenseDesign,
   Flag,
   FraudRule,
+  InvestPrinciples,
   LimitRow,
   Profile,
   TransferRow,
@@ -18,6 +19,104 @@ import {
   personOf,
 } from "../profile";
 import { personLabel, won } from "../format";
+import { hasChapter, isUnified } from "../questions";
+import { ASSET_CLASS_LABEL, RISK_CAP_PCT } from "../questions/invest";
+
+/**
+ * 자산 소진 추정. 수익률·물가를 반영하지 않은 단순 인출 계산이다.
+ *
+ * 설계서 §6 과 어드바이징(lib/advising)이 같은 함수를 쓴다 — 이벤트 화면의
+ * "소진 시점 변화" 가 설계서의 추정과 어긋나면 안 되기 때문이다.
+ *
+ * @param assets     지금 인출 가능한 자산
+ * @param monthlyNet 월 순인출액 (수입을 뺀 뒤). 0 이하면 소진되지 않는다.
+ * @param bump       careAt 년차부터 더해지는 월 증액 (요양비)
+ * @param careAt     증액이 시작되는 년차. Infinity 면 없음.
+ */
+export function projectRunway(
+  assets: number,
+  monthlyNet: number,
+  bump = 0,
+  careAt = Infinity,
+): { years: number | null; series: { year: number; balance: number }[]; careStartYear?: number } {
+  const series: { year: number; balance: number }[] = [];
+  let years: number | null = null;
+  let careStartYear: number | undefined;
+  if (!(assets > 0 && monthlyNet > 0)) return { years, series, careStartYear };
+
+  let balance = assets;
+  for (let y = 0; y <= 30; y++) {
+    series.push({ year: y, balance: Math.max(0, Math.round(balance)) });
+    if (balance <= 0) {
+      if (years === null) years = y;
+      break;
+    }
+    const monthly = y >= careAt ? monthlyNet + bump : monthlyNet;
+    if (y >= careAt && careStartYear === undefined) careStartYear = y;
+    balance -= monthly * 12;
+  }
+  if (years === null && series[series.length - 1].balance > 0) years = null;
+  else if (years === null) years = series.length;
+  return { years, series, careStartYear };
+}
+
+const CRASH_POLICY_LABEL: Record<string, string> = {
+  do_nothing: "아무것도 하지 않는다",
+  reduce: "일부를 줄인다",
+  all_safe: "전량 안전자산으로 바꾼다",
+  consult: "지정한 사람과 상의한 뒤 정한다",
+};
+
+const HANDOVER_LABEL: Record<string, string> = {
+  designee: "지정한 사람에게 맡긴다",
+  institution: "금융기관 일임 운용으로 넘긴다",
+  freeze: "새 매매를 멈추고 그대로 둔다",
+  undecided: "아직 정하지 않았다",
+};
+
+const STANCE_LABEL: Record<string, string> = {
+  preserve: "그대로 두고 팔지 않기",
+  phased: "생활비가 필요한 만큼만 단계적으로 현금화",
+  partial: "큰돈이 필요할 때만 일부 매도",
+  delegate: "전문가에게 운용을 맡기기",
+};
+
+/**
+ * §7 투자 원칙. invest 챕터를 선언하지 않았으면 null 을 돌려 조항 자체를 생략한다.
+ * 있는 답만으로 만든다 — I01 만 답해도 금지 자산군 항은 선다.
+ */
+export function buildInvestPrinciples(p: Profile): InvestPrinciples | null {
+  if (!(isUnified(p) ? hasChapter(p, "invest") : p.track === "future")) return null;
+
+  const forbidden = multiOf(p, "I01").filter((v) => v !== "none");
+  const cap = choiceOf(p, "I02");
+  const crash = choiceOf(p, "I03");
+  const handover = choiceOf(p, "I04");
+  const handoverPerson = personOf(p, "I05");
+  const stance = choiceOf(p, "B11");
+
+  const answered = [
+    !!p.answers["I01"],
+    cap !== undefined,
+    crash !== undefined,
+    handover !== undefined,
+  ].filter(Boolean).length;
+
+  return {
+    forbidden,
+    forbiddenLabels: forbidden.map((k) => ASSET_CLASS_LABEL[k] ?? k),
+    riskCapPct: cap !== undefined ? RISK_CAP_PCT[cap] : undefined,
+    crashPolicyCode: crash,
+    crashPolicy: crash ? CRASH_POLICY_LABEL[crash] : undefined,
+    handover: handover
+      ? handover === "designee" && handoverPerson
+        ? `${HANDOVER_LABEL[handover]} — ${personLabel(handoverPerson)}`
+        : HANDOVER_LABEL[handover]
+      : undefined,
+    stance: stance ? STANCE_LABEL[stance] : undefined,
+    status: answered === 4 ? "set" : answered > 0 || stance ? "partial" : "missing",
+  };
+}
 
 const ITEM_LABEL: Record<string, string> = {
   utility: "전기·가스·수도",
@@ -256,26 +355,13 @@ export function buildExpenseDesign(p: Profile): ExpenseDesign {
     Object.values(assetMap).reduce((a, b) => a + b, 0) + (amountOf(p, "A10") ?? 0);
   const monthlyNet = Math.max(0, cashflow.net);
 
-  const series: { year: number; balance: number }[] = [];
-  let years: number | null = null;
-  let careStartYear: number | undefined;
-
-  if (assets > 0 && monthlyNet > 0) {
-    let balance = assets;
-    const careAt = bump > 0 ? 5 : Infinity; // 데모: 5년 뒤 요양 진입 가정
-    for (let y = 0; y <= 30; y++) {
-      series.push({ year: y, balance: Math.max(0, Math.round(balance)) });
-      if (balance <= 0) {
-        if (years === null) years = y;
-        break;
-      }
-      const monthly = y >= careAt ? monthlyNet + bump : monthlyNet;
-      if (y >= careAt && careStartYear === undefined) careStartYear = y;
-      balance -= monthly * 12;
-    }
-    if (years === null && series[series.length - 1].balance > 0) years = null;
-    else if (years === null) years = series.length;
-  }
+  // 데모: 요양 증액(B08)이 있으면 5년 뒤 요양 진입을 가정한다.
+  const { years, series, careStartYear } = projectRunway(
+    assets,
+    monthlyNet,
+    bump,
+    bump > 0 ? 5 : Infinity,
+  );
 
   /* ── 플래그 ── */
   const flags: Flag[] = [];
@@ -360,6 +446,7 @@ export function buildExpenseDesign(p: Profile): ExpenseDesign {
     approval,
     cashflow,
     sustainability: { assets, monthlyNet, years, series, careStartYear },
+    invest: buildInvestPrinciples(p),
     flags,
     completeness: Math.round((done / checks.length) * 100),
     missing: checks.length - done,

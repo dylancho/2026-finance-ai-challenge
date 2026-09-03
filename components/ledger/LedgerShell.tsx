@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import LedgerChart from "./LedgerChart";
 import PersonaCard from "./PersonaCard";
 import Badge from "../common/Badge";
-import { TRACK_META } from "../../lib/questions";
+import { flowMeta } from "../../lib/questions";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import {
   analyze,
@@ -131,7 +131,7 @@ export default function LedgerShell() {
     );
   }
 
-  const meta = TRACK_META[profile.track];
+  const meta = flowMeta(profile);
   const willExtract = tracksInvestment(profile.track)
     ? ["소비 패턴", "고정비 구조", "이상거래 베이스라인", "투자 대응 성향"]
     : ["소비 패턴", "고정비 구조", "이상거래 베이스라인"];

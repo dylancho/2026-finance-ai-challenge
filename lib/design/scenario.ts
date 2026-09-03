@@ -14,7 +14,7 @@ import {
   personOf,
 } from "../profile";
 import { personLabel, won } from "../format";
-import { isAnswered } from "../questions";
+import { hasChapter, isAnswered, isUnified } from "../questions";
 
 export const SCENARIOS: Scenario[] = [
   {
@@ -22,47 +22,62 @@ export const SCENARIOS: Scenario[] = [
     name: "치매 진단",
     caption: "전문의 진단을 받고 금융 결정이 어려워지는 경우",
     tracks: ["future", "caregiver", "estate"],
+    chapters: ["medical", "estate"],
   },
   {
     id: "accident",
     name: "갑작스러운 사고",
     caption: "예고 없이, 준비할 시간 없이 찾아오는 경우",
     tracks: ["future", "caregiver", "estate"],
+    chapters: ["medical", "estate"],
   },
   {
     id: "care",
     name: "장기 요양시설 입소",
     caption: "매달 나가는 돈의 규모가 바뀌는 경우",
     tracks: ["future", "caregiver"],
+    chapters: ["medical"],
   },
   {
     id: "phishing",
     name: "보이스피싱 시도",
     caption: "누군가 계좌에 손을 대려 하는 경우",
     tracks: ["daily", "future", "caregiver", "estate"],
+    chapters: ["core"],
   },
   {
     id: "hospital",
     name: "장기 입원",
     caption: "본인이 직접 은행에 갈 수 없는 경우",
     tracks: ["daily", "future", "caregiver"],
+    chapters: ["core"],
   },
   {
     id: "shortfall",
     name: "자동이체 잔액 부족",
     caption: "가장 흔하게 벌어지는 일",
     tracks: ["daily"],
+    chapters: ["core"],
   },
   {
     id: "spouse_death",
     name: "배우자 사망",
     caption: "재산이 다음 사람에게 넘어가는 경우",
     tracks: ["estate"],
+    chapters: ["estate"],
   },
 ];
 
+/**
+ * 이 프로필에서 돌려볼 수 있는 시나리오.
+ * 통합 플로우: 코어 시나리오는 항상, 나머지는 해당 챕터를 선언했을 때만.
+ */
 export function scenariosFor(p: Profile): Scenario[] {
-  if (!p.track) return SCENARIOS;
+  if (isUnified(p)) {
+    return SCENARIOS.filter((s) =>
+      s.chapters.some((ch) => ch === "core" || hasChapter(p, ch)),
+    );
+  }
   return SCENARIOS.filter((s) => s.tracks.includes(p.track!));
 }
 

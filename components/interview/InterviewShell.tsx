@@ -12,7 +12,7 @@ import {
   isAnswered,
   overallProgress,
   sectionProgress,
-  TRACK_META,
+  flowMeta,
 } from "../../lib/questions";
 import { engine } from "../../lib/ai/engine";
 import { answerToLabel, docName } from "../../lib/ai/rules";
@@ -305,7 +305,7 @@ export default function InterviewShell() {
     );
   }
 
-  const meta = TRACK_META[profile.track];
+  const meta = flowMeta(profile);
   const sections = sectionProgress(profile);
   const progress = overallProgress(profile);
   const done = !current;

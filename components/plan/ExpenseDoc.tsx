@@ -263,6 +263,46 @@ export default function ExpenseDoc({
           <Sustainability s={design.sustainability} />
         </div>
 
+        {/* §7 은 투자 챕터를 선언했을 때만 선다. 건너뛰면 조항을 비워 두지 않고 생략한다. */}
+        {design.invest && (
+          <>
+            <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§7. 투자 원칙
+              <EditClauseLink profile={profile} doc="expense" clause="§7" />
+            </h4>
+            <div className={`clause ${design.invest.status}`}>
+              <ul className="clause-body">
+                <li>
+                  ① 손대지 않을 자산군:{" "}
+                  {design.invest.forbiddenLabels.length
+                    ? design.invest.forbiddenLabels.join(", ")
+                    : profile.answers["I01"]
+                      ? "없음 (모든 자산군을 검토 대상에 둔다)"
+                      : "— 아직 정해지지 않았습니다."}
+                </li>
+                <li>
+                  ② 위험자산 상한:{" "}
+                  {design.invest.riskCapPct !== undefined
+                    ? `전체 자산의 ${design.invest.riskCapPct}%`
+                    : "— 아직 정해지지 않았습니다."}
+                </li>
+                <li>
+                  ③ 시장이 25% 이상 급락하면:{" "}
+                  {design.invest.crashPolicy ?? "— 아직 정해지지 않았습니다."}
+                </li>
+                <li>
+                  ④ 판단이 어려워지면 운용은:{" "}
+                  {design.invest.handover ?? "— 아직 정해지지 않았습니다."}
+                </li>
+                {design.invest.stance && <li>⑤ 운용지침: {design.invest.stance}</li>}
+              </ul>
+              <p className="clause-note">
+                이 조항은 특정 상품이나 금융회사를 정하지 않습니다. 상황이 바뀌었을 때 검토
+                후보를 만드는 기준일 뿐입니다.
+              </p>
+            </div>
+          </>
+        )}
+
         <Disclaimer>
           위 계좌 구조와 룰셋은 설계 초안입니다. 실제 적용 가능한 한도·차단·알림 서비스의 명칭과
           범위는 거래 금융기관마다 다르므로 개별 확인이 필요합니다.

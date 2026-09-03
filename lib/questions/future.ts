@@ -1,8 +1,15 @@
 import type { Question } from "../types";
+import { B11 } from "./invest";
+import { B08, B09, B17, B18 } from "./medical";
 
 /**
- * Track B — 미래 판단력 저하 대비
- * 6섹션 22문항. 신탁·후견·지출 설계서 3종을 모두 채운다.
+ * @deprecated Track B — 미래 판단력 저하 대비. 2026-08-30 결정으로 메인 시나리오에서
+ * 보류됐고, 통합 플로우(코어+챕터)에서는 이 배열을 쓰지 않는다. ?demo=B 와 엔진의
+ * fallback 체인(firstAmount(p, "B02", ...))을 위해 코드는 남긴다.
+ *
+ * 의료·요양 성격(B08·B09·B17·B18)은 ./medical.ts 로, 운용지침(B11)은 ./invest.ts 로
+ * 이관했다. 여기서는 같은 객체를 원래 자리에 끼워 넣어 순서를 보존한다.
+ * 이관되지 않은 나머지는 chapter 가 없어 통합 플로우에서 묻지 않는다.
  */
 export const futureQuestions: Question[] = [
   /* ── B-1 재산 파악 ─────────────────────────────── */
@@ -118,36 +125,8 @@ export const futureQuestions: Question[] = [
     presets: [1_500_000, 2_000_000, 3_000_000, 4_000_000],
     mapsTo: [{ doc: "trust", clause: "제5조", label: "정기지급액" }],
   },
-  {
-    id: "B08",
-    track: "future",
-    section: "얼마씩 나올까",
-    prompt: "요양시설에 들어가게 되면 월 지급액을 얼마나 올릴까요?",
-    helper:
-      "요양원 본인부담은 월 100~250만원대가 흔합니다. 증액 트리거를 미리 넣어두면 그때 가족이 다투지 않습니다.",
-    type: "amount",
-    min: 0,
-    max: 5_000_000,
-    step: 100_000,
-    presets: [1_000_000, 1_500_000, 2_000_000],
-    mapsTo: [{ doc: "trust", clause: "제5조", label: "증액 트리거" }],
-  },
-  {
-    id: "B09",
-    track: "future",
-    section: "얼마씩 나올까",
-    prompt: "치료비와 요양비는 어디까지 쓸까요?",
-    helper:
-      "상한이 없으면 자산이 빠르게 소진되고, 너무 낮으면 정작 치료를 못 받습니다. 수시지급 조항(제6조)입니다.",
-    type: "choice",
-    options: [
-      { value: "unlimited", label: "필요하면 제한 없이" },
-      { value: "total_cap", label: "누적 총액 상한을 두고" },
-      { value: "yearly_cap", label: "연간 상한을 두고" },
-      { value: "family", label: "매번 가족 합의를 거쳐서" },
-    ],
-    mapsTo: [{ doc: "trust", clause: "제6조", label: "의료비 지급 한도" }],
-  },
+  B08,
+  B09,
   {
     id: "B10",
     track: "future",
@@ -169,21 +148,7 @@ export const futureQuestions: Question[] = [
   },
 
   /* ── B-5 자산 운용과 권한 ──────────────────────── */
-  {
-    id: "B11",
-    track: "future",
-    section: "누가 어디까지",
-    prompt: "투자자산은 어떻게 관리되길 원하세요?",
-    helper: "판단이 어려워진 시점에 급하게 파는 것이 가장 큰 손실 원인입니다. 운용지침(제7조)입니다.",
-    type: "choice",
-    options: [
-      { value: "preserve", label: "그대로 두고 팔지 않기" },
-      { value: "phased", label: "생활비가 필요한 만큼만 단계적으로 현금화" },
-      { value: "partial", label: "큰돈이 필요할 때만 일부 매도" },
-      { value: "delegate", label: "전문가에게 운용을 맡기기" },
-    ],
-    mapsTo: [{ doc: "trust", clause: "제7조", label: "운용지침" }],
-  },
+  B11,
   {
     id: "B12",
     track: "future",
@@ -266,38 +231,8 @@ export const futureQuestions: Question[] = [
   },
 
   /* ── B-6 신상·종료·귀속 ────────────────────────── */
-  {
-    id: "B17",
-    track: "future",
-    section: "몸과 마무리",
-    prompt: "요양과 치료 방식에 대해 미리 정해두고 싶은 것이 있나요?",
-    helper: "돈만이 아니라 신상에 관한 결정도 후견 사무에 포함됩니다.",
-    type: "choice",
-    options: [
-      { value: "home", label: "가능한 한 집에서 지내고 싶다" },
-      { value: "facility", label: "전문 요양시설이 낫다고 본다" },
-      { value: "family_decide", label: "그때 가족이 판단하도록" },
-      { value: "undecided", label: "아직 생각해 보지 않았다" },
-    ],
-    mapsTo: [{ doc: "guardianship", clause: "§3", label: "신상보호 선호" }],
-  },
-  {
-    id: "B18",
-    track: "future",
-    section: "몸과 마무리",
-    prompt: "후견인에게 맡길 신상 사무는 어디까지인가요?",
-    helper: "고르지 않은 항목은 '제외'로 남고, 그 결정은 그때 아무도 대신할 수 없습니다.",
-    type: "multi",
-    options: [
-      { value: "residence", label: "어디서 살지 결정" },
-      { value: "medical", label: "의료행위 동의" },
-      { value: "facility", label: "요양시설 입퇴소 계약" },
-      { value: "visit", label: "면접교섭 (누가 만날 수 있는지)" },
-      { value: "mail", label: "우편·통신물 관리" },
-      { value: "eol", label: "연명의료 의사 확인" },
-    ],
-    mapsTo: [{ doc: "guardianship", clause: "§3", label: "신상보호 사무범위" }],
-  },
+  B17,
+  B18,
   {
     id: "B19",
     track: "future",

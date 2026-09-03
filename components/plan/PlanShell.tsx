@@ -10,7 +10,7 @@ import ConsultationModal from "./ConsultationModal";
 import ContrastPanel from "./ContrastPanel";
 import Badge from "../common/Badge";
 import { buildDesign, findGaps, readinessAxes } from "../../lib/design";
-import { TRACK_META } from "../../lib/questions";
+import { flowMeta } from "../../lib/questions";
 import {
   demoProfile,
   firstPerson,
@@ -130,7 +130,7 @@ export default function PlanShell() {
   }
 
   const axes = readinessAxes(design);
-  const meta = TRACK_META[profile.track];
+  const meta = flowMeta(profile);
   const manager = firstPerson(profile, "B12", "C07", "A07", "D11");
   const monthly = firstAmount(profile, "B07", "A02", "D09");
 
