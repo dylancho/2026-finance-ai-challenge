@@ -8,6 +8,7 @@ export {
 
 export {
   analyze,
+  trustContact,
   analyzeBehavior,
   analyzeDecision,
   baselineMonths,

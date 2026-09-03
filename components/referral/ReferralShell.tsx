@@ -5,6 +5,7 @@ import Link from "next/link";
 import InstrumentCard from "./InstrumentCard";
 import ReferralDoc from "./ReferralDoc";
 import { buildDesign } from "../../lib/design";
+import { applyDemoLedger, emptyLedgerState, readLedgerState } from "../../lib/ledger";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import {
   buildInstruments,
@@ -18,6 +19,7 @@ import type {
   AuthorityStage,
   AuthorityState,
   InstrumentKind,
+  LedgerState,
   Profile,
 } from "../../lib/types";
 import { emptyAuthorityState } from "../../lib/authority";
@@ -38,6 +40,7 @@ export default function ReferralShell() {
   const [to, setTo] = useState("은행 WM·신탁부서");
   const [time, setTime] = useState("평일 오전");
   const [sent, setSent] = useState(false);
+  const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
 
   useEffect(() => {
     const demo = new URLSearchParams(window.location.search).get("demo");
@@ -45,8 +48,10 @@ export default function ReferralShell() {
     if (d) {
       saveProfile(d);
       setProfile(d);
+      setLedgerState(applyDemoLedger(demo!));
     } else {
       setProfile(readProfile());
+      setLedgerState(readLedgerState());
     }
     setAuth(readAuthorityState());
   }, []);

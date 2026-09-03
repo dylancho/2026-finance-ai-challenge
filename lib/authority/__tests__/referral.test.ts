@@ -226,3 +226,60 @@ describe("참조 법령", () => {
     expect(ref("C").executorNote).toContain("4촌 이내의 친족");
   });
 });
+
+describe("주거래 금융기관 안내", () => {
+  const withLedger = (key: string, institutions: any[]) => {
+    const p = DEMO_PROFILES[key];
+    return buildReferral(p, buildDesign(p), {
+      now: NOW,
+      ledger: { institutions } as any,
+    });
+  };
+
+  it("주거래 은행 신탁부서를 수신처로 삼는다", () => {
+    const r = withLedger("B", [
+      { name: "하나은행", share: 0.62, trustDesk: true },
+      { name: "카카오뱅크", share: 0.38, trustDesk: false },
+    ]);
+    expect(r.recipients[0]).toBe("하나은행 WM·신탁부서");
+  });
+
+  it("주거래에 신탁 창구가 없으면 다음 기관으로 돌리고 그 사실을 밝힌다", () => {
+    const r = withLedger("B", [
+      { name: "카카오뱅크", share: 0.55, trustDesk: false },
+      { name: "KB국민은행", share: 0.45, trustDesk: true },
+    ]);
+    expect(r.recipients[0]).toBe("KB국민은행 WM·신탁부서");
+    const row = r.overview.find((o) => o.label === "주거래 금융기관")!;
+    expect(row.value).toContain("카카오뱅크");
+    expect(row.value).toContain("신탁 창구를 두지 않는");
+  });
+
+  it("이력이 없으면 기관명을 지어내지 않는다", () => {
+    const r = make("B");
+    expect(r.recipients[0]).toBe("은행 WM·신탁부서");
+    expect(r.overview.some((o) => o.label === "주거래 금융기관")).toBe(false);
+  });
+
+  it("이 값이 설문이 아니라 이력에서 왔음을 문서에 적는다", () => {
+    const r = withLedger("B", [{ name: "신한은행", share: 0.7, trustDesk: true }]);
+    expect(r.overview.find((o) => o.label === "판단 근거")?.value).toContain(
+      "금융이력",
+    );
+  });
+});
+
+describe("신탁 비용 표기", () => {
+  it("확인되지 않은 보수 요율을 숫자로 적지 않는다", () => {
+    // 이 표는 은행 WM 에게 그대로 제출된다. 요율을 지어내면 읽는 사람이 바로 안다.
+    const joined = make("B").procedure.map((c) => c.value).join(" ");
+    expect(joined).not.toMatch(/0\.\d+\s*~\s*\d+(\.\d+)?%/);
+    expect(joined).toContain("신탁계약에서 정합니다");
+  });
+
+  it("최저 수탁금액은 공시로 확인된 두 지점을 함께 적는다", () => {
+    const v = make("B").procedure.find((c) => c.label === "최저 수탁금액")!.value;
+    expect(v).toContain("1,000만원");
+    expect(v).toContain("5억원");
+  });
+});

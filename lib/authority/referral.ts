@@ -5,11 +5,13 @@ import type {
   DesignSet,
   Gap,
   Instrument,
+  Ledger,
   Profile,
   Question,
 } from "../types";
 import { activeQuestions } from "../questions";
 import { findGaps } from "../design";
+import { trustContact } from "../ledger/analyze";
 import { personLabel, won } from "../format";
 import { actsAlone } from "./instruments";
 import { PETITIONERS, statutesForReferral } from "./statutes";
@@ -162,7 +164,12 @@ const NOTICE_COMMON = [
 export function buildReferral(
   p: Profile,
   design: DesignSet,
-  opts: { instruments?: Instrument[]; contrasts?: Contrast[]; now?: number } = {},
+  opts: {
+    instruments?: Instrument[];
+    contrasts?: Contrast[];
+    ledger?: Ledger | null;
+    now?: number;
+  } = {},
 ): Referral {
   const now = opts.now ?? Date.now();
   const mode: ReferralMode = actsAlone(p) ? "contract" : "petition";
@@ -251,6 +258,23 @@ export function buildReferral(
 
   const petition = mode === "petition";
 
+  /* 전달처는 이력에서 정한다. 설문에서 묻지 않는다. */
+  const contact = trustContact(opts.ledger ?? null);
+  if (contact) {
+    overview.push({
+      qid: "",
+      label: "주거래 금융기관",
+      value: contact.redirected
+        ? `${contact.primary.name} (거래 비중 ${Math.round(contact.primary.share * 100)}%) — 신탁 창구를 두지 않는 기관이므로 ${contact.recommended.name} 신탁부서를 제안합니다`
+        : `${contact.primary.name} (거래 비중 ${Math.round(contact.primary.share * 100)}%)`,
+    });
+    overview.push({
+      qid: "",
+      label: "판단 근거",
+      value: "고정비 자동이체와 입출금이 거친 기관의 비중. 설문 응답이 아닌 금융이력 관찰값입니다.",
+    });
+  }
+
   return {
     mode,
     docNo: docNumber(p, now),
@@ -260,7 +284,12 @@ export function buildReferral(
       : "본인 작성 설문에 기초한 사전 의사 정리 및 조항 초안",
     recipients: petition
       ? ["가정법원", "후견인 후보자", "법무법인"]
-      : ["은행 WM·신탁부서", "법무법인"],
+      : [
+          contact
+            ? `${contact.recommended.name} WM·신탁부서`
+            : "은행 WM·신탁부서",
+          "법무법인",
+        ],
     executor: actsAlone(p) ? "본인" : "보호자",
     executorNote: actsAlone(p)
       ? undefined

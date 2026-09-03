@@ -387,6 +387,18 @@ export type IncidentType =
   | "new_payee_large"
   | "unused_subscription";
 
+/**
+ * 거래 금융기관. 고정비 자동이체와 입출금이 어느 기관을 거쳤는지의 관찰값이다.
+ * 설문에서 묻지 않는다 — 물어보면 대개 정확히 답하지 못하고, 이력에는 그대로 남는다.
+ */
+export interface Institution {
+  name: string;
+  /** 고정비 자동이체·이체 건수 기준 비중 0~1 */
+  share: number;
+  /** 신탁·후견 관련 상품을 취급하는 기관인가 */
+  trustDesk: boolean;
+}
+
 export interface Incident {
   date: string;
   type: IncidentType;
@@ -413,6 +425,8 @@ export interface Ledger {
   baselineYears: number;
   months: MonthRoll[];
   trades: TradeEvent[];
+  /** 거래 금융기관. 비중 내림차순 */
+  institutions?: Institution[];
   incidents: Incident[];
   drawdowns: DrawdownWindow[];
   holdings: { equity: number; bond: number; cash: number };
