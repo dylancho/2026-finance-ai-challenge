@@ -578,6 +578,15 @@ export type InstrumentKind =
 
 export type ActorKind = "본인" | "보호자" | "전문가" | "법원" | "금융기관";
 
+export interface Statute {
+  law: string;
+  article: string;
+  title: string;
+  /** 조문 전문. 옮겨 적되 고치지 않는다. */
+  text: string;
+  url: string;
+}
+
 export interface AuthorityStep {
   n: number;
   label: string;
@@ -603,6 +612,8 @@ export interface Instrument {
   unavailableReason?: string;
   /** unavailable 일 때의 대안 경로 */
   fallback?: { name: string; why: string }[];
+  /** 근거 조문. 명문 근거가 없는 문서에는 비어 있다. */
+  basis: Statute[];
 }
 
 export interface AuthorityState {

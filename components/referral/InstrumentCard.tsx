@@ -86,6 +86,25 @@ export default function InstrumentCard({
         </>
       )}
 
+      {inst.basis.length ? (
+        <details className="rf-basis">
+          <summary>
+            근거 조문 {inst.basis.map((b) => `${b.law} ${b.article}`).join(" · ")}
+          </summary>
+          <ul>
+            {inst.basis.map((b) => (
+              <li key={`${b.law}${b.article}`}>
+                <a href={b.url} target="_blank" rel="noreferrer">
+                  {b.law} {b.article}
+                </a>{" "}
+                <span className="ti">{b.title}</span>
+                <p>{b.text}</p>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+
       <p className="rf-covers">
         covers <b>{inst.covers.join(" · ")}</b>
       </p>

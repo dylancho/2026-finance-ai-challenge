@@ -6,6 +6,8 @@ import type { Referral } from "../../lib/authority/referral";
 /** 은행 WM·신탁부서·법무법인에 제출하는 문서. 인쇄를 전제로 한 레이아웃. */
 export default function ReferralDoc({ r }: { r: Referral }) {
   const sections = groupBySection(r);
+  let n = 0;
+  const no = () => `§${++n}`;
 
   return (
     <article className="rf-doc">
@@ -37,7 +39,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
 
       <section className="rf-sec">
         <h4>
-          <span className="no">§1</span>의뢰 개요
+          <span className="no">{no()}</span>의뢰 개요
         </h4>
         <dl className="rf-kv">
           {r.overview.map((f) => (
@@ -52,7 +54,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
       {r.assetTables.length || r.roles.length ? (
         <section className="rf-sec">
           <h4>
-            <span className="no">§2</span>재산 및 관계 현황
+            <span className="no">{no()}</span>재산 및 관계 현황
             <small>설문 응답 기준 · 실사 미실시</small>
           </h4>
 
@@ -102,7 +104,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
       {r.directives.length ? (
         <section className="rf-sec">
           <h4>
-            <span className="no">§3</span>확정된 지시사항
+            <span className="no">{no()}</span>확정된 지시사항
             <small>각 항목에 근거 문항 번호 병기</small>
           </h4>
           {r.directives.map((d) => (
@@ -126,7 +128,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
 
       <section className="rf-sec">
         <h4>
-          <span className="no">§4</span>미확정 사항
+          <span className="no">{no()}</span>미확정 사항
         </h4>
         {r.open.length ? (
           r.open.map((g) => (
@@ -148,7 +150,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
       {r.contrasts.length ? (
         <section className="rf-sec">
           <h4>
-            <span className="no">§5</span>선언과 금융이력의 대조
+            <span className="no">{no()}</span>선언과 금융이력의 대조
           </h4>
           <ul className="rf-list">
             {r.contrasts.map((c) => (
@@ -163,7 +165,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
       {r.procedure.length ? (
         <section className="rf-sec">
           <h4>
-            <span className="no">§{r.contrasts.length ? 6 : 5}</span>절차 · 요건 · 비용
+            <span className="no">{no()}</span>절차 · 요건 · 비용
           </h4>
           <ul className="rf-check">
             {r.procedure.map((c, i) => (
@@ -177,9 +179,31 @@ export default function ReferralDoc({ r }: { r: Referral }) {
         </section>
       ) : null}
 
+      {r.statutes.length ? (
+        <section className="rf-sec">
+          <h4>
+            <span className="no">{no()}</span>참조 법령
+            <small>본 설계가 전제하는 제도의 근거</small>
+          </h4>
+          <ul className="rf-statutes">
+            {r.statutes.map((st) => (
+              <li key={`${st.law}${st.article}`}>
+                <div className="hd">
+                  <a href={st.url} target="_blank" rel="noreferrer">
+                    {st.law} {st.article}
+                  </a>
+                  <span className="ti">{st.title}</span>
+                </div>
+                <p>{st.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="rf-sec">
         <h4>
-          <span className="no">§{(r.contrasts.length ? 6 : 5) + 1}</span>고지
+          <span className="no">{no()}</span>고지
         </h4>
         <div className="rf-notice">
           {r.notice.map((n, i) => (

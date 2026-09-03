@@ -10,6 +10,7 @@ function inst(over: Partial<Instrument> = {}): Instrument {
     covers: ["trust:*"],
     effectRule: "체결 및 재산 이전 완료 시",
     steps: [],
+    basis: [],
     ...over,
   };
 }

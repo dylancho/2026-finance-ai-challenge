@@ -154,3 +154,75 @@ describe("buildReferral — 설문 기반 §2", () => {
     );
   });
 });
+
+describe("참조 법령", () => {
+  const insts = (key: string) => {
+    const p = DEMO_PROFILES[key];
+    return buildInstruments(p, buildDesign(p));
+  };
+  const ref = (key: string) => {
+    const p = DEMO_PROFILES[key];
+    return buildReferral(p, buildDesign(p), {
+      now: NOW,
+      instruments: insts(key),
+    });
+  };
+
+  it("임의후견에는 공정증서·효력발생·감독인 선임 조문이 붙는다", () => {
+    const g = insts("B").find((i) => i.kind === "voluntary_guardianship")!;
+    const arts = g.basis.map((b) => `${b.law} ${b.article}`);
+    expect(arts).toContain("민법 제959조의14 제2항");
+    expect(arts).toContain("민법 제959조의14 제3항");
+    expect(arts).toContain("민법 제959조의15 제1항");
+  });
+
+  it("조문 전문을 요약하지 않고 그대로 싣는다", () => {
+    const g = insts("B").find((i) => i.kind === "voluntary_guardianship")!;
+    const form = g.basis.find((b) => b.article === "제959조의14 제2항")!;
+    expect(form.text).toBe("후견계약은 공정증서로 체결하여야 한다.");
+  });
+
+  it("법정후견은 판정된 유형의 조문만 붙는다", () => {
+    const g = insts("C").find((i) => i.kind === "legal_guardianship")!;
+    const arts = g.basis.map((b) => b.article);
+    expect(arts).toContain("제9조 제1항"); // 성년후견
+    expect(arts).not.toContain("제12조 제1항");
+  });
+
+  it("금융기관 위임장에는 근거 조문을 지어내지 않는다", () => {
+    const m = insts("B").find((i) => i.kind === "bank_mandate")!;
+    expect(m.basis).toEqual([]);
+  });
+
+  it("신탁 유형에 따라 신탁법 조문이 갈린다", () => {
+    const b = insts("B").find((i) => i.kind === "trust")!;
+    const d = insts("D").find((i) => i.kind === "trust")!;
+    expect(b.basis.map((x) => x.article)).toEqual(["제3조 제1항"]);
+    expect(d.basis.map((x) => x.article).length).toBeGreaterThan(1);
+  });
+
+  it("설정이 막힌 신탁에는 조문을 달지 않는다", () => {
+    const t = insts("C").find((i) => i.kind === "trust")!;
+    expect(t.stage).toBe("unavailable");
+    expect(t.basis).toEqual([]);
+  });
+
+  it("의뢰서는 발급 문서들의 조문을 중복 없이 모은다", () => {
+    const arts = ref("B").statutes.map((s) => `${s.law} ${s.article}`);
+    expect(new Set(arts).size).toBe(arts.length);
+    expect(arts).toContain("신탁법 제3조 제1항");
+  });
+
+  it("유류분 조문은 넣지 않는다 — 2024년 헌재 결정으로 변동", () => {
+    const all = ref("D").statutes.map((s) => s.article).join(" ");
+    expect(all).not.toContain("1112");
+  });
+
+  it("고지에 인용 시점 단서를 넣는다", () => {
+    expect(ref("B").notice.join(" ")).toContain("개정 여부");
+  });
+
+  it("보호자 안내에 법정 청구권자를 명시한다", () => {
+    expect(ref("C").executorNote).toContain("4촌 이내의 친족");
+  });
+});

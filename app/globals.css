@@ -3678,3 +3678,92 @@ table.data tfoot td {
     break-inside: avoid;
   }
 }
+
+/* 참조 법령 */
+
+.rf-basis {
+  border-top: 1px dashed var(--line);
+  padding-top: 11px;
+}
+
+.rf-basis summary {
+  font-size: 12.5px;
+  color: var(--blue);
+  cursor: pointer;
+  font-family: var(--mono);
+}
+
+.rf-basis ul {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rf-basis li {
+  font-size: 12.5px;
+  border-left: 2px solid var(--line);
+  padding-left: 11px;
+}
+
+.rf-basis a {
+  font-family: var(--mono);
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+.rf-basis .ti {
+  color: var(--muted);
+}
+
+.rf-basis p {
+  color: #46505f;
+  line-height: 1.75;
+  margin-top: 3px;
+}
+
+.rf-statutes {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rf-statutes li {
+  border-left: 3px solid var(--blue);
+  background: var(--blue-soft);
+  border-radius: 0 7px 7px 0;
+  padding: 12px 15px;
+}
+
+.rf-statutes .hd {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+
+.rf-statutes a {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--blue);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.rf-statutes .ti {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.rf-statutes p {
+  font-size: 13px;
+  color: #2c3646;
+  line-height: 1.8;
+}
+
+@media print {
+  .rf-basis[open] summary {
+    list-style: none;
+  }
+}

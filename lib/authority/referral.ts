@@ -1,5 +1,6 @@
 import type {
   AnswerValue,
+  Statute,
   Contrast,
   DesignSet,
   Gap,
@@ -11,6 +12,7 @@ import { activeQuestions } from "../questions";
 import { findGaps } from "../design";
 import { personLabel, won } from "../format";
 import { actsAlone } from "./instruments";
+import { PETITIONERS, statutesForReferral } from "./statutes";
 
 /**
  * 전문가 이양 서류 — 「신탁·후견 설계 의뢰서」.
@@ -76,6 +78,8 @@ export interface Referral {
   directives: ReferralDirective[];
   open: Gap[];
   procedure: { label: string; value: string }[];
+  /** 참조 법령. 명문 근거가 있는 것만 싣는다. */
+  statutes: Statute[];
   answers: ReferralAnswer[];
   answered: number;
   total: number;
@@ -145,6 +149,9 @@ const CAPACITY_LABEL: Record<string, string> = {
   incident:
     "이미 금융 피해·사고가 발생한 상태 — 신규 계약 설정이 어려우며 즉시 보호 조치 필요",
 };
+
+const NOTICE_STATUTE =
+  "인용한 조문은 확인 시점(2026-09-03) 기준이며, 개정 여부와 본 사안에의 적용 여부는 전문가의 확인이 필요합니다.";
 
 const NOTICE_COMMON = [
   "본 문서는 의뢰인의 설문 응답을 정리한 초안이며, 그 자체로 법적 효력이 없습니다.",
@@ -257,13 +264,17 @@ export function buildReferral(
     executor: actsAlone(p) ? "본인" : "보호자",
     executorNote: actsAlone(p)
       ? undefined
-      : "본인이 직접 절차를 밟기 어려운 상태입니다. 이하 절차는 보호자 또는 법정 청구권자가 진행하며, 본인 단독으로 한 행위는 나중에 효력이 다투어질 수 있습니다.",
+      : `본인이 직접 절차를 밟기 어려운 상태입니다. 후견개시 심판은 ${PETITIONERS}가 청구할 수 있으며(민법 제9조·제12조·제14조의2), 본인 단독으로 한 행위는 나중에 효력이 다투어질 수 있습니다.`,
     overview,
     assetTables,
     roles,
     directives,
     open: findGaps(p, design),
     procedure,
+    statutes: statutesForReferral(
+      design,
+      (opts.instruments ?? []).map((i) => i.kind),
+    ),
     answers,
     answered,
     total: answers.length,
@@ -273,11 +284,13 @@ export function buildReferral(
           "본 문서는 후견개시 심판 청구 시 본인의 사전 의사를 참고자료로 전달하기 위한 것이며, 그 자체로 법적 효력이 없습니다.",
           "후견인의 권한은 가정법원의 심판으로 정해지며, 본 문서가 그 범위를 구속하지 않습니다.",
           ...NOTICE_COMMON.slice(1),
+          NOTICE_STATUTE,
         ]
       : [
           NOTICE_COMMON[0],
           "효력은 전문가의 검토를 거쳐 신탁계약·후견계약 등 정식 절차가 체결됨으로써 비로소 발생합니다.",
           ...NOTICE_COMMON.slice(1),
+          NOTICE_STATUTE,
         ],
   };
 }

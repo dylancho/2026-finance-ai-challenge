@@ -1,3 +1,4 @@
+import { statutesFor } from "./statutes";
 import type {
   ActorKind,
   AuthorityState,
@@ -137,6 +138,7 @@ export function buildInstruments(
             covers: ["trust:*"],
             effectRule: "신탁계약을 체결하고 신탁재산의 이전을 마친 때",
             steps: resolveActors(TRUST_STEPS, p),
+            basis: statutesFor("trust", design),
           }
         : {
             kind: "trust",
@@ -147,6 +149,7 @@ export function buildInstruments(
             steps: [],
             unavailableReason: trust.blockedReason,
             fallback: trust.type.alternatives,
+            basis: [],
           },
     );
   }
@@ -162,6 +165,10 @@ export function buildInstruments(
         ? "가정법원이 임의후견감독인을 선임한 때"
         : "가정법원의 후견개시 심판이 확정된 때",
       steps: resolveActors(fromRoadmap(g.roadmap), p),
+      basis: statutesFor(
+        voluntary ? "voluntary_guardianship" : "legal_guardianship",
+        design,
+      ),
     });
   }
 
@@ -173,6 +180,7 @@ export function buildInstruments(
     covers: MANDATE_COVERS,
     effectRule: "금융기관에 대리인 지정이 등록된 때",
     steps: resolveActors(MANDATE_STEPS, p),
+    basis: [],
   });
 
   return out.map((i) => applyStage(i, state));
