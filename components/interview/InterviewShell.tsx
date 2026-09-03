@@ -572,6 +572,11 @@ export default function InterviewShell() {
                 <Link href="/simulation" className="btn outline">
                   시뮬레이션 돌려보기
                 </Link>
+                {unified && (
+                  <Link href="/events" className="btn outline">
+                    상황이 바뀌면
+                  </Link>
+                )}
                 {unified && remainingChapters.length > 0 && (
                   <button
                     type="button"

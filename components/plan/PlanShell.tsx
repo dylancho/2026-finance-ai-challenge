@@ -335,6 +335,9 @@ export default function PlanShell() {
           <Link href="/simulation" className="btn outline">
             먼저 시뮬레이션 보기
           </Link>
+          <Link href="/events" className="btn outline">
+            상황이 바뀌었나요?
+          </Link>
           <button className="btn" onClick={() => setModal(true)}>
             전문가 상담 준비하기
           </button>

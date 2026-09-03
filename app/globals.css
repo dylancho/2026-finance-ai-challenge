@@ -3312,3 +3312,125 @@ button.feed-item.here .edit {
   border-left-color: var(--navy);
   background: var(--blue-soft);
 }
+
+/* ── 이벤트 → 판정 (2026-09-03) ────────────────────── */
+
+.ev-summary {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.ev-summary .src,
+.ev-note .src {
+  font-size: 10.5px;
+  color: var(--faint);
+  margin-left: 6px;
+}
+
+.ev-note {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--ink);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.ev-contrast {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+
+.ev-contrast .ct-col .k {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.cand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.cand {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 18px 16px;
+}
+
+.cand-head h3 {
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.cand-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cand-impact {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 13px;
+}
+
+.cand-impact .kv-row span:first-child {
+  color: var(--muted);
+}
+
+.cand-basis {
+  display: grid;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.cand-basis li {
+  padding-left: 12px;
+  position: relative;
+}
+
+.cand-basis li::before {
+  content: "·";
+  position: absolute;
+  left: 2px;
+}
+
+.cand-note {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+  border-left: 2px solid var(--blue);
+  padding-left: 10px;
+}
+
+.cand-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.cand-recorded {
+  font-size: 12px;
+  color: var(--ok);
+}
