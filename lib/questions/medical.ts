@@ -25,7 +25,7 @@ export const B17: Question = {
     { value: "family_decide", label: "그때 가족이 판단하도록" },
     { value: "undecided", label: "아직 생각해 보지 않았다" },
   ],
-  mapsTo: [{ doc: "guardianship", clause: "§3", label: "신상보호 선호" }],
+  mapsTo: [{ doc: "guardianship", clause: "제3조", label: "신상보호 선호" }],
 };
 
 export const B08: Question = {
@@ -78,7 +78,7 @@ export const B18: Question = {
     { value: "mail", label: "우편·통신물 관리" },
     { value: "eol", label: "연명의료 의사 확인" },
   ],
-  mapsTo: [{ doc: "guardianship", clause: "§3", label: "신상보호 사무범위" }],
+  mapsTo: [{ doc: "guardianship", clause: "제3조", label: "신상보호 사무범위" }],
 };
 
 export const medicalQuestions: Question[] = [B17, B08, B09, B18];

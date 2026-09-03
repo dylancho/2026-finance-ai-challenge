@@ -47,7 +47,7 @@ describe("후보 생성 — 세 이벤트 모두", () => {
   });
 });
 
-describe("impact 는 설계서 §6 과 같은 계산이다", () => {
+describe("impact 는 설계서 제6조 과 같은 계산이다", () => {
   it("진단·급락의 현상 유지 소진 시점이 설계서 추정과 일치한다", () => {
     const p = base();
     const design = buildExpenseDesign(p);

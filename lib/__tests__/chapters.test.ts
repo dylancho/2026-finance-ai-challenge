@@ -104,7 +104,7 @@ describe("설계 엔진 — 있는 답으로만 만든다", () => {
     expect(d.expense.sustainability.careStartYear).toBe(5);
   });
 
-  it("투자 챕터를 시작만 해도 §7 이 있는 답으로 선다", () => {
+  it("투자 챕터를 시작만 해도 제7조 이 있는 답으로 선다", () => {
     const p = unified({
       answers: { I01: { kind: "multi", values: ["derivative", "crypto"] } },
     });

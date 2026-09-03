@@ -46,12 +46,12 @@ export const CHAPTER_META: Record<Chapter, ChapterMeta> = {
   invest: {
     label: "투자 원칙",
     short: "투자",
-    caption: "손대지 않을 자산, 위험자산 상한, 급락 때의 대응을 미리 선언합니다.",
+    caption: "손대지 않을 자산, 위험자산 한도, 급락했을 때 어떻게 할지를 미리 정합니다.",
     withoutIt: "목돈이 생기거나 시장이 급락했을 때 판단 근거가 없습니다.",
     count: investQuestions.filter((q) => !q.showIf).length,
     minutes: "2분",
     required: false,
-    docs: ["지출설계서 §7"],
+    docs: ["지출설계서 제7조"],
   },
   estate: {
     label: "상속 의사",
@@ -66,7 +66,7 @@ export const CHAPTER_META: Record<Chapter, ChapterMeta> = {
   medical: {
     label: "의료·요양 기준",
     short: "의료·요양",
-    caption: "요양 방식, 요양 진입 시 지급 증액, 의료비 상한을 정합니다.",
+    caption: "어디서 요양할지, 요양이 시작되면 지급액을 얼마나 올릴지, 의료비는 어디까지 쓸지를 정합니다.",
     withoutIt: "요양시설 입소 시 비용 상한과 재원 순서를 정할 수 없습니다.",
     count: medicalQuestions.length,
     minutes: "2분",
@@ -271,7 +271,7 @@ export function flowMeta(p: Profile): { name: string; short: string; docs: strin
   }
   const declared = OPTIONAL_CHAPTERS.filter((ch) => hasChapter(p, ch));
   const docs = new Set<string>(CHAPTER_META.core.docs);
-  for (const ch of declared) for (const d of CHAPTER_META[ch].docs) docs.add(d.replace(/ §\d+$/, ""));
+  for (const ch of declared) for (const d of CHAPTER_META[ch].docs) docs.add(d.replace(/ 제\d+조$/, ""));
   return {
     name: declared.length
       ? `코어 + ${declared.map((ch) => CHAPTER_META[ch].short).join("·")}`

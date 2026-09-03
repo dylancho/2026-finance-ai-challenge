@@ -42,7 +42,7 @@ export const futureQuestions: Question[] = [
     max: 15_000_000,
     step: 100_000,
     presets: [500_000, 1_000_000, 2_000_000, 3_000_000],
-    mapsTo: [{ doc: "expense", clause: "§6", label: "지속가능성 추정" }],
+    mapsTo: [{ doc: "expense", clause: "제6조", label: "지속가능성 추정" }],
   },
 
   /* ── B-2 신탁 대상과 목적 ──────────────────────── */
@@ -144,7 +144,7 @@ export const futureQuestions: Question[] = [
       { value: "hospital", label: "정기 통원 치료비" },
       { value: "support", label: "가족 정기 지원" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§2", label: "자동이체 매트릭스" }],
+    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 매트릭스" }],
   },
 
   /* ── B-5 자산 운용과 권한 ──────────────────────── */
@@ -158,7 +158,7 @@ export const futureQuestions: Question[] = [
     type: "person",
     mapsTo: [
       { doc: "trust", clause: "제3조", label: "1차 관리자" },
-      { doc: "guardianship", clause: "§2", label: "후견인 후보" },
+      { doc: "guardianship", clause: "제2조", label: "후견인 후보" },
     ],
   },
   {
@@ -170,7 +170,7 @@ export const futureQuestions: Question[] = [
     type: "person",
     mapsTo: [
       { doc: "trust", clause: "제3조", label: "예비 관리자" },
-      { doc: "guardianship", clause: "§2", label: "예비 후견인" },
+      { doc: "guardianship", clause: "제2조", label: "예비 후견인" },
     ],
   },
   {
@@ -186,7 +186,7 @@ export const futureQuestions: Question[] = [
     presets: [500_000, 1_000_000, 3_000_000, 5_000_000],
     mapsTo: [
       { doc: "trust", clause: "제3조", label: "단독 결정 상한" },
-      { doc: "expense", clause: "§3", label: "공동승인 기준" },
+      { doc: "expense", clause: "제3조", label: "공동승인 기준" },
     ],
   },
   {
@@ -226,7 +226,7 @@ export const futureQuestions: Question[] = [
     ],
     mapsTo: [
       { doc: "trust", clause: "제9조", label: "신탁감독인" },
-      { doc: "guardianship", clause: "§4", label: "후견감독인" },
+      { doc: "guardianship", clause: "제4조", label: "후견감독인" },
     ],
   },
 

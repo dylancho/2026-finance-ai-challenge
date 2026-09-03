@@ -124,12 +124,13 @@ export default function EventsShell() {
         <div className="eyebrow">Event → Judgement</div>
         <h1>상황이 바뀌었나요?</h1>
         <p className="section-lede">
-          설계서는 선언입니다. 상황이 바뀌면 그 선언을 근거로 <b>검토 후보</b>를 만듭니다.
-          NEXT는 후보를 정렬할 뿐 하나를 고르지 않습니다. 결정은 사람이 합니다.
+          설계서에 적어 둔 원칙은 상황이 바뀌었을 때 쓰라고 있는 것입니다. 상황을 고르면 그
+          원칙을 근거로 <b>검토할 후보</b>를 늘어놓습니다. NEXT는 후보를 늘어놓을 뿐 하나를
+          고르지 않습니다. 결정은 사람이 합니다.
         </p>
         <p className="lg-note mono">
-          데모용 시뮬레이션 · 아래 상황은 실제 사건이 아니라 가정입니다. 특정 상품·금융회사를
-          추천하지 않습니다.
+          데모용 시뮬레이션입니다. 아래 상황은 실제로 일어난 일이 아니라 가정이며, 특정
+          상품이나 금융회사를 추천하지 않습니다.
         </p>
       </div>
 
@@ -157,16 +158,17 @@ export default function EventsShell() {
           {advice.reentry.map((ch) => (
             <div className="gap-item chapter high" key={ch}>
               <div>
-                <div className="r mono">이 판단에 필요한 선언이 없습니다</div>
+                <div className="r mono">먼저 정해야 할 것이 있습니다</div>
                 <div className="w">
                   이 판단에는 {CHAPTER_META[ch].label} 선언이 필요합니다
                 </div>
                 <div className="c">
-                  {CHAPTER_META[ch].withoutIt} 아래 후보는 선언 없이 만든 것이라 근거가 약합니다.
+                  {CHAPTER_META[ch].withoutIt} 아래 후보는 그 기준 없이 만든 것이라 근거가
+                  약합니다.
                 </div>
               </div>
               <Link href={`/interview?chapter=${ch}`} className="btn sm">
-                이 영역 선언하기
+                이 영역 답하기
               </Link>
             </div>
           ))}
@@ -179,11 +181,11 @@ export default function EventsShell() {
               </div>
               <div className="ct-cols">
                 <div className="ct-col">
-                  <div className="k mono">선언 (인터뷰)</div>
+                  <div className="k mono">인터뷰에서 정한 것</div>
                   <p>{advice.contrast.declared}</p>
                 </div>
                 <div className="ct-col">
-                  <div className="k mono">관측 (이력)</div>
+                  <div className="k mono">이력에서 보인 것</div>
                   <p>{advice.contrast.observed}</p>
                 </div>
               </div>
@@ -201,7 +203,7 @@ export default function EventsShell() {
                 <p className="ev-note">
                   {narration.contrastNote.text}{" "}
                   <span className="src mono">
-                    {narration.contrastNote.source === "llm" ? "AI 판정" : "규칙 문장"}
+                    {narration.contrastNote.source === "llm" ? "AI 해설" : "규칙 문장"}
                   </span>
                 </p>
               )}
@@ -213,7 +215,7 @@ export default function EventsShell() {
             <div className="section-title">
               <h2>검토 후보 {advice.candidates.length}개</h2>
               <Badge tone="neutral">
-                현재 설계서 기준 소진 시점 {yearsLabel(advice.baselineRunwayYears)}
+                지금 설계서대로면 {yearsLabel(advice.baselineRunwayYears)} 뒤 소진
               </Badge>
             </div>
             {narration && (
@@ -221,16 +223,17 @@ export default function EventsShell() {
                 {narration.summary.text}{" "}
                 <span className="src mono">
                   {narrating
-                    ? "AI 판정을 기다리는 중 · 규칙 문장"
+                    ? "규칙 문장 (AI 해설을 기다리는 중)"
                     : narration.summary.source === "llm"
-                      ? "AI 판정"
+                      ? "AI 해설"
                       : "규칙 문장"}
                 </span>
               </p>
             )}
             <p className="muted" style={{ fontSize: 12.5, marginBottom: 14 }}>
-              {EVENT_META[advice.event.kind].exposureLabel}: {EVENT_META[advice.event.kind].exposureHelp}.
-              소진 시점은 설계서 §6 과 같은 방식(수익률·물가 미반영)으로 계산했습니다.
+              &lsquo;{EVENT_META[advice.event.kind].exposureLabel}&rsquo;은{" "}
+              {EVENT_META[advice.event.kind].exposureHelp}입니다. 소진 시점은 설계서 제6조와 같은
+              방식으로, 수익률과 물가는 빼고 계산했습니다.
             </p>
 
             {/* ── 후보 카드. do-nothing 도 시각적으로 동급이다. ── */}
@@ -302,8 +305,8 @@ export default function EventsShell() {
         </div>
         {decisions.length === 0 ? (
           <p className="muted" style={{ fontSize: 13 }}>
-            아직 기록된 검토 후보가 없습니다. 기록은 실행이 아닙니다 — 상담이나 가족 회의에서
-            꺼내 볼 근거를 남기는 것입니다.
+            아직 기록한 후보가 없습니다. 기록해 둔다고 실행되는 것은 아닙니다. 나중에 상담이나
+            가족 회의에서 꺼내 볼 근거로 남을 뿐입니다.
           </p>
         ) : (
           decisions.map((d) => (
@@ -326,8 +329,8 @@ export default function EventsShell() {
       </section>
 
       <p className="disclaimer">
-        위 후보는 설계서의 선언과 합성 이력을 근거로 규칙에 따라 만든 검토 항목이며 투자 자문이
-        아닙니다. 어떤 후보도 실행되지 않으며, 특정 금융회사·상품을 추천하지 않습니다.
+        위 후보는 설계서에 적힌 원칙과 합성 이력을 바탕으로 규칙에 따라 만든 검토 항목이며 투자
+        자문이 아닙니다. 어느 후보도 실행되지 않고, 특정 금융회사나 상품을 추천하지 않습니다.
       </p>
     </div>
   );

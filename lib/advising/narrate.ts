@@ -35,21 +35,19 @@ export function ruleAdviceNarration(advice: Advice): AdviceNarration {
   const exposureText =
     minEx === maxEx ? `모두 ${won(minEx)}` : `${won(minEx)}에서 ${won(maxEx)} 사이`;
   const summary =
-    `후보 ${candidates.length}개의 소진 시점은 ${runwayText}으로 관측되고, ` +
+    `후보 ${candidates.length}개의 소진 시점은 ${runwayText}이고, ` +
     `${meta.exposureLabel}은 ${exposureText}입니다. ` +
-    (doNothing
-      ? `"${doNothing.title}"도 같은 단위로 나란히 두었습니다. `
-      : "") +
-    "어느 것도 권하지 않습니다. 되돌릴 수 있는 조치인지가 첫 번째 기준일 수 있습니다.";
+    (doNothing ? `'${doNothing.title}'도 같은 잣대로 나란히 두었습니다. ` : "") +
+    "어느 쪽도 권하지 않습니다. 되돌릴 수 있는지부터 보시는 것도 한 방법입니다.";
 
   const tradeoffs: AdviceNarration["tradeoffs"] = {};
   for (const c of candidates) {
     tradeoffs[c.id] = {
       text:
-        `소진 시점 ${yearsLabel(c.impact.runwayYears ?? null)} · ${meta.exposureLabel} ${won(c.impact.riskExposure ?? 0)}. ` +
+        `소진 시점 ${yearsLabel(c.impact.runwayYears ?? null)}, ${meta.exposureLabel} ${won(c.impact.riskExposure ?? 0)}. ` +
         (c.reversible
-          ? "되돌릴 수 있는 조치로 분류됩니다."
-          : "되돌리기 어려운 조치입니다. 결정 전에 지정인과 확인하는 편이 안전합니다."),
+          ? "되돌릴 수 있는 조치입니다."
+          : "되돌리기 어렵습니다. 정하기 전에 지정한 사람과 한 번 확인하는 편이 안전합니다."),
       source: "rule",
     };
   }
@@ -57,8 +55,8 @@ export function ruleAdviceNarration(advice: Advice): AdviceNarration {
   const contrastNote = advice.contrast
     ? {
         text:
-          `선언은 "${advice.contrast.declared}", 이력은 "${advice.contrast.observed}"로 관측됩니다. ` +
-          "둘이 어긋난다면 지금의 선택은 원칙이 아니라 그때의 감정에 따를 가능성이 있습니다.",
+          `정해 둔 것은 '${advice.contrast.declared}', 이력은 '${advice.contrast.observed}'입니다. ` +
+          "둘이 어긋난다면 급할 때의 선택은 원칙보다 그때 기분을 따라갈 수 있습니다.",
         source: "rule" as const,
       }
     : undefined;

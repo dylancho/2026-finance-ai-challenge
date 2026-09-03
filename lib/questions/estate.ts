@@ -148,7 +148,7 @@ export const estateQuestions: Question[] = [
     presets: [1_500_000, 2_000_000, 3_000_000],
     mapsTo: [
       { doc: "trust", clause: "제5조", label: "위탁자 생활비 유보" },
-      { doc: "expense", clause: "§1", label: "생활계좌" },
+      { doc: "expense", clause: "제1조", label: "생활계좌" },
     ],
   },
   {

@@ -292,7 +292,7 @@ export default function PlanShell() {
                         <div className="c">{g.consequence}</div>
                       </div>
                       <Link href={`/interview?chapter=${g.chapter}`} className="btn sm">
-                        이 영역 선언하기
+                        이 영역 답하기
                       </Link>
                     </div>
                   ) : (

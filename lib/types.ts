@@ -35,7 +35,7 @@ export interface Option {
 
 export interface ClauseRef {
   doc: DocKey;
-  clause: string; // "제4조" | "§2"
+  clause: string; // "제4조" | "제2조"
   label: string;
 }
 
@@ -256,7 +256,7 @@ export interface FraudRule {
   active: boolean;
 }
 
-/** §7 투자 원칙 — invest 챕터의 선언을 조항으로 옮긴 것. 챕터를 건너뛰면 null. */
+/** 제7조 투자 원칙 — invest 챕터의 선언을 조항으로 옮긴 것. 챕터를 건너뛰면 null. */
 export interface InvestPrinciples {
   /** 손대지 않을 자산군 (I01). 어드바이징의 하드 제약이다. */
   forbidden: string[];
@@ -300,7 +300,7 @@ export interface ExpenseDesign {
     series: { year: number; balance: number }[];
     careStartYear?: number;
   };
-  /** §7. 투자 챕터를 선언하지 않았으면 null — 조항을 비워 두지 않고 생략한다. */
+  /** 제7조. 투자 챕터를 선언하지 않았으면 null — 조항을 비워 두지 않고 생략한다. */
   invest: InvestPrinciples | null;
   flags: Flag[];
   completeness: number;

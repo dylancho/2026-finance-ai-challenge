@@ -18,7 +18,7 @@ const CHAPTER_GAP: Record<
 > = {
   invest: {
     doc: "expense",
-    clause: "§7 투자 원칙",
+    clause: "제7조 투자 원칙",
     what: "투자 원칙이 선언되지 않았습니다",
     consequence: "목돈이 생기거나 시장이 급락했을 때 판단 근거가 없습니다.",
     severity: "high",

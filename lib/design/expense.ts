@@ -25,7 +25,7 @@ import { ASSET_CLASS_LABEL, RISK_CAP_PCT } from "../questions/invest";
 /**
  * 자산 소진 추정. 수익률·물가를 반영하지 않은 단순 인출 계산이다.
  *
- * 설계서 §6 과 어드바이징(lib/advising)이 같은 함수를 쓴다 — 이벤트 화면의
+ * 설계서 제6조 과 어드바이징(lib/advising)이 같은 함수를 쓴다 — 이벤트 화면의
  * "소진 시점 변화" 가 설계서의 추정과 어긋나면 안 되기 때문이다.
  *
  * @param assets     지금 인출 가능한 자산
@@ -82,7 +82,7 @@ const STANCE_LABEL: Record<string, string> = {
 };
 
 /**
- * §7 투자 원칙. invest 챕터를 선언하지 않았으면 null 을 돌려 조항 자체를 생략한다.
+ * 제7조 투자 원칙. invest 챕터를 선언하지 않았으면 null 을 돌려 조항 자체를 생략한다.
  * 있는 답만으로 만든다 — I01 만 답해도 금지 자산군 항은 선다.
  */
 export function buildInvestPrinciples(p: Profile): InvestPrinciples | null {
@@ -110,7 +110,7 @@ export function buildInvestPrinciples(p: Profile): InvestPrinciples | null {
     crashPolicy: crash ? CRASH_POLICY_LABEL[crash] : undefined,
     handover: handover
       ? handover === "designee" && handoverPerson
-        ? `${HANDOVER_LABEL[handover]} — ${personLabel(handoverPerson)}`
+        ? `${HANDOVER_LABEL[handover]} (${personLabel(handoverPerson)})`
         : HANDOVER_LABEL[handover]
       : undefined,
     stance: stance ? STANCE_LABEL[stance] : undefined,

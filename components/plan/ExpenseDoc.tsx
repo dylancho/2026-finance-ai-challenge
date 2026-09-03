@@ -115,8 +115,8 @@ export default function ExpenseDoc({
   return (
     <div className="doc">
       <div>
-        <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>§1. 3층 계좌 구조
-          <EditClauseLink profile={profile} doc="expense" clause="§1" />
+        <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>제1조 3층 계좌 구조
+          <EditClauseLink profile={profile} doc="expense" clause="제1조" />
         </h4>
         <div className="accounts">
           {design.accounts.map((a) => (
@@ -137,8 +137,8 @@ export default function ExpenseDoc({
           ))}
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§2. 자동이체 매트릭스
-          <EditClauseLink profile={profile} doc="expense" clause="§2" />
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제2조 자동이체 매트릭스
+          <EditClauseLink profile={profile} doc="expense" clause="제2조" />
         </h4>
         {design.transfers.length ? (
           <div className="table-wrap">
@@ -186,8 +186,8 @@ export default function ExpenseDoc({
           </p>
         )}
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§3. 한도 정책
-          <EditClauseLink profile={profile} doc="expense" clause="§3" />
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제3조 한도 정책
+          <EditClauseLink profile={profile} doc="expense" clause="제3조" />
         </h4>
         <div className="table-wrap">
           <table className="data">
@@ -206,11 +206,11 @@ export default function ExpenseDoc({
         </div>
 
         <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>
-          §4. 이상거래 룰셋{" "}
+          제4조 이상거래 룰셋{" "}
           <span className="mono" style={{ fontSize: 12, color: "var(--faint)" }}>
             {activeRules}/{design.fraudRules.length} 활성
           </span>
-          <EditClauseLink profile={profile} doc="expense" clause="§4" />
+          <EditClauseLink profile={profile} doc="expense" clause="제4조" />
         </h4>
         <div className="table-wrap">
           <table className="data">
@@ -241,8 +241,8 @@ export default function ExpenseDoc({
           </table>
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§5. 승인·알림 체계
-          <EditClauseLink profile={profile} doc="expense" clause="§5" />
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제5조 승인·알림 체계
+          <EditClauseLink profile={profile} doc="expense" clause="제5조" />
         </h4>
         <div className="clause set">
           <ul className="clause-body">
@@ -256,18 +256,18 @@ export default function ExpenseDoc({
           </ul>
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§6. 지속가능성 추정
-          <EditClauseLink profile={profile} doc="expense" clause="§6" />
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제6조 지속가능성 추정
+          <EditClauseLink profile={profile} doc="expense" clause="제6조" />
         </h4>
         <div className="card" style={{ padding: "18px 20px" }}>
           <Sustainability s={design.sustainability} />
         </div>
 
-        {/* §7 은 투자 챕터를 선언했을 때만 선다. 건너뛰면 조항을 비워 두지 않고 생략한다. */}
+        {/* 제7조 은 투자 챕터를 선언했을 때만 선다. 건너뛰면 조항을 비워 두지 않고 생략한다. */}
         {design.invest && (
           <>
-            <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§7. 투자 원칙
-              <EditClauseLink profile={profile} doc="expense" clause="§7" />
+            <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제7조 투자 원칙
+              <EditClauseLink profile={profile} doc="expense" clause="제7조" />
             </h4>
             <div className={`clause ${design.invest.status}`}>
               <ul className="clause-body">
@@ -276,7 +276,7 @@ export default function ExpenseDoc({
                   {design.invest.forbiddenLabels.length
                     ? design.invest.forbiddenLabels.join(", ")
                     : profile.answers["I01"]
-                      ? "없음 (모든 자산군을 검토 대상에 둔다)"
+                      ? "없음 (모든 자산군을 그대로 둔다)"
                       : "— 아직 정해지지 않았습니다."}
                 </li>
                 <li>

@@ -59,7 +59,7 @@ export const investQuestions: Question[] = [
     section: "자산군",
     prompt: "앞으로 절대 손대지 않을 자산이 있나요?",
     helper:
-      "여기서 고른 자산군은 어떤 상황이 와도 검토 후보에서 제외됩니다. 고르지 않은 자산군은 나중에 선택지로 남습니다.",
+      "여기서 고른 자산은 어떤 상황이 와도 후보에 올리지 않습니다. 고르지 않은 자산은 나중에 선택지로 남습니다.",
     type: "multi",
     options: [
       { value: "derivative", label: "파생상품·레버리지" },
@@ -71,7 +71,7 @@ export const investQuestions: Question[] = [
       { value: "deposit", label: "예금·적금" },
       { value: "none", label: "금지할 자산군은 없습니다" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§7", label: "금지 자산군" }],
+    mapsTo: [{ doc: "expense", clause: "제7조", label: "금지 자산군" }],
   },
   {
     id: "I02",
@@ -80,15 +80,15 @@ export const investQuestions: Question[] = [
     section: "자산군",
     prompt: "위험자산은 전체 자산의 얼마까지 두시겠어요?",
     helper:
-      "주식·펀드처럼 값이 오르내리는 자산의 상한입니다. 목돈이 생겼을 때 이 비중 안에서만 배분 후보를 만듭니다.",
+      "주식이나 펀드처럼 값이 오르내리는 자산을 어디까지 둘지입니다. 목돈이 생기면 이 비중 안에서만 나누는 후보를 만듭니다.",
     type: "choice",
     options: [
-      { value: "none", label: "0% — 위험자산은 두지 않는다" },
+      { value: "none", label: "0%, 위험자산은 두지 않는다" },
       { value: "low", label: "20% 이하", hint: "보수적" },
       { value: "half", label: "50% 수준" },
       { value: "high", label: "70% 이상", hint: "공격적" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§7", label: "위험자산 상한" }],
+    mapsTo: [{ doc: "expense", clause: "제7조", label: "위험자산 상한" }],
   },
   {
     id: "I03",
@@ -97,7 +97,7 @@ export const investQuestions: Question[] = [
     section: "급락 대응",
     prompt: "시장이 25% 넘게 떨어지면 어떻게 하기로 정하시겠어요?",
     helper:
-      "지금 정해 두는 이유는, 실제로 떨어졌을 때는 이 답을 차분히 고를 수 없기 때문입니다. 과거 이력이 있으면 옆에 함께 보여드립니다.",
+      "막상 떨어졌을 때는 이 답을 차분히 고르기 어렵습니다. 그래서 지금 정해 둡니다. 과거 이력이 있으면 옆에 함께 보여드립니다.",
     type: "choice",
     options: [
       { value: "do_nothing", label: "아무것도 하지 않는다", hint: "권장" },
@@ -109,7 +109,7 @@ export const investQuestions: Question[] = [
       },
       { value: "consult", label: "지정한 사람과 상의한 뒤 정한다" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§7", label: "급락 시 대응 원칙" }],
+    mapsTo: [{ doc: "expense", clause: "제7조", label: "급락 시 대응 원칙" }],
   },
   {
     id: "I04",
@@ -125,7 +125,7 @@ export const investQuestions: Question[] = [
       { value: "freeze", label: "새 매매를 멈추고 그대로 둔다" },
       { value: "undecided", label: "아직 정하지 못했다" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§7", label: "운용 이양 방식" }],
+    mapsTo: [{ doc: "expense", clause: "제7조", label: "운용 이양 방식" }],
   },
   {
     id: "I05",
@@ -133,11 +133,11 @@ export const investQuestions: Question[] = [
     chapter: "invest",
     section: "운용 이양",
     prompt: "운용을 넘길 사람은 누구인가요?",
-    helper: "I04 에서 '지정한 사람' 을 고르셨을 때만 묻습니다.",
+    helper: "앞 질문에서 '지정한 사람에게 맡긴다'를 고르셨을 때만 묻습니다.",
     type: "person",
     optional: true,
     showIf: (p) => p.answers["I04"]?.kind === "choice" && p.answers["I04"].value === "designee",
-    mapsTo: [{ doc: "expense", clause: "§7", label: "운용 이양 대상" }],
+    mapsTo: [{ doc: "expense", clause: "제7조", label: "운용 이양 대상" }],
   },
   B11,
 ];

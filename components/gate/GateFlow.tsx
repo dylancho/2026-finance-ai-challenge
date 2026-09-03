@@ -104,7 +104,7 @@ export default function GateFlow() {
     <div className="gate shell-wide">
       <div className="fade-in gate-center">
         <div className="gate-step">
-          약 {CHAPTER_META.core.count}문항 · {CHAPTER_META.core.minutes} — 필요한 부분만 더
+          약 {CHAPTER_META.core.count}문항 · {CHAPTER_META.core.minutes}, 필요한 부분만 더
         </div>
         <h1>지금 상태를 알려주세요</h1>
         <p className="gate-lede">
@@ -116,8 +116,8 @@ export default function GateFlow() {
         </p>
         {focus && (
           <p className="gate-focus mono">
-            관심 영역: {CHAPTER_META[focus].label} — 기본 질문을 마친 뒤 이 영역을 먼저
-            제안해 드립니다.
+            {CHAPTER_META[focus].label}을(를) 고르셨네요. 기본 질문이 끝나면 이 영역부터
+            이어서 여쭤봅니다.
           </p>
         )}
 

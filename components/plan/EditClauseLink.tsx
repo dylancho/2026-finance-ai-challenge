@@ -18,7 +18,7 @@ export default function EditClauseLink({
   profile: Profile;
   doc: DocKey;
   clause: string;
-  /** 한 조항이 여러 표로 나뉠 때(예: 후견 §3 = 재산관리 + 신상보호) 표별 필터 */
+  /** 한 조항이 여러 표로 나뉠 때(예: 후견 제3조 = 재산관리 + 신상보호) 표별 필터 */
   match?: (label: string) => boolean;
 }) {
   const target = entryQuestionForClause(profile, doc, clause, match);

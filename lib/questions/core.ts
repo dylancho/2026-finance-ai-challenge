@@ -25,7 +25,7 @@ export const coreQuestions: Question[] = [
     max: 10_000_000,
     step: 100_000,
     presets: [500_000, 1_000_000, 2_000_000, 3_000_000],
-    mapsTo: [{ doc: "expense", clause: "§6", label: "월 수입" }],
+    mapsTo: [{ doc: "expense", clause: "제6조", label: "월 수입" }],
   },
   {
     id: "A10",
@@ -41,7 +41,7 @@ export const coreQuestions: Question[] = [
     max: 1_000_000_000,
     step: 10_000_000,
     presets: [50_000_000, 100_000_000, 300_000_000, 500_000_000],
-    mapsTo: [{ doc: "expense", clause: "§6", label: "자산 소진 추정" }],
+    mapsTo: [{ doc: "expense", clause: "제6조", label: "자산 소진 추정" }],
   },
   {
     id: "A01",
@@ -66,7 +66,7 @@ export const coreQuestions: Question[] = [
       { value: "hospital", label: "병원 정기 치료비" },
       { value: "support", label: "가족 정기 지원" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§2", label: "자동이체 매트릭스" }],
+    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 매트릭스" }],
   },
   {
     id: "A02",
@@ -81,7 +81,7 @@ export const coreQuestions: Question[] = [
     max: 8_000_000,
     step: 100_000,
     presets: [1_000_000, 1_500_000, 2_000_000, 3_000_000],
-    mapsTo: [{ doc: "expense", clause: "§1", label: "생활계좌 유입액" }],
+    mapsTo: [{ doc: "expense", clause: "제1조", label: "생활계좌 유입액" }],
   },
   {
     id: "A03",
@@ -101,7 +101,7 @@ export const coreQuestions: Question[] = [
         warn: "청구를 잊으면 생활비가 끊깁니다. 정기 지급에 청구를 얹는 방식을 권합니다.",
       },
     ],
-    mapsTo: [{ doc: "expense", clause: "§1", label: "지급 주기" }],
+    mapsTo: [{ doc: "expense", clause: "제1조", label: "지급 주기" }],
   },
   {
     id: "A04",
@@ -122,7 +122,7 @@ export const coreQuestions: Question[] = [
       },
       { value: "hold", label: "결제를 보류하고 승인 요청" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§2", label: "이체 실패 시 조치" }],
+    mapsTo: [{ doc: "expense", clause: "제2조", label: "이체 실패 시 조치" }],
   },
   {
     id: "A05",
@@ -131,13 +131,13 @@ export const coreQuestions: Question[] = [
     section: "보호 장치",
     prompt: "한 번에 이체할 수 있는 최대 금액을 얼마로 할까요?",
     helper:
-      "이 금액을 넘는 이체는 보류되고 확인 절차를 거칩니다. 1일 한도(1회의 2배)와 월 한도는 여기서 자동으로 산정해 §3에 채웁니다.",
+      "이 금액을 넘는 이체는 보류되고 확인 절차를 거칩니다. 1일 한도(1회의 2배)와 월 한도는 여기서 자동으로 산정해 제3조에 채웁니다.",
     type: "amount",
     min: 100_000,
     max: 30_000_000,
     step: 100_000,
     presets: [500_000, 1_000_000, 3_000_000, 5_000_000],
-    mapsTo: [{ doc: "expense", clause: "§3", label: "1회 이체 한도" }],
+    mapsTo: [{ doc: "expense", clause: "제3조", label: "1회 이체 한도" }],
   },
   {
     id: "A06",
@@ -166,7 +166,7 @@ export const coreQuestions: Question[] = [
       { value: "deposit_break", label: "정기예금 중도해지" },
       { value: "burst", label: "월 지급액의 3배가 넘는 인출·이체" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§4", label: "이상거래 룰셋" }],
+    mapsTo: [{ doc: "expense", clause: "제4조", label: "이상거래 룰셋" }],
   },
   {
     id: "A07",
@@ -177,7 +177,7 @@ export const coreQuestions: Question[] = [
     helper:
       "본인 외 최소 1명을 두는 것을 권합니다. 본인이 판단하기 어려운 상황이 바로 위험한 상황이기 때문입니다.",
     type: "person",
-    mapsTo: [{ doc: "expense", clause: "§5", label: "알림 대상" }],
+    mapsTo: [{ doc: "expense", clause: "제5조", label: "알림 대상" }],
   },
   {
     id: "A11",
@@ -189,7 +189,7 @@ export const coreQuestions: Question[] = [
       "없으면 해당 거래는 자동 차단됩니다. 차단이 늘 안전한 것은 아니어서, 두 번째 사람을 두면 막힘과 방치를 함께 줄일 수 있습니다.",
     type: "person",
     optional: true,
-    mapsTo: [{ doc: "expense", clause: "§5", label: "2차 승인자(감독)" }],
+    mapsTo: [{ doc: "expense", clause: "제5조", label: "2차 승인자(감독)" }],
   },
   {
     id: "A08",
@@ -211,8 +211,8 @@ export const coreQuestions: Question[] = [
       { value: "notify_after", label: "먼저 집행하고 바로 통보" },
     ],
     mapsTo: [
-      { doc: "expense", clause: "§1", label: "의료예비계좌" },
-      { doc: "expense", clause: "§5", label: "예외 승인 경로" },
+      { doc: "expense", clause: "제1조", label: "의료예비계좌" },
+      { doc: "expense", clause: "제5조", label: "예외 승인 경로" },
     ],
   },
 ];

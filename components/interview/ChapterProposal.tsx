@@ -37,13 +37,13 @@ export default function ChapterProposal({ profile, focus, onPick }: Props) {
       <div className="eyebrow">기본 설계 완료</div>
       <h2>더 정해 두고 싶은 영역이 있나요?</h2>
       <p className="section-lede">
-        지금까지의 답으로 지출설계서가 이미 만들어졌습니다. 아래 영역은 선택입니다.
-        건너뛰어도 되지만, 건너뛴 영역은 설계서에 <b>아직 선언하지 않은 것</b>으로 남습니다.
+        지금까지 답하신 내용으로 지출설계서는 이미 만들어졌습니다. 아래는 선택입니다.
+        건너뛰어도 되지만, 건너뛴 영역은 설계서에 <b>아직 정하지 않은 것</b>으로 남습니다.
       </p>
 
       {done.length > 0 && (
         <p className="chapter-done mono">
-          선언 완료:{" "}
+          답한 영역:{" "}
           {done.map((ch) => (
             <Badge tone="ok" key={ch}>
               {CHAPTER_META[ch].label}
@@ -71,7 +71,7 @@ export default function ChapterProposal({ profile, focus, onPick }: Props) {
                   )}
                 </span>
                 <span className="d">{m.caption}</span>
-                <span className="d chapter-without">건너뛰면 — {m.withoutIt}</span>
+                <span className="d chapter-without">건너뛰면 {m.withoutIt}</span>
                 <span className="meta">
                   약 {m.count}문항 · {m.minutes} · {m.docs.join(" · ")}
                 </span>

@@ -26,7 +26,7 @@ function ScopeTable({
     <>
       <h4 style={{ margin: "26px 0 12px", fontSize: 15 }}>
         {title}
-        <EditClauseLink profile={profile} doc="guardianship" clause="§3" match={match} />
+        <EditClauseLink profile={profile} doc="guardianship" clause="제3조" match={match} />
       </h4>
       <div className="scope-grid">
         {items.map((it) => (
@@ -78,7 +78,7 @@ export default function GuardianshipDoc({
 
         <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>
           판정 경로
-          <EditClauseLink profile={profile} doc="guardianship" clause="§1" />
+          <EditClauseLink profile={profile} doc="guardianship" clause="제1조" />
         </h4>
         <div className="tree">
           {design.tree.map((n, i) => (
@@ -115,7 +115,7 @@ export default function GuardianshipDoc({
           <>
             <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>
               절차 로드맵
-              <EditClauseLink profile={profile} doc="guardianship" clause="§5" />
+              <EditClauseLink profile={profile} doc="guardianship" clause="제5조" />
             </h4>
             <div className="card" style={{ padding: "6px 22px" }}>
               {design.roadmap.map((s) => (

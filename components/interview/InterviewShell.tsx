@@ -434,7 +434,7 @@ export default function InterviewShell() {
                       <span className="dot" aria-hidden />
                       <span className="nm">{CHAPTER_META[ch].label}</span>
                       <span className="cnt">
-                        {doneCh ? "선언됨" : ch === "core" ? "필수" : "선택"}
+                        {doneCh ? "완료" : ch === "core" ? "필수" : "선택"}
                       </span>
                     </button>
                   </li>
@@ -574,7 +574,7 @@ export default function InterviewShell() {
                 </Link>
                 {unified && (
                   <Link href="/events" className="btn outline">
-                    상황이 바뀌면
+                    상황이 바뀌었을 때
                   </Link>
                 )}
                 {unified && remainingChapters.length > 0 && (
@@ -598,7 +598,7 @@ export default function InterviewShell() {
               </div>
               <p className="iv-hint">
                 {unified && remainingChapters.length === 0
-                  ? "모든 영역을 선언하셨습니다. "
+                  ? "모든 영역에 답하셨습니다. "
                   : ""}
                 오른쪽 조항이나 왼쪽 섹션을 누르면 그 질문으로 돌아가 답을 고칠 수 있습니다.
               </p>
