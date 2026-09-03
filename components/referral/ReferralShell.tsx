@@ -50,7 +50,11 @@ export default function ReferralShell() {
   const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
 
   useEffect(() => {
-    const demo = new URLSearchParams(window.location.search).get("demo");
+    const q = new URLSearchParams(window.location.search);
+    // ?step=2 로 의뢰서 본문에 바로 진입한다. 시연·공유용.
+    const st = Number(q.get("step"));
+    if (st === 1 || st === 2 || st === 3) setStep(st as Step);
+    const demo = q.get("demo");
     const d = demo ? demoProfile(demo) : null;
     if (d) {
       saveProfile(d);
