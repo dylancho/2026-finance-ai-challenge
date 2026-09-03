@@ -51,6 +51,77 @@ export default function ReferralDoc({ r }: { r: Referral }) {
         </dl>
       </section>
 
+      {r.detection ? (
+        <section className="rf-sec">
+          <h4>
+            <span className="no">{no()}</span>금융이력 이상 탐지 기록
+            <small>관측 기록이며 진단이 아닙니다</small>
+          </h4>
+
+          <div className={`rf-det${r.detection.fired ? " fired" : ""}`}>
+            <div className="hd">
+              <span className="sc">{r.detection.score}</span>
+              <span className="bd">{r.detection.band}</span>
+              <span className="st">
+                {r.detection.fired
+                  ? "전환 조건 충족"
+                  : "전환 조건 미충족 — 아래 항목이 필요합니다"}
+              </span>
+            </div>
+
+            {r.detection.signals.length ? (
+              <div className="table-wrap">
+                <table className="rf-table">
+                  <thead>
+                    <tr>
+                      <th>관측 항목</th>
+                      <th>건강기 기준</th>
+                      <th>최근 관측</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {r.detection.signals.map((sg) => (
+                      <tr key={sg.label}>
+                        <td>{sg.label}</td>
+                        <td>{sg.baseline}</td>
+                        <td>{sg.observed}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+
+            <dl className="rf-kv">
+              <div>
+                <dt>의료 증빙</dt>
+                <dd>
+                  {r.detection.proof
+                    ? `${r.detection.proof.kind === "diagnosis" ? "의사 진단서" : "장기요양보험 등급 발행서"} · ${r.detection.proof.issuedAt} 발행${
+                        r.detection.proofFresh ? "" : " (발행 1개월 초과)"
+                      }`
+                    : "첨부되지 않음"}
+                </dd>
+              </div>
+            </dl>
+
+            {r.detection.blockedBy.length ? (
+              <ul className="rf-blocked-list">
+                {r.detection.blockedBy.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            ) : null}
+
+            <p className="rf-det-note">
+              본 기록은 평소 금융 패턴과 달라진 지점을 정리한 것이며, 인지기능에 대한 판단이
+              아닙니다. 의학적 판정은 의료기관의 진단에 따릅니다. AI 경보만으로는 어떤 전환도
+              발동하지 않으며, 의사 진단서 또는 장기요양보험 등급 발행서가 함께 있어야 합니다.
+            </p>
+          </div>
+        </section>
+      ) : null}
+
       {r.assetTables.length || r.roles.length ? (
         <section className="rf-sec">
           <h4>

@@ -4,14 +4,18 @@ import type {
   Contrast,
   DesignSet,
   Gap,
+  BiomarkerReading,
   Instrument,
   Ledger,
+  MedicalProof,
   Profile,
+  TriggerGate,
   Question,
 } from "../types";
 import { activeQuestions } from "../questions";
 import { findGaps } from "../design";
 import { trustContact } from "../ledger/analyze";
+import { bandLabel } from "../ledger/biomarker";
 import { personLabel, won } from "../format";
 import { actsAlone } from "./instruments";
 import { PETITIONERS, statutesForReferral } from "./statutes";
@@ -65,6 +69,23 @@ export interface ReferralAnswer {
   answer: string | null;
 }
 
+/**
+ * 이상 탐지 소명.
+ *
+ * 관측된 것만 싣는다. 진단하지 않는다 — 문서 어디에도 인지장애·치매 여부를 쓰지 않는다.
+ * 그것은 의료기관의 몫이고, 여기 실리는 진단서는 의사가 발행한 것이다.
+ */
+export interface ReferralDetection {
+  score: number;
+  band: string;
+  signals: { label: string; baseline: string; observed: string }[];
+  proof: MedicalProof | null;
+  proofFresh: boolean;
+  fired: boolean;
+  /** 발동을 막고 있는 것. AI 경보만으로는 발동하지 않는다 */
+  blockedBy: string[];
+}
+
 export interface Referral {
   mode: ReferralMode;
   docNo: string;
@@ -80,6 +101,8 @@ export interface Referral {
   directives: ReferralDirective[];
   open: Gap[];
   procedure: { label: string; value: string }[];
+  /** 금융이력 이상 탐지 기록. 없으면 이 절을 싣지 않는다. */
+  detection?: ReferralDetection;
   /** 참조 법령. 명문 근거가 있는 것만 싣는다. */
   statutes: Statute[];
   answers: ReferralAnswer[];
@@ -168,11 +191,23 @@ export function buildReferral(
     instruments?: Instrument[];
     contrasts?: Contrast[];
     ledger?: Ledger | null;
+    reading?: BiomarkerReading | null;
+    gate?: TriggerGate | null;
     now?: number;
   } = {},
 ): Referral {
   const now = opts.now ?? Date.now();
-  const mode: ReferralMode = actsAlone(p) ? "contract" : "petition";
+
+  /**
+   * 청구 모드로 넘어가는 조건은 둘이다.
+   *   ① 설문에서 이미 진단을 받았다고 답한 경우
+   *   ② 2조건 게이트가 발동한 경우 (AI 경보 + 최근 1개월 내 진단서·장기요양등급)
+   *
+   * reading.band 를 직접 보지 않는다. 그러면 회의에서 확정한 2조건 게이트를 우회하게
+   * 되고, AI 경보만으로 사람의 법적 지위를 바꾸는 셈이 된다.
+   */
+  const delegated = !actsAlone(p) || opts.gate?.fired === true;
+  const mode: ReferralMode = delegated ? "petition" : "contract";
   const qs = activeQuestions(p);
 
   /* 부록 — 응답 전문. 미응답도 싣는다. */
@@ -258,6 +293,27 @@ export function buildReferral(
 
   const petition = mode === "petition";
 
+  const reading = opts.reading ?? null;
+  const gate = opts.gate ?? null;
+  const detection: ReferralDetection | undefined = reading
+    ? {
+        score: reading.score,
+        band: bandLabel(reading.band),
+        // 베이스라인에서 실제로 벗어난 신호만 싣는다. 전부 나열하면 소명이 아니라 목록이 된다.
+        signals: reading.signals
+          .filter((sg) => sg.deviation > 0)
+          .map((sg) => ({
+            label: sg.label,
+            baseline: sg.baseline,
+            observed: sg.observed,
+          })),
+        proof: gate?.proof ?? null,
+        proofFresh: gate?.proofFresh ?? false,
+        fired: gate?.fired ?? false,
+        blockedBy: gate?.blockedBy ?? [],
+      }
+    : undefined;
+
   /* 전달처는 이력에서 정한다. 설문에서 묻지 않는다. */
   const contact = trustContact(opts.ledger ?? null);
   if (contact) {
@@ -290,8 +346,8 @@ export function buildReferral(
             : "은행 WM·신탁부서",
           "법무법인",
         ],
-    executor: actsAlone(p) ? "본인" : "보호자",
-    executorNote: actsAlone(p)
+    executor: delegated ? "보호자" : "본인",
+    executorNote: !delegated
       ? undefined
       : `본인이 직접 절차를 밟기 어려운 상태입니다. 후견개시 심판은 ${PETITIONERS}가 청구할 수 있으며(민법 제9조·제12조·제14조의2), 본인 단독으로 한 행위는 나중에 효력이 다투어질 수 있습니다.`,
     overview,
@@ -300,6 +356,7 @@ export function buildReferral(
     directives,
     open: findGaps(p, design),
     procedure,
+    detection,
     statutes: statutesForReferral(
       design,
       (opts.instruments ?? []).map((i) => i.kind),

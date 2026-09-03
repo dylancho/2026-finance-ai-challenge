@@ -283,3 +283,99 @@ describe("신탁 비용 표기", () => {
     expect(v).toContain("5억원");
   });
 });
+
+import { evaluateTrigger, generateLedger, readBiomarker } from "../../ledger";
+
+describe("이상 탐지 → 의뢰서", () => {
+  const ledger = generateLedger("demo-B-panic", {
+    preset: "panic_seller",
+    decline: true,
+    declineFromYear: 8,
+  });
+  const reading = readBiomarker(ledger);
+  const AS_OF = new Date("2026-09-03T00:00:00Z");
+
+  const build = (proof: any, key = "B") => {
+    const p = DEMO_PROFILES[key];
+    return buildReferral(p, buildDesign(p), {
+      now: NOW,
+      ledger,
+      reading,
+      gate: evaluateTrigger(reading, proof, AS_OF),
+    });
+  };
+
+  it("이력이 없으면 탐지 절을 싣지 않는다", () => {
+    expect(make("B").detection).toBeUndefined();
+  });
+
+  it("탐지 기록에 점수·구간·관측 신호를 싣는다", () => {
+    const d = build(null).detection!;
+    expect(d.score).toBe(reading.score);
+    expect(d.band).toBeTruthy();
+    expect(d.signals.every((s) => s.baseline && s.observed)).toBe(true);
+  });
+
+  it("이탈이 없는 신호는 싣지 않는다 — 소명이지 목록이 아니다", () => {
+    const d = build(null).detection!;
+    expect(d.signals.length).toBeLessThanOrEqual(reading.signals.length);
+  });
+
+  it("AI 경보만으로는 청구 모드로 넘어가지 않는다", () => {
+    // 회의에서 확정한 2조건 게이트. 여기가 뚫리면 서비스 논리가 붕괴한다.
+    const r = build(null);
+    expect(r.detection!.fired).toBe(false);
+    expect(r.mode).toBe("contract");
+    expect(r.executor).toBe("본인");
+    expect(r.detection!.blockedBy.length).toBeGreaterThan(0);
+  });
+
+  it("시드 B 는 경보 구간에 도달한다 — 아래 케이스의 전제", () => {
+    expect(reading.band).toBe("alert");
+    expect(reading.score).toBeGreaterThanOrEqual(61);
+  });
+
+  it("진단서가 붙고 게이트가 발동하면 청구 참고자료로 바뀐다", () => {
+    const r = build({ kind: "diagnosis", issuedAt: "2026-08-20" });
+    expect(r.detection!.fired).toBe(true);
+    expect(r.mode).toBe("petition");
+    expect(r.title).toBe("후견 청구 참고자료");
+    expect(r.executor).toBe("보호자");
+    expect(r.recipients).toContain("가정법원");
+  });
+
+  it("발행 1개월이 지난 증빙은 신선하지 않다고 표시한다", () => {
+    const d = build({ kind: "diagnosis", issuedAt: "2026-01-05" }).detection!;
+    expect(d.proofFresh).toBe(false);
+    expect(d.fired).toBe(false);
+  });
+
+  it("진단서가 있어도 AI 경보가 없으면 발동하지 않는다", () => {
+    // 2조건 게이트의 나머지 절반. 서류만으로도 넘어가면 안 된다.
+    const quiet = generateLedger("demo-A-spender", {
+      preset: "spender",
+      decline: false,
+    });
+    const qr = readBiomarker(quiet);
+    const p = DEMO_PROFILES.B;
+    const r = buildReferral(p, buildDesign(p), {
+      now: NOW,
+      ledger: quiet,
+      reading: qr,
+      gate: evaluateTrigger(
+        qr,
+        { kind: "diagnosis", issuedAt: "2026-08-20" },
+        AS_OF,
+      ),
+    });
+    expect(qr.band).not.toBe("alert");
+    expect(r.detection!.fired).toBe(false);
+    expect(r.mode).toBe("contract");
+    expect(r.detection!.blockedBy.join(" ")).toContain("경보");
+  });
+
+  it("증빙 종류와 발행일을 그대로 싣는다", () => {
+    const d = build({ kind: "ltci", issuedAt: "2026-08-20" }).detection!;
+    expect(d.proof).toEqual({ kind: "ltci", issuedAt: "2026-08-20" });
+  });
+});

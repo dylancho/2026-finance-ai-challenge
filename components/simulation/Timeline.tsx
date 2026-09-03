@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Badge from "../common/Badge";
 import type {
   ApprovalTier,
@@ -137,9 +138,15 @@ export default function Timeline({
                 )}
 
                 {gate?.fired && (
-                  <p className="tl-fired-note">
-                    두 조건이 모두 충족됐습니다. 이제부터 사전에 정한 원칙이 집행됩니다.
-                  </p>
+                  <>
+                    <p className="tl-fired-note">
+                      두 조건이 모두 충족됐습니다. 다만 집행하려면 그 근거가 될 계약이 필요합니다.
+                      아래 기록을 그대로 담은 의뢰서를 만들 수 있습니다.
+                    </p>
+                    <Link href="/referral" className="btn sm" style={{ marginTop: 10 }}>
+                      이 기록으로 의뢰서 만들기 →
+                    </Link>
+                  </>
                 )}
               </div>
             )}

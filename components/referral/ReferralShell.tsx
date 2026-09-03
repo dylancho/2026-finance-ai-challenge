@@ -5,7 +5,13 @@ import Link from "next/link";
 import InstrumentCard from "./InstrumentCard";
 import ReferralDoc from "./ReferralDoc";
 import { buildDesign } from "../../lib/design";
-import { applyDemoLedger, emptyLedgerState, readLedgerState } from "../../lib/ledger";
+import {
+  applyDemoLedger,
+  emptyLedgerState,
+  evaluateTrigger,
+  readBiomarker,
+  readLedgerState,
+} from "../../lib/ledger";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import {
   buildInstruments,
@@ -61,6 +67,16 @@ export default function ReferralShell() {
   const instruments = useMemo(
     () => (profile && design ? buildInstruments(profile, design, auth) : []),
     [profile, design, auth],
+  );
+
+  const reading = useMemo(
+    () => (ledgerState.ledger ? readBiomarker(ledgerState.ledger) : null),
+    [ledgerState.ledger],
+  );
+
+  const gate = useMemo(
+    () => (reading ? evaluateTrigger(reading, ledgerState.proof) : null),
+    [reading, ledgerState.proof],
   );
 
   const referral = useMemo(
