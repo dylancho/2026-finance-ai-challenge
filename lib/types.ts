@@ -576,7 +576,7 @@ export type InstrumentKind =
   | "legal_guardianship"
   | "bank_mandate";
 
-export type ActorKind = "본인" | "전문가" | "법원" | "금융기관";
+export type ActorKind = "본인" | "보호자" | "전문가" | "법원" | "금융기관";
 
 export interface AuthorityStep {
   n: number;
@@ -584,6 +584,8 @@ export interface AuthorityStep {
   by: ActorKind;
   detail?: string;
   period?: string;
+  /** 의사능력에 따라 이 단계에서 주의할 점 */
+  caution?: string;
 }
 
 export interface Instrument {

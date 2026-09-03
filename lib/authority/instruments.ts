@@ -39,6 +39,38 @@ function fromRoadmap(steps: RoadmapStep[]): AuthorityStep[] {
   }));
 }
 
+/**
+ * 본인이 단독으로 절차를 밟을 수 있는 상태인가.
+ *
+ * 진단을 받았거나 이미 사고가 있었다면 본인 단독 행위의 효력이 다투어질 수 있고,
+ * 가족이 대리해 설계한 경우에는 애초에 본인이 실행 주체가 아니다.
+ * trust.ts · guardianship.ts 가 diagnosed 와 incident 를 늘 같이 검사하는 것과 맞춘다.
+ */
+export function actsAlone(p: Profile): boolean {
+  return (
+    p.subject !== "family" &&
+    p.capacity !== "diagnosed" &&
+    p.capacity !== "incident"
+  );
+}
+
+const CAUTION_DELEGATED =
+  "본인의 의사능력이 충분하지 않은 상태에서 한 행위는 나중에 효력이 다투어질 수 있습니다. 보호자 또는 법정 청구권자가 대신 진행해야 합니다.";
+
+const CAUTION_DECLINING =
+  "판단에 어려움이 보이기 시작한 단계입니다. 이 시기에 한 행위는 나중에 의사능력을 두고 다투어질 수 있으므로, 전문의 소견서를 함께 받아두는 것이 일반적입니다.";
+
+/** 본인이 못 하는 상태면 그 단계의 주체를 보호자로 바꾸고 이유를 붙인다. */
+function resolveActors(steps: AuthorityStep[], p: Profile): AuthorityStep[] {
+  const alone = actsAlone(p);
+  return steps.map((s) => {
+    if (s.by !== "본인") return s;
+    if (!alone) return { ...s, by: "보호자" as const, caution: CAUTION_DELEGATED };
+    if (p.capacity === "declining") return { ...s, caution: CAUTION_DECLINING };
+    return s;
+  });
+}
+
 const TRUST_STEPS: AuthorityStep[] = [
   {
     n: 1,
@@ -104,7 +136,7 @@ export function buildInstruments(
             stage: "draft",
             covers: ["trust:*"],
             effectRule: "신탁계약을 체결하고 신탁재산의 이전을 마친 때",
-            steps: TRUST_STEPS,
+            steps: resolveActors(TRUST_STEPS, p),
           }
         : {
             kind: "trust",
@@ -129,7 +161,7 @@ export function buildInstruments(
       effectRule: voluntary
         ? "가정법원이 임의후견감독인을 선임한 때"
         : "가정법원의 후견개시 심판이 확정된 때",
-      steps: fromRoadmap(g.roadmap),
+      steps: resolveActors(fromRoadmap(g.roadmap), p),
     });
   }
 
@@ -140,7 +172,7 @@ export function buildInstruments(
     stage: "draft",
     covers: MANDATE_COVERS,
     effectRule: "금융기관에 대리인 지정이 등록된 때",
-    steps: MANDATE_STEPS,
+    steps: resolveActors(MANDATE_STEPS, p),
   });
 
   return out.map((i) => applyStage(i, state));

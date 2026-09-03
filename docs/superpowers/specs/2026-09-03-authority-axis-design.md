@@ -36,7 +36,7 @@ export interface TriggerGate {
 
 산출물은 두 가지다.
 
-1. **핸드오프 패킷** — 설문 답변에서 조립한, 후견인·변호사·신탁팀에게 넘기는 이양 서류
+1. **의뢰서** — 설문 응답에서 조립해 은행 WM·신탁부서·법무법인에 제출하는 「신탁·후견 설계 의뢰서」
 2. **집행권한 게이트** — 그 서류가 실제 계약이 되기 전까지 조항이 집행되지 않음을 추적
 
 ---
@@ -62,11 +62,11 @@ export interface TriggerGate {
 
 ## 2. 두 개의 진입점 — 시점이 서류의 성격을 바꾼다
 
-핸드오프 패킷은 한 종류가 아니다. **언제 발급되느냐**에 따라 성격이 달라진다.
+의뢰서은 한 종류가 아니다. **언제 발급되느냐**에 따라 성격이 달라진다.
 
 ```
 ① 평시 (capacity: full)
-   설문 완료 → /plan → 전문가 연결 → 패킷 전달
+   설문 완료 → /plan → 전문가 연결 → 의뢰서 전달
    → 변호사·신탁팀이 임의후견계약 / 신탁계약을 체결
    → 서류의 성격: "이 지시를 계약서로 옮겨 달라"
 
@@ -79,15 +79,32 @@ export interface TriggerGate {
 
 ②에서 신탁·임의후견은 **새로 만들 수 없다**. 본인의 유효한 의사표시를 전제로 하는
 제도이기 때문이고, 레포는 이미 그렇게 판정한다 (`trust.ts:540`, `guardianship.ts:264`).
-따라서 패킷의 §2는 "계약 조항 초안"이 아니라 **"법원과 후견인에게 전달할 본인의 사전 의사"**
+따라서 의뢰서의 §3는 "계약 조항 초안"이 아니라 **"법원과 후견인에게 전달할 본인의 사전 의사"**
 로 제목과 어조가 바뀐다. 내용의 출처는 같다 — 건강할 때의 답변이다.
 
 > 미리 했으면 계약서가 되고, 늦었으면 법원에 낼 근거가 남는다. 어느 쪽이든 빈손이 아니다.
 
-`buildPacket()` 은 `profile.capacity` 를 읽어 `mode: "contract" | "petition"` 을 정한다.
+`buildReferral()` 은 `profile.capacity` 를 읽어 `mode: "contract" | "petition"` 을 정한다.
 섹션 구조는 동일하고 제목·서문·§5 체크리스트만 갈린다. 두 벌을 따로 만들지 않는다.
 
 ---
+
+### 절차를 밟는 사람이 바뀐다
+
+시점은 서류의 성격만 바꾸는 것이 아니라 **실행 주체**도 바꾼다. 진단을 받은 뒤에는 본인이
+공증사무소에 가서 계약을 맺는 장면 자체가 성립하지 않고, 그 상태에서 본인이 한 행위는 나중에
+효력이 다투어질 수 있다.
+
+`actsAlone(profile)` 이 `subject === "family"` 이거나 `capacity` 가 `diagnosed` · `incident`
+인 경우를 걸러낸다 (trust.ts · guardianship.ts 가 두 값을 늘 같이 검사하는 것과 맞춘다).
+해당하면 `by === "본인"` 인 단계가 전부 `보호자` 로 바뀌고 그 이유가 `caution` 으로 붙는다.
+법원 · 전문가 · 금융기관 단계는 원래 본인이 하는 일이 아니므로 손대지 않는다.
+
+`capacity === "declining"` 은 아직 본인이 할 수 있지만, 이 시기에 한 행위는 나중에 의사능력을
+두고 다투어질 수 있다는 `caution` 이 붙는다 (`trust.ts:509` 의 기존 플래그와 같은 내용).
+
+의뢰서에도 같은 사실이 `executor` 와 `executorNote` 로 실린다. 표지의 "제출 주체"가 곧
+그 답이다.
 
 ## 3. 데이터 모델
 
@@ -202,7 +219,7 @@ bank_mandate (stage: draft)
 그대로 인용한다. 같은 판단을 두 곳에서 따로 쓰면 반드시 어긋난다.
 
 공정증서 유언은 넣지 않는다. 트랙 D는 유언대용신탁·수익자연속신탁 중심으로 설계되어 있고
-(`estate.ts:5`), 유언 작성 여부를 묻는 문항이 없다. 근거 답변이 없는 도구를 만들면 패킷 §2에
+(`estate.ts:5`), 유언 작성 여부를 묻는 문항이 없다. 근거 답변이 없는 도구를 만들면 의뢰서 §3에
 인용할 것이 없다.
 
 `guardianship.roadmap` 의 `RoadmapStep` 에는 `by` 필드가 없다. `title` 과 `docs` 에서 파생한다
@@ -232,19 +249,30 @@ export function canExecute(
 
 20줄 남짓이다. 축 전체가 이 함수 하나로 수렴한다.
 
-### 4.3 `packet.ts` — `buildPacket(profile, design, opts?): Packet`
+### 4.3 `referral.ts` — `buildReferral(profile, design, opts?): Referral`
 
 설문 답변에서 전문가 이양 서류를 조립한다. `opts` 로 `LedgerInsight` · `Contrast[]` 를
 받으면 §4가 붙고, 없으면 생략한다.
 
-| § | 제목 (contract / petition) | 출처 |
+| § | 제목 | 출처 |
 |---|---|---|
-| 1 | 의뢰 개요 / 청구 배경 | `profile.track` · `subject` · `capacity`, 바이오마커 판독 |
-| 2 | 확정된 지시 / 본인의 사전 의사 | `design.*.clauses` 중 `status === "set"` |
-| 3 | 미정 사항 — 전문가 확인 필요 | `findGaps()` 재사용 |
-| 4 | 선언과 이력의 대조 | `Contrast[]` (있을 때만) |
-| 5 | 절차 · 요건 · 비용 체크리스트 | `guardianship.roadmap` + `trust.cost` |
-| 6 | 고지 | 고정 문구 |
+| 표지 | 문서번호 · 수신 · 제출 주체 · 응답 문항 수 | `docNumber()` · `recipients` · `executor` |
+| 1 | 의뢰 개요 | `profile.track` · `subject` · `capacity` · 판정 유형 |
+| 2 | 재산 및 관계 현황 | 금액이 붙은 `multi` 응답 → 표, `person`·`allocation` → 관계 |
+| 3 | 확정된 지시사항 | `design.trust.clauses` 중 `status !== "missing"` |
+| 4 | 미확정 사항 | `findGaps()` 재사용 |
+| 5 | 선언과 이력의 대조 | `Contrast[]` (있을 때만) |
+| 6 | 절차 · 요건 · 비용 | `guardianship.roadmap` + `trust.cost` |
+| 7 | 고지 | 모드별 고정 문구 |
+| 부록 A | 설문 응답 원문 | `activeQuestions()` 전 문항. **미응답도 싣는다** |
+
+§2는 문항 id 를 박지 않는다. 트랙마다 자산 문항 번호가 다르므로 "금액이 붙은 복수응답"이라는
+형태로 훑는다. A~D 어느 트랙에서도 같은 코드가 돈다.
+
+부록 A 가 이 문서를 상담 메모와 갈라놓는다. §3 의 조항마다 근거 문항 번호가 붙어 있고 부록에
+그 문항의 질문과 응답이 원문 그대로 실리므로, 전문가는 지시의 출처를 역추적할 수 있고 나중에
+다투어질 때 원본으로 돌아갈 수 있다. **미응답도 응답의 일부로 싣는다** — 빈칸을 감추면 문서가
+완성된 것처럼 보이고, 그 상태로 계약이 체결된다.
 
 **§2의 각 항목에는 근거 질문 id를 병기한다.**
 
@@ -273,31 +301,31 @@ export function canExecute(
 | **서술** | LLM (선택) | §1 의뢰 취지 문단, §3 각 공백의 "안 정하면 무슨 일이 생기나" |
 
 **조항 본문은 LLM이 쓰지 않는다.** `buildTrustDesign()` 이 이미 결정론적으로 냈고, 그것이
-화면에 표시된 문장이다. 패킷에서 다시 생성하면 화면과 서류가 어긋난다. 심사 중에 두 화면을
+화면에 표시된 문장이다. 의뢰서에서 다시 생성하면 화면과 서류가 어긋난다. 심사 중에 두 화면을
 나란히 놓고 비교당하면 그 자리에서 끝난다.
 
-`/api/ai/packet` 은 `/api/ai/narrate` 와 같은 규약을 쓴다. 툴콜 스키마 고정, 키 없으면 204,
+`/api/ai/referral` 은 `/api/ai/narrate` 와 같은 규약을 쓴다. 툴콜 스키마 고정, 키 없으면 204,
 클라이언트는 템플릿 폴백. **키 없이 전 구간이 돈다.**
 
 > 프로바이더는 레포 통일성상 `@anthropic-ai/sdk` 를 따른다. 교체 시
-> `app/api/ai/packet/route.ts` 한 파일만 바꾸면 되고 출력 스키마는 유지된다.
+> `app/api/ai/referral/route.ts` 한 파일만 바꾸면 되고 출력 스키마는 유지된다.
 
 ---
 
 ## 6. 화면
 
 ```
-/  →  /start  →  /ledger  →  /interview  →  /plan  →  /handoff  →  /simulation
+/  →  /start  →  /ledger  →  /interview  →  /plan  →  /referral  →  /simulation
                                               수정      신규        확장
 ```
 
-### 신규 `/handoff` — 3단
+### 신규 `/referral` — 3단
 
 **① 발급 대상 문서**
 Instrument 카드. 현재 `stage` 뱃지, `effectRule`, 단계 체크리스트(`by` 로 누가 할 일인지 표기).
 `unavailable` 카드는 이유와 `fallback` 경로를 함께 보여준다.
 
-**② 핸드오프 패킷**
+**② 의뢰서**
 설문 기반 6섹션 본문. 인쇄 가능 레이아웃. `mode` 에 따라 제목과 서문이 바뀐다.
 
 **③ 전달**
@@ -307,7 +335,7 @@ Instrument 카드. 현재 `stage` 뱃지, `effectRule`, 단계 체크리스트(`
 
 ### 수정 `/plan`
 
-하단 "전문가 연결" 버튼이 모달 대신 `/handoff` 로 이동. **탭은 추가하지 않는다.**
+하단 "전문가 연결" 버튼이 모달 대신 `/referral` 로 이동. **탭은 추가하지 않는다.**
 설계서 3탭 + gaps + contrast 로 이미 다섯이고, 집행 근거는 설계서의 한 면이 아니라 다음 단계다.
 
 ### 확장 `/simulation`
@@ -360,8 +388,10 @@ applyAuthority(result: ScenarioResult, instruments: Instrument[]): ScenarioResul
 | `canExecute` | draft 차단 / effective 통과 / covers 밖 통과 | 여기가 뚫리면 축 전체가 무의미해진다 |
 | `buildInstruments` | `capacity === "diagnosed"` → 신탁 · 임의후견이 `unavailable` 인지 | 게이트 논리의 붕괴 지점 |
 | `buildInstruments` | daily 트랙에서도 `bank_mandate` 가 나오는지 | 신탁 없는 트랙의 유일한 집행 근거 |
-| `buildPacket` | `findGaps()` 의 모든 gap 이 §3에 빠짐없이 들어가는지 | 전문가가 놓치면 안 되는 것 |
-| `buildPacket` | `capacity` 별 `mode` 분기 | contract / petition 이 뒤바뀌면 문서가 틀린다 |
+| `buildReferral` | `findGaps()` 의 모든 gap 이 §4에 빠짐없이 들어가는지 | 전문가가 놓치면 안 되는 것 |
+| `buildReferral` | `capacity` 별 `mode` 분기 | contract / petition 이 뒤바뀌면 문서가 틀린다 |
+| `buildReferral` | 활성 문항을 하나도 빠뜨리지 않고, 미응답을 `null` 로 싣는지 | 빈칸을 감추면 완성된 문서로 보인다 |
+| `resolveActors` | 본인이 못 하는 상태에서 `본인` 단계가 `보호자` 로 바뀌는지 | 진단 후 본인 단독 행위는 효력이 다투어진다 |
 | `applyAuthority` | 기존 `gap` 노드를 `noauthority` 로 덮어쓰지 않는지 | 두 상태는 해결 방법이 다르다 |
 
 ### 테스트하지 않는 것
@@ -375,9 +405,9 @@ LLM 출력 문장(비결정적, 스키마 계약만 검사), UI 스냅샷, 인�
 각 단계가 끝날 때마다 독립적으로 시연 가능하다.
 
 1. **기반** — 타입, `store.ts`, `instruments.ts`, `gate.ts`, 테스트
-2. **패킷** — `packet.ts`, `/handoff` ①②③, `/plan` 버튼 연결, `ConsultationModal` 제거
+2. **의뢰서** — `referral.ts`, `/referral` ①②③, `/plan` 버튼 연결, `ConsultationModal` 제거
 3. **게이팅** — `applyAuthority`, `/simulation` 확장, stage 토글 ← **데모 하이라이트**
-4. **서술층** — `/api/ai/packet`, §1 · §3 LLM 승격
+4. **서술층** — `/api/ai/referral`, §1 · §3 LLM 승격
 
 3단계까지가 발표 필수 경로다. 4는 키가 준비되면 붙인다. 폴백이 먼저 깔리므로 LLM은 언제
 붙어도 앞 단계를 흔들지 않는다.
@@ -406,7 +436,7 @@ LLM 출력 문장(비결정적, 스키마 계약만 검사), UI 스냅샷, 인�
 벌어진 일(공증 · 등기 · 심판 · 금융기관 등록)을 앱에 알려주는 입력이지, 앱이 내리는 결정이
 아니다. 토글 옆에 그 문장을 명시한다.
 
-**패킷은 초안이다.** 표지와 §6에 다음을 고정 문구로 싣는다.
+**의뢰서는 초안이다.** 표지와 §7에 다음을 고정 문구로 싣는다.
 
 > 본 문서는 AI가 사용자의 답변을 정리한 초안이며, 그 자체로 법적 효력이 없습니다.
 > 효력은 전문가의 검토를 거쳐 신탁계약 · 후견계약 · 공정증서 유언 등 정식 절차가
