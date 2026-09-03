@@ -107,31 +107,37 @@ export type InstrumentKind =
   | "legal_guardianship"     // 법정후견 심판
   | "bank_mandate";          // 금융기관 대리인 지정 · 자동이체 위임
 
+export type ActorKind = "본인" | "전문가" | "법원" | "금융기관";
+
 export interface AuthorityStep {
+  n: number;
   label: string;
-  by: "본인" | "전문가" | "법원" | "금융기관";
-  done: boolean;
-  note?: string;
+  by: ActorKind;
+  detail?: string;
+  period?: string;
 }
 
 export interface Instrument {
   kind: InstrumentKind;
   name: string;
   stage: AuthorityStage;
-  /** 이 문서가 없으면 집행 근거가 없는 조항들. "doc:조항번호" */
+  /**
+   * 이 문서가 없으면 집행 근거가 없는 조항들. `"doc:ref"` 형식.
+   * `"trust:*"` 로 문서 전체를 덮을 수 있다.
+   */
   covers: string[];
   /** 효력이 언제 발생하는지. 제도마다 다르다 */
   effectRule: string;
   steps: AuthorityStep[];
   unavailableReason?: string;
-  /** unavailable 일 때의 대안 경로 */
-  fallback?: string;
+  /** unavailable 일 때의 대안 경로. trust.type.alternatives 를 그대로 인용 */
+  fallback?: { name: string; why: string }[];
 }
 
 export interface AuthorityState {
   version: 1;
   /** stage 만 저장한다. 나머지는 매번 파생 */
-  stages: Record<InstrumentKind, AuthorityStage>;
+  stages: Partial<Record<InstrumentKind, AuthorityStage>>;
   sentAt: number | null;
 }
 ```
@@ -143,15 +149,30 @@ export interface AuthorityState {
 
 ```
 trust 계약 (stage: draft)
-  covers: ["trust:제4조", "trust:제5조", "trust:제8조", ...]
+  covers: ["trust:*"]
 
-bank_mandate (stage: effective)
-  covers: ["expense:§2", "expense:§3"]
+bank_mandate (stage: draft)
+  covers: ["expense:§2", "expense:§6"]     // 대행이 필요한 항목만
 ```
 
-같은 시나리오 안에서 **공과금 자동납부는 흐르고 신탁 지급개시는 막히는** 장면이 이 배선에서
+같은 시나리오 안에서 **이상거래 차단은 흐르고 신탁 지급개시는 막히는** 장면이 이 배선에서
 나온다. 서비스가 말하는 3단계 권한 체계(AI 독자 / 보호자 동의 / 법적 후견인)가 화면에서
 분리되어 보이는 지점이기도 하다.
+
+### 지출설계서 전체를 위임장에 묶지 않는 이유
+
+`bank_mandate` 가 `"expense:*"` 를 덮으면 **이상거래 차단(§4)과 한도 축소(§3)까지 잠긴다.**
+그런데 이 둘은 위임 없이 지금 당장 신청할 수 있는 조치이고, 신탁이 막힌 사용자에게 서비스가
+바로 그것을 권한다 (`trust.ts` `blockedDesign` → "즉시 가능한 계좌 보호 조치").
+
+여기가 잠기면 그 안내가 거짓말이 된다. 대행이 필요한 §2(자동이체)·§6(대리 결제)만 건다.
+`instruments.test.ts` 가 이 경계를 지킨다.
+
+### ref 정규화
+
+시나리오가 내는 ref 에는 항 번호가 붙는다 — `{ doc: "trust", ref: "제5조 ②" }`
+(`scenario.ts:464`). `covers` 는 조(條) 단위로 적으므로 `normalizeRef()` 가 머리만 떼어
+비교한다. 이것을 빠뜨리면 `제5조 ②` 가 어떤 문서에도 안 걸려 조용히 통과한다.
 
 ### 상태만 저장하는 이유
 
@@ -174,7 +195,7 @@ bank_mandate (stage: effective)
 | `design.trust.available` | 신탁계약 (`trust.type.name`) | `trust.cost` + 표준 3단계 | 계약 체결 및 재산 이전 완료 시 |
 | `guardianship.verdict.code === "voluntary"` | 임의후견계약 | **`guardianship.roadmap` 그대로** | 가정법원이 임의후견감독인을 선임한 때 |
 | `verdict.code` 가 법정후견 계열 | 법정후견 심판 | `guardianship.roadmap` | 심판이 확정된 때 |
-| `capacity === "diagnosed"` | 위 둘을 `unavailable` | — | — |
+| `capacity === "diagnosed"` | 신탁을 `unavailable` (후견은 법정후견으로) | — | — |
 | 전 트랙 | 금융기관 대리인 지정 | 표준 2단계 | 금융기관 등록 완료 시 |
 
 `unavailableReason` 은 `trust.blockedReason` 과 `guardianship.verdict.ruledOut[].why` 를
@@ -195,10 +216,13 @@ bank_mandate (stage: effective)
 
 ```ts
 export function canExecute(
-  ref: string,                 // "trust:제5조"
+  doc: DocKey,
+  ref: string,                 // "제5조 ②"
   instruments: Instrument[],
-): { ok: boolean; instrument?: Instrument; reason?: string }
+): ExecutionCheck
 ```
+
+시나리오 노드가 `ScenarioClause { doc, ref }` 를 그대로 넘길 수 있도록 인자를 둘로 나눈다.
 
 규칙은 셋이다.
 

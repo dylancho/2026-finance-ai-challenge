@@ -556,3 +556,66 @@ export interface LedgerState {
   /** 트리거 게이트용 증빙. 없으면 AI 경보만으로는 발동하지 않는다. */
   proof: MedicalProof | null;
 }
+
+/* ── 집행권한 (Authority) ──────────────────────────────
+ * Profile 이 "선언", Ledger 가 "관찰"이라면 Authority 는 "근거"다.
+ * 설계서는 초안이고, 집행 권한은 체결된 계약서에서 나온다.
+ * docs/superpowers/specs/2026-09-03-authority-axis-design.md 참조.
+ */
+
+export type AuthorityStage =
+  | "draft" // AI 초안. 집행 근거 없음
+  | "sent" // 전문가에게 전달됨
+  | "executing" // 체결 절차 진행 중 (공증 · 등기 · 심판 대기)
+  | "effective" // 효력 발생. 이때부터 집행 근거
+  | "unavailable"; // 의사능력 흠결 등으로 신규 설정 불가
+
+export type InstrumentKind =
+  | "trust"
+  | "voluntary_guardianship"
+  | "legal_guardianship"
+  | "bank_mandate";
+
+export type ActorKind = "본인" | "전문가" | "법원" | "금융기관";
+
+export interface AuthorityStep {
+  n: number;
+  label: string;
+  by: ActorKind;
+  detail?: string;
+  period?: string;
+}
+
+export interface Instrument {
+  kind: InstrumentKind;
+  name: string;
+  stage: AuthorityStage;
+  /**
+   * 이 문서가 없으면 집행 근거가 없는 조항들. `"doc:ref"` 형식.
+   * `"trust:*"` 처럼 문서 전체를 덮을 수 있다.
+   */
+  covers: string[];
+  /** 효력이 언제 발생하는지. 제도마다 다르다 */
+  effectRule: string;
+  steps: AuthorityStep[];
+  unavailableReason?: string;
+  /** unavailable 일 때의 대안 경로 */
+  fallback?: { name: string; why: string }[];
+}
+
+export interface AuthorityState {
+  version: 1;
+  /**
+   * 단계만 저장한다. covers · steps · effectRule 은 설계서에서 매번 파생한다.
+   * 답변이 바뀌면 조항이 바뀌므로 스냅샷을 저장하면 그 순간 낡는다.
+   * 저장하는 것은 사람이 앱 바깥에서 한 일(체결 여부)뿐이다.
+   */
+  stages: Partial<Record<InstrumentKind, AuthorityStage>>;
+  sentAt: number | null;
+}
+
+export interface ExecutionCheck {
+  ok: boolean;
+  instrument?: Instrument;
+  reason?: string;
+}
