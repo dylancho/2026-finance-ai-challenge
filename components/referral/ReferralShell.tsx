@@ -82,8 +82,16 @@ export default function ReferralShell() {
   );
 
   const referral = useMemo(
-    () => (profile && design ? buildReferral(profile, design, { instruments }) : null),
-    [profile, design, instruments],
+    () =>
+      profile && design
+        ? buildReferral(profile, design, {
+            instruments,
+            ledger: ledgerState.ledger,
+            reading,
+            gate,
+          })
+        : null,
+    [profile, design, instruments, ledgerState.ledger, reading, gate],
   );
 
   if (!profile || !design || !referral) {
