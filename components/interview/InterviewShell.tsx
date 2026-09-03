@@ -53,6 +53,18 @@ interface Bubble {
   text: string;
   helper?: string;
   source?: "rule" | "llm";
+  /** 질문·답변·반영 안내 말풍선은 질문 id 로 묶인다. 되돌아가면 새로 붙이지 않고 이 자리를 쓴다. */
+  qid?: string;
+  kind?: "question" | "answer" | "reply";
+}
+
+/** 같은 id 의 말풍선이 있으면 제자리에서 바꾸고, 없으면 뒤에 붙인다. */
+function upsertBubble(prev: Bubble[], b: Bubble): Bubble[] {
+  const i = prev.findIndex((x) => x.id === b.id);
+  if (i < 0) return [...prev, b];
+  const next = [...prev];
+  next[i] = b;
+  return next;
 }
 
 const isChapter = (v: string | null): v is Chapter =>
@@ -87,7 +99,11 @@ export default function InterviewShell() {
   /** 설계서의 공백 카드에서 챕터 하나만 채우러 들어온 경우 — 끝나면 설계서로 복귀 */
   const [reentry, setReentry] = useState(false);
   const streamRef = useRef<HTMLDivElement>(null);
-  const askedRef = useRef<string | null>(null);
+  /** 이미 말풍선을 붙인 질문 id. 되돌아가면 새로 붙이지 않고 그 말풍선으로 스크롤한다. */
+  const askedRef = useRef<Set<string>>(new Set());
+  const bubbleEls = useRef<Map<string, HTMLDivElement>>(new Map());
+  /** 지금 보고 있는 질문의 말풍선 id — 강조와 스크롤 목표 */
+  const [focusId, setFocusId] = useState<string | null>(null);
   const completedRef = useRef<Chapter | null>(null);
 
   /* ── 초기화 ── */
@@ -256,34 +272,41 @@ export default function InterviewShell() {
     if (remaining.length) setProposing(true);
   }, [profile, current, chapter, proposing, reentry, router]);
 
-  /* ── 질문 제시 ── */
+  /* ── 질문 제시 ──
+   * 처음 보는 질문만 말풍선을 붙인다. 이미 물어본 질문으로 돌아가면 그 말풍선을
+   * 강조하고 거기로 스크롤한다 — 되돌아갈 때마다 스트림이 늘어나지 않는다. */
   useEffect(() => {
     if (!current) return;
-    if (askedRef.current === current.id) return;
-    askedRef.current = current.id;
-    const revisit = !!profile && isAnswered(profile, current.id);
-    setBubbles((prev) => [
-      ...prev,
-      {
-        id: `q-${current.id}-${prev.length}`,
-        role: "ai",
-        text: revisit ? `다시 여쭤보겠습니다. ${current.prompt}` : current.prompt,
-        helper: revisit
-          ? "이미 답하신 질문입니다. 새로 답하시면 해당 조항이 갱신됩니다."
-          : current.helper,
-      },
-    ]);
+    const id = `q-${current.id}`;
+    if (!askedRef.current.has(current.id)) {
+      askedRef.current.add(current.id);
+      setBubbles((prev) =>
+        upsertBubble(prev, {
+          id,
+          role: "ai",
+          text: current.prompt,
+          helper: current.helper,
+          qid: current.id,
+          kind: "question",
+        }),
+      );
+    }
+    setFocusId(id);
     setPending([]);
-    // profile 은 재질문 여부 판단에만 쓴다. askedRef 가 중복 추가를 막는다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current]);
 
+  /* 새 말풍선이 붙으면 아래로, 예전 질문을 보고 있으면 그 말풍선으로 스크롤한다. */
   useEffect(() => {
-    streamRef.current?.scrollTo({
-      top: streamRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [bubbles, pending]);
+    const stream = streamRef.current;
+    if (!stream) return;
+    const lastQuestion = [...bubbles].reverse().find((b) => b.kind === "question");
+    const target = focusId ? bubbleEls.current.get(focusId) : undefined;
+    if (target && lastQuestion && lastQuestion.id !== focusId) {
+      target.scrollIntoView({ block: "center", behavior: "smooth" });
+    } else {
+      stream.scrollTo({ top: stream.scrollHeight, behavior: "smooth" });
+    }
+  }, [bubbles, pending, thinking, focusId]);
 
   /* ── 건너뛰기 ──
    * 답으로 저장하지 않는다. optional 질문에 빈 답을 저장하면 isAnswered 가
@@ -291,10 +314,9 @@ export default function InterviewShell() {
    * 이 세션 동안만 기억하므로 새로고침하면 다시 물어본다. */
   const skip = useCallback((q: Question) => {
     setSkipped((prev) => new Set(prev).add(q.id));
-    setBubbles((prev) => [
-      ...prev,
-      { id: `s-${q.id}-${prev.length}`, role: "user", text: "건너뜀" },
-    ]);
+    setBubbles((prev) =>
+      upsertBubble(prev, { id: `a-${q.id}`, role: "user", text: "건너뜀", qid: q.id, kind: "answer" }),
+    );
     setPending([]);
     setJumpTo(null);
   }, []);
@@ -319,28 +341,31 @@ export default function InterviewShell() {
         next.delete(q.id);
         return next;
       });
-      setBubbles((prev) => [
-        ...prev,
-        {
-          id: `a-${q.id}-${prev.length}`,
-          role: "user",
-          text: echo ?? answerToLabel(value, q),
-        },
-      ]);
+      // 답변·반영 안내 말풍선은 질문마다 하나씩이다. 고치면 그 자리에서 바뀐다.
       const ref = q.mapsTo[0];
       const verb = wasAnswered ? "갱신했습니다" : "반영했습니다";
-      setBubbles((prev) => [
-        ...prev,
-        {
-          id: `r-${q.id}-${prev.length}`,
-          role: "ai",
-          text: ref
-            ? `${docName(ref.doc)} ${ref.clause} ${ref.label}을(를) ${verb}.`
-            : wasAnswered
-              ? "수정했습니다."
-              : "기록했습니다.",
-        },
-      ]);
+      setBubbles((prev) =>
+        upsertBubble(
+          upsertBubble(prev, {
+            id: `a-${q.id}`,
+            role: "user",
+            text: echo ?? answerToLabel(value, q),
+            qid: q.id,
+            kind: "answer",
+          }),
+          {
+            id: `r-${q.id}`,
+            role: "ai",
+            text: ref
+              ? `${docName(ref.doc)} ${ref.clause} ${ref.label}을(를) ${verb}.`
+              : wasAnswered
+                ? "수정했습니다."
+                : "기록했습니다.",
+            qid: q.id,
+            kind: "reply",
+          },
+        ),
+      );
       setPending([]);
       // 편집을 마치면 복귀 지점(답 안 한 첫 질문)으로 돌아간다.
       setJumpTo(null);
@@ -511,7 +536,14 @@ export default function InterviewShell() {
 
         <div className="iv-stream" ref={streamRef}>
           {bubbles.map((b) => (
-            <div key={b.id} className={`msg ${b.role} fade-in`}>
+            <div
+              key={b.id}
+              className={`msg ${b.role} fade-in${b.id === focusId ? " here" : ""}`}
+              ref={(el) => {
+                if (el) bubbleEls.current.set(b.id, el);
+                else bubbleEls.current.delete(b.id);
+              }}
+            >
               {b.role === "ai" && (
                 <div className="avatar" aria-hidden>
                   NX

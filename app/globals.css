@@ -3434,3 +3434,8 @@ button.feed-item.here .edit {
   font-size: 12px;
   color: var(--ok);
 }
+
+/* 되돌아가 보고 있는 질문의 말풍선 강조 */
+.msg.here .bubble {
+  box-shadow: 0 0 0 2px var(--blue);
+}
