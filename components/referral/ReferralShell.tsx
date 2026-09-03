@@ -16,6 +16,7 @@ import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import {
   buildInstruments,
   markSent,
+  applyDemoAuthority,
   readAuthorityState,
   saveAuthorityState,
   setStage,
@@ -55,10 +56,11 @@ export default function ReferralShell() {
       saveProfile(d);
       setProfile(d);
       setLedgerState(applyDemoLedger(demo!));
-    } else {
-      setProfile(readProfile());
-      setLedgerState(readLedgerState());
+      setAuth(applyDemoAuthority());
+      return;
     }
+    setProfile(readProfile());
+    setLedgerState(readLedgerState());
     setAuth(readAuthorityState());
   }, []);
 

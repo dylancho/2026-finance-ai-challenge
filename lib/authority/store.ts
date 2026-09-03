@@ -41,6 +41,16 @@ export function clearAuthorityState() {
   if (typeof window !== "undefined") window.localStorage.removeItem(KEY);
 }
 
+/**
+ * ?demo= 로 진입하면 체결 상태를 비운다.
+ *
+ * 체결 상태가 남아 있으면 데모를 다시 열어도 이미 풀려 있어 잠긴 장면을 볼 수 없다.
+ * 이력(applyDemoLedger)과 같은 규칙으로 맞춘다.
+ */
+export function applyDemoAuthority(): AuthorityState {
+  return saveAuthorityState(emptyAuthorityState());
+}
+
 export function setStage(
   s: AuthorityState,
   kind: InstrumentKind,

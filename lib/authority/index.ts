@@ -10,4 +10,5 @@ export {
   clearAuthorityState,
   setStage,
   markSent,
+  applyDemoAuthority,
 } from "./store";

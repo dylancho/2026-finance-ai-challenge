@@ -3,6 +3,7 @@ import { DEMO_PROFILES } from "../../profile";
 import { buildDesign } from "../../design";
 import type { AuthorityState } from "../../types";
 import { actorOf, buildInstruments, instrumentOf } from "../instruments";
+import { applyDemoAuthority } from "../store";
 import { canExecute } from "../gate";
 
 const build = (key: string, state?: AuthorityState) => {
@@ -89,5 +90,22 @@ describe("위임장의 적용 범위", () => {
 
   it("자동이체 대행은 위임장이 있어야 집행된다", () => {
     expect(canExecute("expense", "§2", build("A")).ok).toBe(false);
+  });
+});
+
+describe("데모 진입 시 체결 상태 초기화", () => {
+  it("applyDemoAuthority 는 저장된 단계를 비운다", () => {
+    // 남아 있으면 데모를 다시 열어도 이미 풀려 있어 잠긴 장면을 볼 수 없다.
+    const s = applyDemoAuthority();
+    expect(s.stages).toEqual({});
+    expect(s.sentAt).toBeNull();
+  });
+
+  it("초기화한 상태로는 모든 문서가 초안이다", () => {
+    const p = DEMO_PROFILES.B;
+    const insts = buildInstruments(p, buildDesign(p), applyDemoAuthority());
+    expect(insts.every((i) => i.stage === "draft" || i.stage === "unavailable")).toBe(
+      true,
+    );
   });
 });

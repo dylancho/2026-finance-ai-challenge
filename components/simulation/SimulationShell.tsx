@@ -23,6 +23,7 @@ import {
   applyAuthority,
   buildInstruments,
   emptyAuthorityState,
+  applyDemoAuthority,
   readAuthorityState,
   saveAuthorityState,
   setStage,
@@ -51,7 +52,7 @@ export default function SimulationShell() {
         saveProfile(d);
         setProfile(d);
         setLedgerState(applyDemoLedger(demo));
-        setAuth(readAuthorityState());
+        setAuth(applyDemoAuthority());
         return;
       }
     }
