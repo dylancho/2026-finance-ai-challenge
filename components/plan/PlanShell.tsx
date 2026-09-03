@@ -31,6 +31,7 @@ import {
   setResolution,
   clearResolution,
 } from "../../lib/ledger";
+import { insightFor } from "../../lib/insight";
 import { personLabel, won } from "../../lib/format";
 import type { Contrast, LedgerState, Profile, Resolution } from "../../lib/types";
 import { emptyLedgerState } from "../../lib/ledger";
@@ -74,7 +75,7 @@ export default function PlanShell() {
   );
 
   const insight = useMemo(
-    () => (profile && ledgerState.ledger ? analyze(ledgerState.ledger, profile.track) : null),
+    () => (profile && ledgerState.ledger ? insightFor(ledgerState.ledger, profile) : null),
     [profile, ledgerState.ledger],
   );
 

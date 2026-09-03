@@ -3168,3 +3168,147 @@ button.feed-item.here .edit {
   font-size: 12px;
   color: var(--faint);
 }
+
+/* ── 통합 플로우: 챕터 (2026-09-03) ───────────────── */
+
+.iv-chapters {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.iv-chapters li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 6px 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.iv-chapters .iv-sec {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+}
+
+.iv-chapters .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  margin-top: 7px;
+  flex: none;
+}
+
+.iv-chapters li.done .dot {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.iv-chapters li.here .dot {
+  background: var(--blue);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+.iv-chapters li.done,
+.iv-chapters li.here {
+  color: var(--navy);
+  font-weight: 500;
+}
+
+.iv-chapters .cnt {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.chapter-propose h2 {
+  font-size: 22px;
+  margin: 8px 0 10px;
+}
+
+.chapter-propose .gate-cards {
+  margin: 18px 0 6px;
+}
+
+.chapter-propose .gate-nav {
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.chapter-done {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--faint);
+  margin-top: 6px;
+}
+
+.chapter-focus-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  vertical-align: middle;
+}
+
+.chapter-without {
+  color: var(--warn) !important;
+}
+
+.gate-focus {
+  font-size: 12px;
+  color: var(--blue);
+  margin: -6px 0 18px;
+}
+
+/* 설계서 상단 챕터 뱃지 */
+.chapter-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0 6px;
+}
+
+.chapter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.chapter-badge.declared {
+  border-color: var(--ok);
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.chapter-badge.missing {
+  border-style: dashed;
+}
+
+/* 챕터 단위 공백 카드 */
+.gap-item.chapter {
+  border-left-color: var(--navy);
+  background: var(--blue-soft);
+}

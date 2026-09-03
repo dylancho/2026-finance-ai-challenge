@@ -14,14 +14,17 @@ import { useAuth } from "../auth/AuthProvider";
 interface Props {
   className?: string;
   children: React.ReactNode;
-  /** 홈 화면 카테고리 버튼에서 넘어올 때, 게이트 STEP 1(카테고리 선택)을
-   *  건너뛰고 바로 STEP 2(의사능력)로 가기 위한 트랙 값. */
-  track?: string;
+  /**
+   * 홈 화면 카테고리 버튼에서 넘어올 때의 관심 챕터. 어느 버튼을 눌러도 같은
+   * 게이트→이력→코어 인터뷰로 들어가고, 코어를 마친 뒤 챕터 제안 화면에서
+   * 이 챕터가 최상단·선택된 상태로 보인다.
+   */
+  focus?: string;
 }
 
-export default function StartLink({ className = "btn", children, track }: Props) {
+export default function StartLink({ className = "btn", children, focus }: Props) {
   const { session, ready } = useAuth();
-  const startPath = track ? `/start?track=${encodeURIComponent(track)}` : "/start";
+  const startPath = focus ? `/start?focus=${encodeURIComponent(focus)}` : "/start";
   const href =
     ready && session.signedIn ? startPath : `/login?next=${encodeURIComponent(startPath)}`;
 

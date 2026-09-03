@@ -5,20 +5,27 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import QuestionInput from "./QuestionInput";
 import ObservationCard from "./ObservationCard";
+import ChapterProposal from "./ChapterProposal";
 import Badge from "../common/Badge";
 import {
   activeQuestions,
+  chapterCompleted,
+  chapterQuestions,
+  CHAPTER_META,
+  CHAPTER_ORDER,
   findQuestion,
+  flowMeta,
   isAnswered,
+  isUnified,
+  OPTIONAL_CHAPTERS,
   overallProgress,
   sectionProgress,
-  flowMeta,
 } from "../../lib/questions";
+import { markChapterCompleted } from "../../lib/chapters";
 import { engine } from "../../lib/ai/engine";
 import { answerToLabel, docName } from "../../lib/ai/rules";
 import { demoProfile, readProfile, saveProfile, setAnswer } from "../../lib/profile";
 import {
-  analyze,
   buildContrasts,
   contrastFor,
   applyDemoLedger,
@@ -28,8 +35,10 @@ import {
   saveLedgerState,
   setResolution,
 } from "../../lib/ledger";
+import { insightFor } from "../../lib/insight";
 import type {
   AnswerValue,
+  Chapter,
   Contrast,
   Extraction,
   LedgerState,
@@ -46,6 +55,18 @@ interface Bubble {
   source?: "rule" | "llm";
 }
 
+const isChapter = (v: string | null): v is Chapter =>
+  !!v && (CHAPTER_ORDER as string[]).includes(v);
+
+/**
+ * 인터뷰.
+ *
+ * 통합 플로우는 챕터 단위로 진행한다: 코어(필수) → 챕터 제안 → 고른 챕터 → 다시 제안.
+ * 챕터를 끝내면 Profile.chaptersCompleted 에 기록하고, 설계서의 공백 카드에서
+ * ?chapter= 로 재진입하면 그 챕터만 답한 뒤 설계서로 돌아간다.
+ *
+ * 보류 트랙 데모(?demo=B/C/D)는 옛 트랙 질문 목록을 한 줄로 진행한다.
+ */
 export default function InterviewShell() {
   const router = useRouter();
 
@@ -57,40 +78,66 @@ export default function InterviewShell() {
   const [jumpTo, setJumpTo] = useState<string | null>(null);
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
   const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
+  /** 통합 플로우에서 지금 진행 중인 챕터 */
+  const [chapter, setChapter] = useState<Chapter>("core");
+  /** 홈 카테고리 버튼에서 넘어온 관심 챕터 */
+  const [focus, setFocus] = useState<Chapter | null>(null);
+  /** 코어(또는 챕터)를 마치고 다음 챕터를 고르는 화면 */
+  const [proposing, setProposing] = useState(false);
+  /** 설계서의 공백 카드에서 챕터 하나만 채우러 들어온 경우 — 끝나면 설계서로 복귀 */
+  const [reentry, setReentry] = useState(false);
   const streamRef = useRef<HTMLDivElement>(null);
   const askedRef = useRef<string | null>(null);
+  const completedRef = useRef<Chapter | null>(null);
 
   /* ── 초기화 ── */
   useEffect(() => {
     // 정적 프리렌더 페이지에서는 useSearchParams 가 최초 렌더에 비어 있을 수 있어
     // 마운트 후 실제 URL 을 읽는다. (?demo=, ?q= 딥링크가 /start 로 튕기는 문제)
     const query = new URLSearchParams(window.location.search);
+    const focusParam = query.get("focus");
+    if (isChapter(focusParam) && focusParam !== "core") setFocus(focusParam);
+
+    let p: Profile | null = null;
     const demo = query.get("demo");
     if (demo) {
       const d = demoProfile(demo);
       if (d) {
         saveProfile(d);
-        setProfile(d);
         setLedgerState(applyDemoLedger(demo));
-        const dq = query.get("q");
-        if (dq) setJumpTo(dq);
-        return;
+        p = d;
       }
     }
-    const p = readProfile();
-    if (!p.track) {
-      router.replace("/start");
-      return;
+    if (!p) {
+      const stored = readProfile();
+      if (!stored.track) {
+        router.replace("/start");
+        return;
+      }
+      setLedgerState(readLedgerState());
+      p = stored;
     }
     setProfile(p);
-    setLedgerState(readLedgerState());
-    const q = query.get("q");
-    if (q) setJumpTo(q);
+
+    const dq = query.get("q");
+    const chapterParam = query.get("chapter");
+    if (isUnified(p)) {
+      if (isChapter(chapterParam)) {
+        setChapter(chapterParam);
+        setReentry(chapterParam !== "core");
+      } else if (dq) {
+        const target = findQuestion(dq);
+        if (target?.chapter) setChapter(target.chapter);
+      }
+    }
+    if (dq) setJumpTo(dq);
   }, [router]);
+
+  const unified = !!profile && isUnified(profile);
 
   /* ── 관찰 (이력이 연동돼 있을 때만) ── */
   const insight = useMemo(
-    () => (profile && ledgerState.ledger ? analyze(ledgerState.ledger, profile.track) : null),
+    () => (profile && ledgerState.ledger ? insightFor(ledgerState.ledger, profile) : null),
     [profile, ledgerState.ledger],
   );
 
@@ -113,20 +160,20 @@ export default function InterviewShell() {
     [],
   );
 
-  /** showIf 를 통과한, 이 트랙의 질문 순서. 앞뒤 이동의 기준축이다. */
-  const activeList = useMemo(
-    () => (profile ? activeQuestions(profile) : []),
-    [profile],
-  );
+  /** 지금 진행 중인 질문 순서. 통합 플로우는 현재 챕터, 보류 트랙은 트랙 전체. */
+  const activeList = useMemo(() => {
+    if (!profile) return [];
+    return isUnified(profile) ? chapterQuestions(profile, chapter) : activeQuestions(profile);
+  }, [profile, chapter]);
 
   const current: Question | null = useMemo(() => {
     if (!profile) return null;
     if (jumpTo) {
       const inActive = activeList.find((q) => q.id === jumpTo);
       if (inActive) return inActive;
-      // showIf 로 빠진 질문에 딥링크로 들어온 경우까지는 허용한다.
+      // showIf 로 빠졌거나 다른 챕터의 질문에 딥링크로 들어온 경우까지는 허용한다.
       const q = findQuestion(jumpTo);
-      if (q && q.track === profile.track) return q;
+      if (q && (isUnified(profile) ? !!q.chapter : q.track === profile.track)) return q;
     }
     return (
       activeList.find((q) => !isAnswered(profile, q.id) && !skipped.has(q.id)) ?? null
@@ -150,6 +197,7 @@ export default function InterviewShell() {
     setJumpTo(qid);
     setPending([]);
     setFreeText("");
+    setProposing(false);
   }, []);
 
   /** 복귀 지점(답 안 한 첫 질문)으로 돌아간다. */
@@ -169,6 +217,44 @@ export default function InterviewShell() {
     },
     [activeList, profile, goTo],
   );
+
+  /** 챕터 제안 화면 또는 왼쪽 챕터 목록에서 챕터를 골랐다. */
+  const startChapter = useCallback((ch: Chapter) => {
+    setChapter(ch);
+    setProposing(false);
+    setSkipped(new Set());
+    setJumpTo(null);
+    setPending([]);
+    setBubbles((prev) => [
+      ...prev,
+      {
+        id: `ch-${ch}-${prev.length}`,
+        role: "ai",
+        text: `${CHAPTER_META[ch].label} 영역으로 넘어갑니다. ${CHAPTER_META[ch].caption}`,
+      },
+    ]);
+  }, []);
+
+  /* ── 챕터 완료 처리 ──
+   * 현재 챕터에 더 물을 질문이 없으면 완료로 기록한다. 재진입이면 설계서로 돌아가고,
+   * 아니면 남은 챕터를 제안한다. 같은 챕터를 두 번 처리하지 않도록 ref 로 막는다. */
+  useEffect(() => {
+    if (!profile || !isUnified(profile) || current || proposing) return;
+    if (completedRef.current === chapter) return;
+    completedRef.current = chapter;
+
+    const next = chapterCompleted(profile, chapter)
+      ? profile
+      : saveProfile(markChapterCompleted(profile, chapter));
+    if (next !== profile) setProfile(next);
+
+    if (reentry) {
+      router.push("/plan");
+      return;
+    }
+    const remaining = OPTIONAL_CHAPTERS.filter((ch) => !chapterCompleted(next, ch));
+    if (remaining.length) setProposing(true);
+  }, [profile, current, chapter, proposing, reentry, router]);
 
   /* ── 질문 제시 ── */
   useEffect(() => {
@@ -306,11 +392,13 @@ export default function InterviewShell() {
   }
 
   const meta = flowMeta(profile);
-  const sections = sectionProgress(profile);
-  const progress = overallProgress(profile);
-  const done = !current;
+  const sections = sectionProgress(profile, activeList);
+  const progress = overallProgress(profile, activeList);
+  const done = !current && !proposing;
+  const remainingChapters = OPTIONAL_CHAPTERS.filter((ch) => !chapterCompleted(profile, ch));
+  const headline = unified ? CHAPTER_META[chapter].label : meta.name;
 
-  /* 조항 피드 */
+  /* 조항 피드 — 코어 + 선언한 챕터에서 답한 것 전부 */
   const feed = activeQuestions(profile)
     .filter((q) => isAnswered(profile, q.id))
     .flatMap((q) =>
@@ -326,9 +414,36 @@ export default function InterviewShell() {
 
   return (
     <div className="interview shell-wide">
-      {/* 좌: 섹션 진행 */}
+      {/* 좌: 챕터 + 섹션 진행 */}
       <aside className="iv-nav">
-        <h4>{meta.short} · 진행</h4>
+        {unified && (
+          <>
+            <h4>영역</h4>
+            <ul className="iv-chapters">
+              {CHAPTER_ORDER.map((ch) => {
+                const doneCh = chapterCompleted(profile, ch);
+                const here = ch === chapter && !proposing;
+                return (
+                  <li key={ch} className={here ? "here" : doneCh ? "done" : ""}>
+                    <button
+                      type="button"
+                      className="iv-sec"
+                      onClick={() => (here ? resume() : startChapter(ch))}
+                      title={`${CHAPTER_META[ch].label} 영역으로 이동`}
+                    >
+                      <span className="dot" aria-hidden />
+                      <span className="nm">{CHAPTER_META[ch].label}</span>
+                      <span className="cnt">
+                        {doneCh ? "선언됨" : ch === "core" ? "필수" : "선택"}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+        <h4>{unified ? CHAPTER_META[chapter].short : meta.short} · 진행</h4>
         <ul className="iv-sections">
           {sections.map((s) => (
             <li
@@ -352,7 +467,7 @@ export default function InterviewShell() {
         </ul>
         <div className="iv-progress">
           <div className="t">
-            <span>전체</span>
+            <span>{unified ? "이 영역" : "전체"}</span>
             <span>
               {progress.done}/{progress.total}
             </span>
@@ -361,7 +476,7 @@ export default function InterviewShell() {
             <i style={{ width: `${Math.round(progress.ratio * 100)}%` }} />
           </div>
         </div>
-        {progress.done > 0 && (
+        {feed.length > 0 && (
           <Link
             href="/plan"
             className="btn outline sm"
@@ -382,11 +497,16 @@ export default function InterviewShell() {
             <div>
               <div className="name">NEXT AI</div>
               <div className="sec">
-                {current ? current.section : "모든 질문 완료"} · {meta.name}
+                {proposing
+                  ? "다음 영역 고르기"
+                  : current
+                    ? current.section
+                    : "모든 질문 완료"}{" "}
+                · {headline}
               </div>
             </div>
           </div>
-          {current && <Badge tone="info">{current.id}</Badge>}
+          {current && !proposing && <Badge tone="info">{current.id}</Badge>}
         </div>
 
         <div className="iv-stream" ref={streamRef}>
@@ -441,7 +561,9 @@ export default function InterviewShell() {
             </div>
           )}
 
-          {done ? (
+          {proposing ? (
+            <ChapterProposal profile={profile} focus={focus} onPick={startChapter} />
+          ) : done ? (
             <>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <Link href="/plan" className="btn">
@@ -450,6 +572,15 @@ export default function InterviewShell() {
                 <Link href="/simulation" className="btn outline">
                   시뮬레이션 돌려보기
                 </Link>
+                {unified && remainingChapters.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn outline"
+                    onClick={() => setProposing(true)}
+                  >
+                    다른 영역 더 답하기
+                  </button>
+                )}
                 {activeList.length > 0 && (
                   <button
                     type="button"
@@ -461,6 +592,9 @@ export default function InterviewShell() {
                 )}
               </div>
               <p className="iv-hint">
+                {unified && remainingChapters.length === 0
+                  ? "모든 영역을 선언하셨습니다. "
+                  : ""}
                 오른쪽 조항이나 왼쪽 섹션을 누르면 그 질문으로 돌아가 답을 고칠 수 있습니다.
               </p>
             </>
@@ -543,7 +677,7 @@ export default function InterviewShell() {
 
       {/* 우: 관측 카드 + 조항 피드 */}
       <aside className="iv-feed">
-        {current && insight && ledgerState.ledger && (
+        {current && !proposing && insight && ledgerState.ledger && (
           <ObservationCard
             observation={observationFor(current.id, insight, ledgerState.ledger)}
             contrast={contrastFor(contrasts, current.id)}

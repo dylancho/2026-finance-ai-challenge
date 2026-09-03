@@ -18,6 +18,7 @@ import {
   saveLedgerState,
   setProof,
 } from "../../lib/ledger";
+import { insightFor } from "../../lib/insight";
 import type { LedgerState, MedicalProof, Profile } from "../../lib/types";
 
 export default function SimulationShell() {
@@ -53,7 +54,7 @@ export default function SimulationShell() {
 
   /* ── 30년 축 ── */
   const insight = useMemo(
-    () => (profile && ledgerState.ledger ? analyze(ledgerState.ledger, profile.track) : null),
+    () => (profile && ledgerState.ledger ? insightFor(ledgerState.ledger, profile) : null),
     [profile, ledgerState.ledger],
   );
 

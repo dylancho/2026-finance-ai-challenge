@@ -4,10 +4,12 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
 
-const CATEGORIES: { label: string; icon: typeof Wallet; track: string }[] = [
-  { label: "일상 관리", icon: Wallet, track: "daily" },
-  { label: "자산·투자 관리", icon: TrendingUp, track: "investment" },
-  { label: "상속 준비", icon: ScrollText, track: "estate" },
+// 세 버튼 모두 같은 게이트 → 이력 → 코어 인터뷰로 들어간다. 누른 카테고리는
+// focus 로 전달되어, 코어를 마친 뒤 챕터 제안 화면에서 그 챕터가 맨 위에 선택돼 있다.
+const CATEGORIES: { label: string; icon: typeof Wallet; focus: string }[] = [
+  { label: "일상 관리", icon: Wallet, focus: "core" },
+  { label: "자산·투자 관리", icon: TrendingUp, focus: "invest" },
+  { label: "상속 준비", icon: ScrollText, focus: "estate" },
 ];
 
 /** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
@@ -63,8 +65,8 @@ export default function Home() {
           </div>
 
           <div className="category-row">
-            {CATEGORIES.map(({ label, icon: Icon, track }) => (
-              <StartLink className="btn outline category-btn" track={track} key={label}>
+            {CATEGORIES.map(({ label, icon: Icon, focus }) => (
+              <StartLink className="btn outline category-btn" focus={focus} key={label}>
                 {label}
                 <Icon className="category-icon" strokeWidth={1.5} aria-hidden="true" />
               </StartLink>
@@ -94,7 +96,7 @@ export default function Home() {
             <p>
               필요한 내용만 차근차근 여쭤볼게요.
               <br />
-              약 2~10분이면 준비할 수 있어요.
+              약 11문항 · 3분이면 기본 설계서가 나옵니다. 필요한 부분만 더 답하시면 돼요.
             </p>
           </div>
           <StartLink>시작하기</StartLink>
