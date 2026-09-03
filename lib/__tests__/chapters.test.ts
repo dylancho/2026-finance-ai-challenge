@@ -137,6 +137,47 @@ describe("공백·시나리오", () => {
     expect(activeQuestions(p).every((q) => q.chapter === "core")).toBe(true);
   });
 
+  it("건너뛴 챕터마다 '선언되지 않은 영역' 공백이 하나씩 선다", () => {
+    const p = unified();
+    const gaps = findGaps(p, buildDesign(p));
+    const chapterGaps = gaps.filter((g) => g.chapter);
+    expect(chapterGaps.map((g) => g.chapter).sort()).toEqual(["estate", "invest", "medical"]);
+    expect(chapterGaps.find((g) => g.chapter === "invest")?.what).toContain("투자 원칙이 선언되지 않았습니다");
+    expect(chapterGaps.find((g) => g.chapter === "estate")?.consequence).toContain("법정상속");
+  });
+
+  it("챕터를 완료로 기록하면 그 챕터의 공백 카드가 사라지고 조항이 선다", () => {
+    const p = unified({
+      chaptersCompleted: ["core", "invest"],
+      answers: {
+        I01: { kind: "multi", values: ["derivative"] },
+        I02: { kind: "choice", value: "low" },
+        I03: { kind: "choice", value: "do_nothing" },
+        I04: { kind: "choice", value: "freeze" },
+      },
+    });
+    const design = buildDesign(p);
+    const gaps = findGaps(p, design);
+    expect(gaps.some((g) => g.chapter === "invest")).toBe(false);
+    expect(gaps.some((g) => g.chapter === "estate")).toBe(true);
+    expect(design.expense.invest?.status).toBe("set");
+    expect(design.expense.invest?.riskCapPct).toBe(20);
+  });
+
+  it("보류 트랙 데모에는 챕터 공백이 없다", () => {
+    const gaps = findGaps(DEMO_PROFILES.B, buildDesign(DEMO_PROFILES.B));
+    expect(gaps.some((g) => g.chapter)).toBe(false);
+  });
+
+  it("게이트의 incident 는 이상거래 룰 전체 활성화 + 긴급조치 플래그로 이어진다", () => {
+    const p = unified({ capacity: "incident" });
+    const d = buildDesign(p);
+    expect(d.expense.fraudRules.every((r) => r.active)).toBe(true);
+    const flag = d.expense.flags.find((f) => f.level === "critical");
+    expect(flag?.title).toContain("이미 피해");
+    expect(flag?.qid).toBeUndefined();
+  });
+
   it("시나리오는 코어 것만, 상속을 선언하면 배우자 사망이 추가된다", () => {
     expect(scenariosFor(unified()).map((s) => s.id)).toEqual(["phishing", "hospital", "shortfall"]);
     const withEstate = unified({ chaptersCompleted: ["core", "estate"] });

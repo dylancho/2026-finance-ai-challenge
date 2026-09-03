@@ -10,7 +10,13 @@ import ConsultationModal from "./ConsultationModal";
 import ContrastPanel from "./ContrastPanel";
 import Badge from "../common/Badge";
 import { buildDesign, findGaps, readinessAxes } from "../../lib/design";
-import { flowMeta } from "../../lib/questions";
+import {
+  chapterCompleted,
+  CHAPTER_META,
+  CHAPTER_ORDER,
+  flowMeta,
+  isUnified,
+} from "../../lib/questions";
 import {
   demoProfile,
   firstPerson,
@@ -132,11 +138,20 @@ export default function PlanShell() {
 
   const axes = readinessAxes(design);
   const meta = flowMeta(profile);
+  const unified = isUnified(profile);
+  const declared = CHAPTER_ORDER.filter((ch) => chapterCompleted(profile, ch));
+  const undeclared = CHAPTER_ORDER.filter((ch) => !chapterCompleted(profile, ch));
   const manager = firstPerson(profile, "B12", "C07", "A07", "D11");
   const monthly = firstAmount(profile, "B07", "A02", "D09");
 
   const summary = [
-    `목적: ${meta.name}`,
+    `범위: ${meta.name}`,
+    ...(unified
+      ? [
+          `선언한 영역: ${declared.map((ch) => CHAPTER_META[ch].label).join(", ") || "없음"}`,
+          `미선언 영역: ${undeclared.map((ch) => CHAPTER_META[ch].label).join(", ") || "없음"}`,
+        ]
+      : []),
     `대상: ${profile.subject === "family" ? `${profile.subjectRelation ?? "가족"} (대리 준비)` : "본인"}`,
     `의사능력 상태: ${
       { full: "스스로 판단 가능", declining: "판단력 저하 조짐", diagnosed: "진단 받음", incident: "금융 사고 발생" }[
@@ -178,9 +193,31 @@ export default function PlanShell() {
         <div className="eyebrow">Your design documents</div>
         <h1>미래의 나에게 남기는 금융 사용 설명서</h1>
         <p className="section-lede">
-          {meta.name} 트랙 · {meta.docs.join(" · ")}. 아래 문서는 AI가 답변을 조항 단위로 정리한
+          {meta.name} · {meta.docs.join(" · ")}. 아래 문서는 AI가 답변을 조항 단위로 정리한
           초안이며 법적 효력이 없습니다.
         </p>
+
+        {unified && (
+          <div className="chapter-badges" aria-label="영역별 선언 상태">
+            {CHAPTER_ORDER.map((ch) => {
+              const done = chapterCompleted(profile, ch);
+              return done ? (
+                <span className="chapter-badge declared" key={ch}>
+                  ✓ {CHAPTER_META[ch].label} 선언됨
+                </span>
+              ) : (
+                <Link
+                  className="chapter-badge missing"
+                  key={ch}
+                  href={`/interview?chapter=${ch}`}
+                  title={`${CHAPTER_META[ch].label} 영역을 이어서 답합니다`}
+                >
+                  {CHAPTER_META[ch].label} 미선언 →
+                </Link>
+              );
+            })}
+          </div>
+        )}
 
         <div className="axes">
           {axes.map((a) => (
@@ -242,20 +279,37 @@ export default function PlanShell() {
                   아래 항목이 비어 있으면 미래의 특정 시점에 결정을 내릴 근거가 없습니다.
                   시뮬레이션은 바로 그 지점에서 멈춥니다.
                 </p>
-                {gaps.map((g) => (
-                  <div className={`gap-item ${g.severity}`} key={g.qid}>
-                    <div>
-                      <div className="r mono">
-                        {g.qid} · {g.clause}
+                {gaps.map((g) =>
+                  g.chapter ? (
+                    // 챕터 단위 공백 — 그 영역의 인터뷰로 들어간다. 기존 답은 보존되고,
+                    // 끝나면 설계서로 돌아와 다시 생성된다.
+                    <div className={`gap-item chapter ${g.severity}`} key={g.qid}>
+                      <div>
+                        <div className="r mono">
+                          선언되지 않은 영역 · {CHAPTER_META[g.chapter].label}
+                        </div>
+                        <div className="w">{g.what}</div>
+                        <div className="c">{g.consequence}</div>
                       </div>
-                      <div className="w">{g.what}</div>
-                      <div className="c">{g.consequence}</div>
+                      <Link href={`/interview?chapter=${g.chapter}`} className="btn sm">
+                        이 영역 선언하기
+                      </Link>
                     </div>
-                    <Link href={`/interview?q=${g.qid}`} className="btn outline sm">
-                      채우러 가기
-                    </Link>
-                  </div>
-                ))}
+                  ) : (
+                    <div className={`gap-item ${g.severity}`} key={g.qid}>
+                      <div>
+                        <div className="r mono">
+                          {g.qid} · {g.clause}
+                        </div>
+                        <div className="w">{g.what}</div>
+                        <div className="c">{g.consequence}</div>
+                      </div>
+                      <Link href={`/interview?q=${g.qid}`} className="btn outline sm">
+                        채우러 가기
+                      </Link>
+                    </div>
+                  ),
+                )}
               </>
             )}
           </div>

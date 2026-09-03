@@ -1,5 +1,61 @@
-import type { DesignSet, Gap, Profile } from "../types";
-import { activeQuestions, isAnswered } from "../questions";
+import type { Chapter, DesignSet, DocKey, Gap, Profile } from "../types";
+import {
+  activeQuestions,
+  chapterCompleted,
+  CHAPTER_META,
+  isAnswered,
+  isUnified,
+  OPTIONAL_CHAPTERS,
+} from "../questions";
+
+/**
+ * 챕터 단위 공백. 건너뛴 챕터는 질문 하나하나가 아니라 "선언되지 않은 판단 영역"
+ * 이다. 이 카드가 재진입 경로가 된다 (/interview?chapter=<id>).
+ */
+const CHAPTER_GAP: Record<
+  Exclude<Chapter, "core">,
+  { doc: DocKey; clause: string; what: string; consequence: string; severity: Gap["severity"] }
+> = {
+  invest: {
+    doc: "expense",
+    clause: "§7 투자 원칙",
+    what: "투자 원칙이 선언되지 않았습니다",
+    consequence: "목돈이 생기거나 시장이 급락했을 때 판단 근거가 없습니다.",
+    severity: "high",
+  },
+  estate: {
+    doc: "trust",
+    clause: "제11조 잔여재산 귀속",
+    what: "상속 의사가 선언되지 않았습니다",
+    consequence: "유고 시 법정상속 순위로만 처리됩니다.",
+    severity: "medium",
+  },
+  medical: {
+    doc: "trust",
+    clause: "제6조 치료·요양비",
+    what: "의료·요양 재무 기준이 선언되지 않았습니다",
+    consequence: "요양시설 입소 시 비용 상한과 재원 순서를 정할 수 없습니다.",
+    severity: "high",
+  },
+};
+
+export const chapterGapId = (ch: Chapter) => `chapter:${ch}`;
+
+export function chapterGaps(p: Profile): Gap[] {
+  if (!isUnified(p)) return [];
+  return OPTIONAL_CHAPTERS.filter((ch) => !chapterCompleted(p, ch)).map((ch) => {
+    const meta = CHAPTER_GAP[ch as Exclude<Chapter, "core">];
+    return {
+      qid: chapterGapId(ch),
+      chapter: ch,
+      doc: meta.doc,
+      clause: meta.clause,
+      what: meta.what,
+      consequence: `${meta.consequence} (${CHAPTER_META[ch].label} · 약 ${CHAPTER_META[ch].count}문항)`,
+      severity: meta.severity,
+    };
+  });
+}
 
 /**
  * 미응답 질문을 "미래에 무슨 일이 생기는가"로 번역한다.
@@ -172,7 +228,7 @@ const CONSEQUENCE: Record<string, { what: string; consequence: string; severity:
 
 export function findGaps(p: Profile, _design: DesignSet): Gap[] {
   const qs = activeQuestions(p);
-  const gaps: Gap[] = [];
+  const gaps: Gap[] = [...chapterGaps(p)];
 
   for (const q of qs) {
     if (q.optional) continue;

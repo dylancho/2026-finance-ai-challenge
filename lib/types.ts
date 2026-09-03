@@ -316,7 +316,10 @@ export interface DesignSet {
 /* ── 공백 ─────────────────────────────────────────────── */
 
 export interface Gap {
+  /** 질문 단위 공백은 질문 id, 챕터 단위 공백은 "chapter:<id>" */
   qid: string;
+  /** 챕터 단위 공백 — 건너뛴 챕터 전체가 "선언되지 않은 판단 영역" 이다 */
+  chapter?: Chapter;
   doc: DocKey;
   clause: string;
   what: string;
