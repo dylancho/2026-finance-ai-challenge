@@ -1,0 +1,166 @@
+import { NextResponse } from 'next/server';
+import { GoogleGenAI, Type } from '@google/genai';
+
+// .env.local 환경 변수에서 GEMINI_API_KEY 로드
+const apiKey = process.env.GEMINI_API_KEY || '';
+const ai = new GoogleGenAI({ apiKey });
+
+interface TransactionLog {
+  timestamp: Date;
+  amount: number;
+  targetAccount: string;
+}
+
+// 사용자 3개월 거래 로그 더미 데이터 생성기
+function generate3MonthLogs(userId = "USER_1004"): TransactionLog[] {
+  const logs: TransactionLog[] = [];
+  const now = new Date();
+  const knownAccounts = ["110-123-456789", "3333-01-9988231", "1002-987-654321"];
+
+  for (let i = 0; i < 40; i++) {
+    const randomDaysAgo = Math.floor(Math.random() * 89) + 1;
+    const randomHour = Math.floor(Math.random() * 11) + 9; // 주 활동시간: 09시 ~ 20시
+    
+    const txDate = new Date(now);
+    txDate.setDate(txDate.getDate() - randomDaysAgo);
+    txDate.setHours(randomHour, Math.floor(Math.random() * 60));
+
+    const randomAmount = (Math.floor(Math.random() * 40) + 10) * 10000; // 10만~50만원대
+    const randomAccount = knownAccounts[Math.floor(Math.random() * knownAccounts.length)];
+
+    logs.push({
+      timestamp: txDate,
+      amount: randomAmount,
+      targetAccount: randomAccount,
+    });
+  }
+
+  return logs.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+}
+
+// 최근 3개월 패턴 기준선(Baseline) 도출
+function trainUserBaseline(logs: TransactionLog[], userId: string) {
+  const amounts = logs.map(l => l.amount);
+  const hours = logs.map(l => l.timestamp.getHours());
+
+  const avgAmount = Math.floor(amounts.reduce((a, b) => a + b, 0) / amounts.length);
+  const maxAmount = Math.max(...amounts);
+  
+  const sortedAmounts = [...amounts].sort((a, b) => a - b);
+  const p95Index = Math.floor(sortedAmounts.length * 0.95);
+  const p95Amount = sortedAmounts[p95Index];
+
+  const accountCounts: { [key: string]: number } = {};
+  logs.forEach(l => {
+    accountCounts[l.targetAccount] = (accountCounts[l.targetAccount] || 0) + 1;
+  });
+  const frequentAccounts = Object.keys(accountCounts).sort((a, b) => accountCounts[b] - accountCounts[a]);
+
+  const minHour = Math.min(...hours);
+  const maxHour = Math.max(...hours);
+
+  return {
+    userId,
+    learnedAt: new Date().toISOString(),
+    financialBaseline: {
+      avgTransferAmount: avgAmount,
+      maxTransferAmount: maxAmount,
+      p95ThresholdAmount: p95Amount,
+      usualActiveHours: `${String(minHour).padStart(2, '0')}:00 - ${String(maxHour).padStart(2, '0')}:00`,
+      knownAccounts: frequentAccounts,
+    }
+  };
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+
+    // 1. 학습된 기준선 및 현재 요청 데이터 구성
+    const logs = generate3MonthLogs("USER_1004");
+    const baseline = trainUserBaseline(logs, "USER_1004");
+    const fb = baseline.financialBaseline;
+
+    const currentTx = {
+      transactionId: body.transaction_id || "TX_99218",
+      amount: body.amount ?? 8000000,
+      targetAccount: body.target_account || "356-0012-9981",
+      isNewTargetAccount: body.is_new_target_account ?? true,
+      requestTime: body.request_time || "02:15 AM",
+      pinErrorCount: body.pin_error_count ?? 2,
+      biometricAnomalyScore: body.biometric_anomaly_score ?? 0.89
+    };
+
+    // 2. Gemini 프롬프트 작성
+    const prompt = `
+[사용자의 최근 3개월 학습된 거래 패턴 (Baseline)]
+- 평소 평균 이체 금액: ${fb.avgTransferAmount.toLocaleString()}원
+- 최근 3개월간 최대 이체 금액: ${fb.maxTransferAmount.toLocaleString()}원 (상위 5% 기준: ${fb.p95ThresholdAmount.toLocaleString()}원)
+- 평소 이용 시간대: ${fb.usualActiveHours}
+- 등록된 주 거래 계좌: ${fb.knownAccounts.join(', ')}
+
+[현재 실시간 이체 요청 데이터 (Current Transaction)]
+- 요청 금액: ${currentTx.amount.toLocaleString()}원
+- 수신 계좌: ${currentTx.targetAccount} (신규 계좌 여부: ${currentTx.isNewTargetAccount})
+- 시도 시각: ${currentTx.requestTime}
+- 비밀번호 오입력 횟수: ${currentTx.pinErrorCount}회
+- 터치 바이오마커 이탈률: ${(currentTx.biometricAnomalyScore * 100).toFixed(0)}%
+
+위 학습 데이터와 현재 거래 데이터를 대조 분석하여 Smart Fraud Shield 리포트를 생성하세요.
+`;
+
+    const systemInstruction = `
+당신은 금융사의 이상 거래 스마트 차단 엔진입니다.
+사용자의 '학습된 3개월 패턴'과 '현재 거래' 간의 이탈 격차를 분석하세요.
+현재 거래가 평소 최대 이체 금액을 크게 초과하고, 활동 시간대 및 행동 패턴을 동시에 이탈한 경우 risk_score를 80 이상으로 산출하고 status를 'BLOCKED'로 처리하세요.
+`;
+
+    // 3. 최신 모델 gemini-3.6-flash 호출
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.6-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: systemInstruction,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            status: { type: Type.STRING, description: "'BLOCKED' 또는 'ALLOW'" },
+            risk_score: { type: Type.INTEGER, description: "위험 확률 (0~100)" },
+            ui_display: {
+              type: Type.OBJECT,
+              properties: {
+                status_tag: { type: Type.STRING, description: "상태 태그 (예: '1차 동결 완료')" },
+                main_title: { type: Type.STRING, description: "앱 메인 경고 문구" },
+                sub_title: { type: Type.STRING, description: "보호자 안내 문구" },
+              },
+              required: ["status_tag", "main_title", "sub_title"],
+            },
+            summary_reasons: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: "화면에 불릿으로 보여줄 핵심 사유 2~3개"
+            },
+          },
+          required: ["status", "risk_score", "ui_display", "summary_reasons"],
+        },
+        temperature: 0.1,
+      },
+    });
+
+    const report = JSON.parse(response.text!);
+
+    return NextResponse.json({
+      ...report,
+      _debug_baseline: baseline,
+      _debug_transaction: currentTx
+    });
+
+  } catch (error: any) {
+    console.error('FDS Engine Error:', error);
+    return NextResponse.json({ 
+      error: 'FDS 분석 실패', 
+      details: error?.message || String(error) 
+    }, { status: 500 });
+  }
+}
