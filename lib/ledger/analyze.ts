@@ -1,4 +1,5 @@
 import type {
+  Institution,
   Baseline,
   BehaviorSelf,
   DecisionSelf,
@@ -200,4 +201,25 @@ export function analyze(ledger: Ledger, track: Track | null): LedgerInsight {
     baseline: computeBaseline(ledger),
     persona: null,
   };
+}
+
+/**
+ * 신탁·후견 절차를 어디로 가져갈지 정한다.
+ *
+ * 설문에서 묻지 않는다. 주거래 은행은 이력에 그대로 남고, 물어보면 오히려 부정확하다.
+ * 주거래에 신탁 창구가 없으면(인터넷은행 등) 그 사실을 밝히고 다음 기관을 제안한다 —
+ * 조용히 다른 기관을 내밀면 왜 그 은행인지 알 수 없다.
+ */
+export function trustContact(ledger: Ledger | null): {
+  primary: Institution;
+  recommended: Institution;
+  redirected: boolean;
+} | null {
+  const list = ledger?.institutions;
+  if (!list?.length) return null;
+  const primary = list[0];
+  const recommended = primary.trustDesk
+    ? primary
+    : (list.find((i) => i.trustDesk) ?? primary);
+  return { primary, recommended, redirected: recommended.name !== primary.name };
 }

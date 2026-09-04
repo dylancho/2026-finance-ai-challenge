@@ -6,15 +6,12 @@ import { useRouter } from "next/navigation";
 import TrustDoc from "./TrustDoc";
 import GuardianshipDoc from "./GuardianshipDoc";
 import ExpenseDoc from "./ExpenseDoc";
-import ConsultationModal from "./ConsultationModal";
 import ContrastPanel from "./ContrastPanel";
 import Badge from "../common/Badge";
 import { buildDesign, findGaps, readinessAxes } from "../../lib/design";
 import { TRACK_META } from "../../lib/questions";
 import {
   demoProfile,
-  firstPerson,
-  firstAmount,
   readProfile,
   saveProfile,
   setAnswer,
@@ -31,7 +28,7 @@ import {
   setResolution,
   clearResolution,
 } from "../../lib/ledger";
-import { personLabel, won } from "../../lib/format";
+
 import type { Contrast, LedgerState, Profile, Resolution } from "../../lib/types";
 import { emptyLedgerState } from "../../lib/ledger";
 
@@ -41,7 +38,6 @@ export default function PlanShell() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tab, setTab] = useState<TabKey>("expense");
-  const [modal, setModal] = useState(false);
   const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
   const [interpretations, setInterpretations] = useState<
     Record<string, { text: string; source: "rule" | "llm" }>
@@ -131,29 +127,6 @@ export default function PlanShell() {
 
   const axes = readinessAxes(design);
   const meta = TRACK_META[profile.track];
-  const manager = firstPerson(profile, "B12", "C07", "A07", "D11");
-  const monthly = firstAmount(profile, "B07", "A02", "D09");
-
-  const summary = [
-    `목적: ${meta.name}`,
-    `대상: ${profile.subject === "family" ? `${profile.subjectRelation ?? "가족"} (대리 준비)` : "본인"}`,
-    `의사능력 상태: ${
-      { full: "스스로 판단 가능", declining: "판단력 저하 조짐", diagnosed: "진단 받음", incident: "금융 사고 발생" }[
-        profile.capacity ?? "full"
-      ]
-    }`,
-    design.trust
-      ? design.trust.available
-        ? `검토 구조: ${design.trust.type.name} (완성도 ${design.trust.completeness}%)`
-        : "신탁: 신규 설정 곤란 — 사유 확인 필요"
-      : "신탁 설계 해당 없음",
-    design.guardianship
-      ? `후견 판정: ${design.guardianship.verdict.name}`
-      : "후견 설계 해당 없음",
-    manager ? `1차 관리자: ${personLabel(manager)}` : "1차 관리자 미지정",
-    monthly ? `월 생활비: ${won(monthly)}` : "월 생활비 미설정",
-    `미결정 항목 ${gaps.length}건`,
-  ];
 
   const tabs: { key: TabKey; label: string; n?: string }[] = [];
   if (design.trust) tabs.push({ key: "trust", label: "신탁설계서", n: design.trust.available ? `${design.trust.completeness}%` : "제한" });
@@ -280,19 +253,12 @@ export default function PlanShell() {
           <Link href="/simulation" className="btn outline">
             먼저 시뮬레이션 보기
           </Link>
-          <button className="btn" onClick={() => setModal(true)}>
-            전문가 상담 준비하기
-          </button>
+          <Link href="/referral" className="btn">
+            전문가에게 전달할 의뢰서 만들기
+          </Link>
         </div>
       </section>
 
-      {modal && (
-        <ConsultationModal
-          design={design}
-          summary={summary}
-          onClose={() => setModal(false)}
-        />
-      )}
     </div>
   );
 }

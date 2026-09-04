@@ -1,4 +1,5 @@
 import type {
+  Institution,
   DrawdownWindow,
   Incident,
   Ledger,
@@ -145,6 +146,36 @@ export interface GenerateOptions {
   decline?: boolean;
   /** decline 이 시작되는 지점 (년차, 1-based) */
   declineFromYear?: number;
+}
+
+/**
+ * 합성 이력의 거래 기관.
+ *
+ * trustDesk 가 false 인 기관을 섞어 둔다. 주거래가 인터넷은행이면 그쪽에는 신탁 창구가
+ * 없고, 그 사실을 알려주는 것이 이 데이터의 쓸모다. 전부 취급 기관으로 채우면 판정이
+ * 늘 같은 답을 내고 로직이 있으나 마나 해진다.
+ */
+const BANKS: { name: string; trustDesk: boolean }[] = [
+  { name: "하나은행", trustDesk: true },
+  { name: "KB국민은행", trustDesk: true },
+  { name: "신한은행", trustDesk: true },
+  { name: "우리은행", trustDesk: true },
+  { name: "카카오뱅크", trustDesk: false },
+  { name: "토스뱅크", trustDesk: false },
+];
+
+function pickInstitutions(rng: () => number): Institution[] {
+  const pool = [...BANKS];
+  const picked: { name: string; trustDesk: boolean }[] = [];
+  for (let i = 0; i < 3 && pool.length; i++) {
+    picked.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+  }
+  // 주거래에 힘을 실어 비중을 벌린다
+  const raw = picked.map((_, i) => 6 - i * 2 + rng());
+  const sum = raw.reduce((a, b) => a + b, 0);
+  return picked
+    .map((b, i) => ({ ...b, share: Math.round((raw[i] / sum) * 100) / 100 }))
+    .sort((a, b) => b.share - a.share);
 }
 
 export function generateLedger(seed: string, opts: GenerateOptions = {}): Ledger {
@@ -353,6 +384,7 @@ export function generateLedger(seed: string, opts: GenerateOptions = {}): Ledger
     baselineYears,
     months,
     trades,
+    institutions: pickInstitutions(rng),
     incidents,
     drawdowns,
     holdings: {

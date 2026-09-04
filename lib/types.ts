@@ -289,6 +289,17 @@ export interface ScenarioClause {
   ref: string;
   label: string;
   detail: string;
+  /** 집행 근거가 없어 잠긴 조항. applyAuthority() 가 표시한다. */
+  locked?: boolean;
+}
+
+/** 노드가 집행되지 못한 이유. status === "noauthority" 일 때만 있다. */
+export interface NodeAuthority {
+  reason: string;
+  instrumentName: string;
+  effectRule: string;
+  /** 잠긴 조항 참조 목록 */
+  refs: string[];
 }
 
 export interface ScenarioNode {
@@ -296,9 +307,15 @@ export interface ScenarioNode {
   title: string;
   detail: string;
   clauses: ScenarioClause[];
-  status: "ok" | "gap";
+  /**
+   * ok           집행됨
+   * gap          안 채운 칸 — 질문에 답하면 풀린다
+   * noauthority  채웠지만 집행 근거가 없는 칸 — 계약을 체결해야 풀린다
+   */
+  status: "ok" | "gap" | "noauthority";
   gapQid?: string;
   gapMessage?: string;
+  authority?: NodeAuthority;
 }
 
 export interface Scenario {
@@ -313,6 +330,8 @@ export interface ScenarioResult {
   nodes: ScenarioNode[];
   verdict: string[];
   gapCount: number;
+  /** applyAuthority() 를 거친 뒤에만 채워진다 */
+  blockedCount?: number;
 }
 
 /* ── 과거 금융이력 (Ledger) ────────────────────────────
@@ -368,6 +387,18 @@ export type IncidentType =
   | "new_payee_large"
   | "unused_subscription";
 
+/**
+ * 거래 금융기관. 고정비 자동이체와 입출금이 어느 기관을 거쳤는지의 관찰값이다.
+ * 설문에서 묻지 않는다 — 물어보면 대개 정확히 답하지 못하고, 이력에는 그대로 남는다.
+ */
+export interface Institution {
+  name: string;
+  /** 고정비 자동이체·이체 건수 기준 비중 0~1 */
+  share: number;
+  /** 신탁·후견 관련 상품을 취급하는 기관인가 */
+  trustDesk: boolean;
+}
+
 export interface Incident {
   date: string;
   type: IncidentType;
@@ -394,6 +425,8 @@ export interface Ledger {
   baselineYears: number;
   months: MonthRoll[];
   trades: TradeEvent[];
+  /** 거래 금융기관. 비중 내림차순 */
+  institutions?: Institution[];
   incidents: Incident[];
   drawdowns: DrawdownWindow[];
   holdings: { equity: number; bond: number; cash: number };
@@ -555,4 +588,82 @@ export interface LedgerState {
   resolutions: Record<string, Resolution>;
   /** 트리거 게이트용 증빙. 없으면 AI 경보만으로는 발동하지 않는다. */
   proof: MedicalProof | null;
+}
+
+/* ── 집행권한 (Authority) ──────────────────────────────
+ * Profile 이 "선언", Ledger 가 "관찰"이라면 Authority 는 "근거"다.
+ * 설계서는 초안이고, 집행 권한은 체결된 계약서에서 나온다.
+ * docs/superpowers/specs/2026-09-03-authority-axis-design.md 참조.
+ */
+
+export type AuthorityStage =
+  | "draft" // AI 초안. 집행 근거 없음
+  | "sent" // 전문가에게 전달됨
+  | "executing" // 체결 절차 진행 중 (공증 · 등기 · 심판 대기)
+  | "effective" // 효력 발생. 이때부터 집행 근거
+  | "unavailable"; // 의사능력 흠결 등으로 신규 설정 불가
+
+export type InstrumentKind =
+  | "trust"
+  | "voluntary_guardianship"
+  | "legal_guardianship"
+  | "bank_mandate";
+
+export type ActorKind = "본인" | "보호자" | "전문가" | "법원" | "금융기관";
+
+export interface Statute {
+  law: string;
+  article: string;
+  title: string;
+  /** 조문 전문. 옮겨 적되 고치지 않는다. */
+  text: string;
+  url: string;
+}
+
+export interface AuthorityStep {
+  n: number;
+  label: string;
+  by: ActorKind;
+  detail?: string;
+  period?: string;
+  /** 의사능력에 따라 이 단계에서 주의할 점 */
+  caution?: string;
+}
+
+export interface Instrument {
+  kind: InstrumentKind;
+  name: string;
+  stage: AuthorityStage;
+  /**
+   * 이 문서가 없으면 집행 근거가 없는 조항들. `"doc:ref"` 형식.
+   * `"trust:*"` 처럼 문서 전체를 덮을 수 있다.
+   */
+  covers: string[];
+  /** 효력이 언제 발생하는지. 제도마다 다르다 */
+  effectRule: string;
+  steps: AuthorityStep[];
+  unavailableReason?: string;
+  /** unavailable 일 때의 대안 경로 */
+  fallback?: { name: string; why: string }[];
+  /** 근거 조문. 명문 근거가 없는 문서에는 비어 있다. */
+  basis: Statute[];
+}
+
+export interface AuthorityState {
+  version: 1;
+  /**
+   * 단계만 저장한다. covers · steps · effectRule 은 설계서에서 매번 파생한다.
+   * 답변이 바뀌면 조항이 바뀌므로 스냅샷을 저장하면 그 순간 낡는다.
+   * 저장하는 것은 사람이 앱 바깥에서 한 일(체결 여부)뿐이다.
+   */
+  stages: Partial<Record<InstrumentKind, AuthorityStage>>;
+  sentAt: number | null;
+  /** 누구에게 전달했는지. 전달만 기록하고 실제 발송은 하지 않는다. */
+  sentTo: string | null;
+}
+
+export interface ExecutionCheck {
+  ok: boolean;
+  instrument?: Instrument;
+  reason?: string;
 }

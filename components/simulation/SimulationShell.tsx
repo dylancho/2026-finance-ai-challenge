@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Timeline from "./Timeline";
+import AuthorityBar from "./AuthorityBar";
 import { buildDesign, runScenario, scenariosFor } from "../../lib/design";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import { docName } from "../../lib/ai/rules";
@@ -18,7 +19,22 @@ import {
   saveLedgerState,
   setProof,
 } from "../../lib/ledger";
-import type { LedgerState, MedicalProof, Profile } from "../../lib/types";
+import {
+  applyAuthority,
+  buildInstruments,
+  emptyAuthorityState,
+  applyDemoAuthority,
+  readAuthorityState,
+  saveAuthorityState,
+  setStage,
+} from "../../lib/authority";
+import type {
+  AuthorityState,
+  InstrumentKind,
+  LedgerState,
+  MedicalProof,
+  Profile,
+} from "../../lib/types";
 
 export default function SimulationShell() {
   const router = useRouter();
@@ -26,6 +42,7 @@ export default function SimulationShell() {
   const [picked, setPicked] = useState<string | null>(null);
   const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
   const [phase, setPhase] = useState<1 | 2 | 3>(1);
+  const [auth, setAuth] = useState<AuthorityState>(emptyAuthorityState());
 
   useEffect(() => {
     const demo = new URLSearchParams(window.location.search).get("demo");
@@ -35,6 +52,7 @@ export default function SimulationShell() {
         saveProfile(d);
         setProfile(d);
         setLedgerState(applyDemoLedger(demo));
+        setAuth(applyDemoAuthority());
         return;
       }
     }
@@ -45,6 +63,7 @@ export default function SimulationShell() {
     }
     setProfile(p);
     setLedgerState(readLedgerState());
+    setAuth(readAuthorityState());
   }, [router]);
 
   const scenarios = useMemo(() => (profile ? scenariosFor(profile) : []), [profile]);
@@ -92,10 +111,23 @@ export default function SimulationShell() {
   const attachProof = (p: MedicalProof | null) => {
     setLedgerState((s) => saveLedgerState(setProof(s, p)));
   };
-  const result = useMemo(
-    () => (profile && design && picked ? runScenario(profile, design, picked) : null),
-    [profile, design, picked],
+  const instruments = useMemo(
+    () => (profile && design ? buildInstruments(profile, design, auth) : []),
+    [profile, design, auth],
   );
+
+  /**
+   * scenario.ts 의 결과를 그대로 받아 집행 근거만 덧씌운다.
+   * 조항이 무엇을 하는지는 그쪽이 이미 계산했다.
+   */
+  const result = useMemo(() => {
+    if (!profile || !design || !picked) return null;
+    const base = runScenario(profile, design, picked);
+    return base ? applyAuthority(base, instruments) : null;
+  }, [profile, design, picked, instruments]);
+
+  const toggleStage = (kind: InstrumentKind, effective: boolean) =>
+    setAuth((s) => saveAuthorityState(setStage(s, kind, effective ? "effective" : "draft")));
 
   if (!profile || !profile.track) {
     return (
@@ -106,6 +138,7 @@ export default function SimulationShell() {
   }
 
   const firstGapIdx = result?.nodes.findIndex((n) => n.status === "gap") ?? -1;
+  const blockedCount = result?.blockedCount ?? 0;
 
   return (
     <div className="sim shell-wide">
@@ -126,6 +159,14 @@ export default function SimulationShell() {
           active={phase}
           onPick={setPhase}
           onProof={attachProof}
+        />
+      )}
+
+      {instruments.length > 0 && (
+        <AuthorityBar
+          instruments={instruments}
+          blockedCount={blockedCount}
+          onToggle={toggleStage}
         />
       )}
 
@@ -154,7 +195,9 @@ export default function SimulationShell() {
                 key={n.n}
                 style={{ animationDelay: `${i * 90}ms` }}
               >
-                <div className="idx mono">{n.status === "gap" ? "!" : n.n}</div>
+                <div className="idx mono">
+                  {n.status === "gap" ? "!" : n.status === "noauthority" ? "🔒" : n.n}
+                </div>
                 <div className="box">
                   <h4>{n.title}</h4>
                   <p>{n.detail}</p>
@@ -162,7 +205,7 @@ export default function SimulationShell() {
                   {n.clauses.length > 0 && (
                     <div className="clauses">
                       {n.clauses.map((c, ci) => (
-                        <div className="cl" key={ci}>
+                        <div className={`cl${c.locked ? " locked" : ""}`} key={ci}>
                           <span className="r">
                             {docName(c.doc).replace("설계서", "")} {c.ref}
                           </span>
@@ -170,6 +213,17 @@ export default function SimulationShell() {
                           <span className="d">{c.detail}</span>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {n.status === "noauthority" && n.authority && (
+                    <div className="authmsg">
+                      <b>집행 근거 없음</b>
+                      {n.authority.reason}
+                      <em>효력 발생: {n.authority.effectRule}</em>
+                      <Link href="/referral" className="btn sm" style={{ marginTop: 12 }}>
+                        전문가에게 전달할 의뢰서 만들기 →
+                      </Link>
                     </div>
                   )}
 
@@ -203,6 +257,11 @@ export default function SimulationShell() {
             {result.gapCount > 0 && (
               <Link href="/plan" className="btn">
                 공백 {result.gapCount}건 채우러 가기
+              </Link>
+            )}
+            {blockedCount > 0 && (
+              <Link href="/referral" className="btn">
+                집행 근거 {blockedCount}건 만들러 가기
               </Link>
             )}
           </aside>

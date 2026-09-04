@@ -522,10 +522,19 @@ export function buildTrustDesign(p: Profile): TrustDesign | null {
     type,
     clauses,
     flags,
+    // 요율을 숫자로 적지 않는다. 이 표는 은행 WM 에게 제출되는 문서에 그대로 실리고,
+    // 그 숫자를 가장 잘 아는 사람들이 읽는다. 공시로 확인되는 것만 남긴다.
     cost: [
-      { label: "신탁 설정 보수", value: "설정액의 0.1~0.5% 수준 (기관별 상이)" },
-      { label: "신탁 관리 보수", value: "잔액의 연 0.3~1.0% 수준" },
-      { label: "최소 설정금액", value: "기관에 따라 5천만원~1억원 이상" },
+      {
+        label: "신탁보수",
+        value: "기관·상품별로 신탁계약에서 정합니다 (계약·집행·관리 보수로 나뉘는 것이 일반적)",
+      },
+      {
+        label: "최저 수탁금액",
+        value:
+          "상품에 따라 편차가 큽니다 — KB 간편형 유언대용신탁 1,000만원(2025.7 출시) / 하나 Living Trust 5억원 이상",
+      },
+      { label: "가입 연령", value: "상품별 상이 (만 19세 이상 또는 만 40세 이상)" },
       { label: "부동산 편입 시", value: "취득세·등록면허세 별도 검토 필요" },
     ],
     completeness,
