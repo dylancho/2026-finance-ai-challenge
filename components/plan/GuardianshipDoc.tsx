@@ -1,8 +1,9 @@
 import { FlagCard } from "./ClauseCard";
+import EditClauseLink from "./EditClauseLink";
 import Badge from "../common/Badge";
 import Disclaimer from "../common/Disclaimer";
 import { personLabel } from "../../lib/format";
-import type { GuardianshipDesign, ScopeItem } from "../../lib/types";
+import type { GuardianshipDesign, Profile, ScopeItem } from "../../lib/types";
 
 const GRANT_META = {
   delegate: { tone: "ok" as const, label: "위임" },
@@ -10,10 +11,23 @@ const GRANT_META = {
   exclude: { tone: "neutral" as const, label: "제외" },
 };
 
-function ScopeTable({ items, title }: { items: ScopeItem[]; title: string }) {
+function ScopeTable({
+  items,
+  title,
+  profile,
+  match,
+}: {
+  items: ScopeItem[];
+  title: string;
+  profile: Profile;
+  match: (label: string) => boolean;
+}) {
   return (
     <>
-      <h4 style={{ margin: "26px 0 12px", fontSize: 15 }}>{title}</h4>
+      <h4 style={{ margin: "26px 0 12px", fontSize: 15 }}>
+        {title}
+        <EditClauseLink profile={profile} doc="guardianship" clause="제3조" match={match} />
+      </h4>
       <div className="scope-grid">
         {items.map((it) => (
           <div
@@ -32,7 +46,13 @@ function ScopeTable({ items, title }: { items: ScopeItem[]; title: string }) {
   );
 }
 
-export default function GuardianshipDoc({ design }: { design: GuardianshipDesign }) {
+export default function GuardianshipDoc({
+  design,
+  profile,
+}: {
+  design: GuardianshipDesign;
+  profile: Profile;
+}) {
   return (
     <div className="doc">
       <div>
@@ -56,7 +76,10 @@ export default function GuardianshipDoc({ design }: { design: GuardianshipDesign
           )}
         </div>
 
-        <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>판정 경로</h4>
+        <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>
+          판정 경로
+          <EditClauseLink profile={profile} doc="guardianship" clause="제1조" />
+        </h4>
         <div className="tree">
           {design.tree.map((n, i) => (
             <div className="tree-node" key={i}>
@@ -66,8 +89,18 @@ export default function GuardianshipDoc({ design }: { design: GuardianshipDesign
           ))}
         </div>
 
-        <ScopeTable items={design.scopeProperty} title="재산관리 사무 (9항목)" />
-        <ScopeTable items={design.scopePersonal} title="신상보호 사무 (6항목)" />
+        <ScopeTable
+          items={design.scopeProperty}
+          title="재산관리 사무 (9항목)"
+          profile={profile}
+          match={(l) => !l.includes("신상보호")}
+        />
+        <ScopeTable
+          items={design.scopePersonal}
+          title="신상보호 사무 (6항목)"
+          profile={profile}
+          match={(l) => l.includes("신상보호")}
+        />
 
         <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>효력 발생 요건</h4>
         <div className="clause set">
@@ -80,7 +113,10 @@ export default function GuardianshipDoc({ design }: { design: GuardianshipDesign
 
         {design.roadmap.length > 0 && (
           <>
-            <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>절차 로드맵</h4>
+            <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>
+              절차 로드맵
+              <EditClauseLink profile={profile} doc="guardianship" clause="제5조" />
+            </h4>
             <div className="card" style={{ padding: "6px 22px" }}>
               {design.roadmap.map((s) => (
                 <div className="roadmap-step" key={s.n}>

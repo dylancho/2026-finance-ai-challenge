@@ -9,6 +9,12 @@ import type {
 } from "../types";
 import { choiceOf, firstPerson, multiOf, personOf } from "../profile";
 import { personLabel } from "../format";
+import { hasChapter, isUnified } from "../questions";
+
+/** 본인이 미리 정해두는 모드 (옛 트랙 B, 또는 의료·요양 챕터 선언). */
+function futureMode(p: Profile): boolean {
+  return p.track === "future" || (isUnified(p) && hasChapter(p, "medical"));
+}
 
 /* ── 사무범위 기본 정의 ──────────────────────────── */
 
@@ -125,7 +131,7 @@ function decideVerdict(p: Profile): {
     });
 
     const wantsPrearrange =
-      p.track === "future" ||
+      futureMode(p) ||
       p.track === "estate" ||
       choiceOf(p, "C12") === "yes_agree";
 
@@ -379,7 +385,8 @@ function statutoryRoadmap(
 /* ── 본체 ────────────────────────────────────────── */
 
 export function buildGuardianshipDesign(p: Profile): GuardianshipDesign | null {
-  if (p.track === "daily") return null;
+  // 후견 초안은 의료·요양 영역(신상 사무·요양 방식)을 선언했을 때만 만든다.
+  if (isUnified(p) && !hasChapter(p, "medical")) return null;
   if (p.track === "estate") return null;
 
   const verdict = decideVerdict(p);
@@ -434,7 +441,7 @@ export function buildGuardianshipDesign(p: Profile): GuardianshipDesign | null {
 
   if (
     (p.capacity === "diagnosed" || p.capacity === "incident") &&
-    p.track === "future"
+    futureMode(p)
   ) {
     flags.push({
       level: "critical",
@@ -471,7 +478,7 @@ export function buildGuardianshipDesign(p: Profile): GuardianshipDesign | null {
   }
 
   const eol = scopePersonal.find((s) => s.key === "eol");
-  if (eol?.grant === "exclude" && p.track === "future") {
+  if (eol?.grant === "exclude" && futureMode(p)) {
     flags.push({
       level: "info",
       title: "연명의료에 관한 뜻이 비어 있습니다",
@@ -497,7 +504,7 @@ export function buildGuardianshipDesign(p: Profile): GuardianshipDesign | null {
     scopeProperty.some((s) => s.grant === "delegate"),
     scopePersonal.some((s) => s.grant === "delegate"),
     supervisorAssigned,
-    hasDocs.size > 0 || p.track === "future",
+    hasDocs.size > 0 || futureMode(p),
   ];
   const done = checks.filter(Boolean).length;
 

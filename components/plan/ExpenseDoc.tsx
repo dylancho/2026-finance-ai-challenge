@@ -1,8 +1,9 @@
 import { FlagCard } from "./ClauseCard";
+import EditClauseLink from "./EditClauseLink";
 import Badge from "../common/Badge";
 import Disclaimer from "../common/Disclaimer";
 import { won, wonShort } from "../../lib/format";
-import type { ExpenseDesign } from "../../lib/types";
+import type { ExpenseDesign, Profile } from "../../lib/types";
 
 function Sustainability({ s }: { s: ExpenseDesign["sustainability"] }) {
   if (!s.series.length || s.assets <= 0) {
@@ -102,13 +103,21 @@ function Sustainability({ s }: { s: ExpenseDesign["sustainability"] }) {
   );
 }
 
-export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
+export default function ExpenseDoc({
+  design,
+  profile,
+}: {
+  design: ExpenseDesign;
+  profile: Profile;
+}) {
   const activeRules = design.fraudRules.filter((r) => r.active).length;
 
   return (
     <div className="doc">
       <div>
-        <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>§1. 3층 계좌 구조</h4>
+        <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>제1조 3층 계좌 구조
+          <EditClauseLink profile={profile} doc="expense" clause="제1조" />
+        </h4>
         <div className="accounts">
           {design.accounts.map((a) => (
             <div className="account" key={a.n}>
@@ -128,7 +137,9 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           ))}
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§2. 자동이체 매트릭스</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제2조 자동이체 매트릭스
+          <EditClauseLink profile={profile} doc="expense" clause="제2조" />
+        </h4>
         {design.transfers.length ? (
           <div className="table-wrap">
             <table className="data">
@@ -175,7 +186,9 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           </p>
         )}
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§3. 한도 정책</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제3조 한도 정책
+          <EditClauseLink profile={profile} doc="expense" clause="제3조" />
+        </h4>
         <div className="table-wrap">
           <table className="data">
             <tbody>
@@ -193,10 +206,11 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
         </div>
 
         <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>
-          §4. 이상거래 룰셋{" "}
+          제4조 이상거래 룰셋{" "}
           <span className="mono" style={{ fontSize: 12, color: "var(--faint)" }}>
             {activeRules}/{design.fraudRules.length} 활성
           </span>
+          <EditClauseLink profile={profile} doc="expense" clause="제4조" />
         </h4>
         <div className="table-wrap">
           <table className="data">
@@ -227,7 +241,9 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           </table>
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§5. 승인·알림 체계</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제5조 승인·알림 체계
+          <EditClauseLink profile={profile} doc="expense" clause="제5조" />
+        </h4>
         <div className="clause set">
           <ul className="clause-body">
             <li>① 통보 채널: {design.approval.channel}</li>
@@ -240,10 +256,52 @@ export default function ExpenseDoc({ design }: { design: ExpenseDesign }) {
           </ul>
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>§6. 지속가능성 추정</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제6조 지속가능성 추정
+          <EditClauseLink profile={profile} doc="expense" clause="제6조" />
+        </h4>
         <div className="card" style={{ padding: "18px 20px" }}>
           <Sustainability s={design.sustainability} />
         </div>
+
+        {/* 제7조 은 투자 챕터를 선언했을 때만 선다. 건너뛰면 조항을 비워 두지 않고 생략한다. */}
+        {design.invest && (
+          <>
+            <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>제7조 투자 원칙
+              <EditClauseLink profile={profile} doc="expense" clause="제7조" />
+            </h4>
+            <div className={`clause ${design.invest.status}`}>
+              <ul className="clause-body">
+                <li>
+                  ① 손대지 않을 자산군:{" "}
+                  {design.invest.forbiddenLabels.length
+                    ? design.invest.forbiddenLabels.join(", ")
+                    : profile.answers["I01"]
+                      ? "없음 (모든 자산군을 그대로 둔다)"
+                      : "— 아직 정해지지 않았습니다."}
+                </li>
+                <li>
+                  ② 위험자산 상한:{" "}
+                  {design.invest.riskCapPct !== undefined
+                    ? `전체 자산의 ${design.invest.riskCapPct}%`
+                    : "— 아직 정해지지 않았습니다."}
+                </li>
+                <li>
+                  ③ 시장이 25% 이상 급락하면:{" "}
+                  {design.invest.crashPolicy ?? "— 아직 정해지지 않았습니다."}
+                </li>
+                <li>
+                  ④ 판단이 어려워지면 운용은:{" "}
+                  {design.invest.handover ?? "— 아직 정해지지 않았습니다."}
+                </li>
+                {design.invest.stance && <li>⑤ 운용지침: {design.invest.stance}</li>}
+              </ul>
+              <p className="clause-note">
+                이 조항은 특정 상품이나 금융회사를 정하지 않습니다. 상황이 바뀌었을 때 검토
+                후보를 만드는 기준일 뿐입니다.
+              </p>
+            </div>
+          </>
+        )}
 
         <Disclaimer>
           위 계좌 구조와 룰셋은 설계 초안입니다. 실제 적용 가능한 한도·차단·알림 서비스의 명칭과

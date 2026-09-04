@@ -86,12 +86,12 @@ describe("위임장의 적용 범위", () => {
     // 신탁이 막힌 사용자에게 서비스가 권하는 '지금 당장 가능한 조치'가 이것이다.
     // 여기가 잠기면 그 안내가 거짓말이 된다.
     const insts = build("A");
-    expect(canExecute("expense", "§3", insts).ok).toBe(true);
-    expect(canExecute("expense", "§4", insts).ok).toBe(true);
+    expect(canExecute("expense", "제3조", insts).ok).toBe(true);
+    expect(canExecute("expense", "제4조", insts).ok).toBe(true);
   });
 
   it("자동이체 대행은 위임장이 있어야 집행된다", () => {
-    expect(canExecute("expense", "§2", build("A")).ok).toBe(false);
+    expect(canExecute("expense", "제2조", build("A")).ok).toBe(false);
   });
 });
 

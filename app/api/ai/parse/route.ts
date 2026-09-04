@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
+import { guard, GLOBAL, PER_CALLER } from "../../../../lib/ratelimit";
 
 export const runtime = "nodejs";
 
@@ -8,6 +9,16 @@ export const runtime = "nodejs";
  * ANTHROPIC_API_KEY 가 없으면 204 를 돌려주고, 클라이언트는 룰 엔진 결과를 그대로 쓴다.
  * 데모 환경에서 이 라우트가 죽어도 인터뷰는 정상 진행된다.
  */
+
+/**
+ * 추출층.
+ *
+ * 출력이 좁다 — 주어진 enum 에서 고르거나 정수 하나를 낸다. 게다가 룰 엔진이
+ * 쉬운 경우를 이미 다 먹고, 신뢰도가 낮은 문장만 여기로 온다. 체급을 올려도
+ * 얻는 게 적고, 사용자는 채팅창에서 문장마다 기다리므로 지연이 곧 체감 품질이다.
+ * 판단이 필요한 일은 판정층(/api/ai/narrate)이 맡는다.
+ */
+const MODEL = "claude-sonnet-5";
 
 interface IncomingQuestion {
   id: string;
@@ -92,12 +103,24 @@ const EXTRACT_TOOL: Anthropic.Tool = {
       },
     },
   },
-  strict: true,
+  // strict 를 켜지 않는다. 이 스키마는 kind 로 갈라지는 합집합이라
+  // 어떤 경우에도 쓰이지 않는 속성이 남는데, strict 는 모든 속성이
+  // required 이기를 요구해 400 이 난다. 대신 아래 describe() 가 질문
+  // 타입과 맞지 않는 추출을 null 로 걸러낸다.
 };
 
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return new NextResponse(null, { status: 204 });
+  }
+
+  // 공개 URL 이므로 폭주를 먼저 막는다. 막혀도 클라이언트는 룰 폴백으로 완주한다.
+  const limit = guard(req, "parse", PER_CALLER, GLOBAL);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { extracted: [], reason: "rate_limited" },
+      { status: 429, headers: { "retry-after": String(limit.retryAfter) } },
+    );
   }
 
   let body: { input?: string; question?: IncomingQuestion };
@@ -116,8 +139,12 @@ export async function POST(req: Request) {
 
   try {
     const response = await client.messages.create({
-      model: "claude-opus-5",
-      max_tokens: 2000,
+      model: MODEL,
+      // thinking 토큰이 이 한도를 같이 먹는다. 2000 이면 툴 호출이 잘릴 수 있다.
+      max_tokens: 4000,
+      // thinking 은 기본으로 켜져 있다. 값 추출에 깊은 사고는 필요 없고,
+      // 사용자가 화면 앞에서 기다리므로 effort 를 낮춰 응답을 앞당긴다.
+      output_config: { effort: "low" },
       system: SYSTEM,
       tools: [EXTRACT_TOOL],
       tool_choice: { type: "tool", name: "record_extraction" },
@@ -180,8 +207,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ extracted: [], reason: "rate_limited" });
     }
     if (error instanceof Anthropic.APIError) {
+      // 조용히 폴백하면 무엇이 잘못됐는지 알 수 없다. 배포 로그에 남긴다.
+      console.error("[ai/parse] anthropic error", error.status, error.message);
       return NextResponse.json(
-        { extracted: [], reason: `api_${error.status}` },
+        { extracted: [], reason: `api_${error.status}`, detail: error.message?.slice(0, 300) },
         { status: 200 },
       );
     }

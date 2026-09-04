@@ -1,7 +1,18 @@
 /** NEXT v2 — 공용 타입 정의 */
 
+/**
+ * @deprecated 트랙 분리는 폐지됐다 (2026-09-03). 통합 플로우는 항상 "daily" 를 저장하고
+ * 질문 소속은 Chapter 로 구분한다. 보류된 future/caregiver 데모와 이력 시드 호환을
+ * 위해 값만 남겨 둔다.
+ */
 export type Track = "daily" | "future" | "caregiver" | "estate";
 export type Subject = "self" | "family";
+
+/**
+ * 인터뷰 챕터. core 는 필수, 나머지는 선택이다.
+ * 챕터를 건너뛰면 그 영역은 "아직 선언하지 않은 것" 으로 남아 설계서에 공백으로 표시된다.
+ */
+export type Chapter = "core" | "invest" | "estate" | "medical";
 export type Capacity = "full" | "declining" | "diagnosed" | "incident";
 
 export type DocKey = "trust" | "guardianship" | "expense";
@@ -24,13 +35,19 @@ export interface Option {
 
 export interface ClauseRef {
   doc: DocKey;
-  clause: string; // "제4조" | "§2"
+  clause: string; // "제4조" | "제2조"
   label: string;
 }
 
 export interface Question {
   id: string;
+  /** @deprecated 통합 플로우는 chapter 를 본다. 보류 트랙 데모·이력 호환용으로만 남긴다. */
   track: Track;
+  /**
+   * 통합 플로우에서의 소속 챕터. 없으면 통합 플로우에서는 묻지 않는 보류 질문이다
+   * (future/caregiver 트랙 전용 — 엔진의 fallback 체인은 그대로 참조한다).
+   */
+  chapter?: Chapter;
   section: string;
   prompt: string;
   helper?: string;
@@ -81,6 +98,10 @@ export interface TranscriptEntry {
 
 export interface Profile {
   version: 2;
+  /**
+   * 통합 플로우에서는 항상 "daily" 로 저장한다 (이력 시드·엔진 분기 호환).
+   * future/caregiver/estate 값은 보류된 트랙 데모(?demo=B/C/D)에서만 나온다.
+   */
   track: Track | null;
   subject: Subject | null;
   /** subject === 'family' 일 때 대상자와의 관계 */
@@ -88,6 +109,8 @@ export interface Profile {
   capacity: Capacity | null;
   answers: Answers;
   transcript: TranscriptEntry[];
+  /** 끝까지 답한 챕터. 여기 없는 챕터는 설계서에 "선언되지 않은 영역" 으로 표시된다. */
+  chaptersCompleted: Chapter[];
   updatedAt: number;
 }
 
@@ -233,6 +256,23 @@ export interface FraudRule {
   active: boolean;
 }
 
+/** 제7조 투자 원칙 — invest 챕터의 선언을 조항으로 옮긴 것. 챕터를 건너뛰면 null. */
+export interface InvestPrinciples {
+  /** 손대지 않을 자산군 (I01). 어드바이징의 하드 제약이다. */
+  forbidden: string[];
+  forbiddenLabels: string[];
+  /** 위험자산 상한 % (I02). 미선언이면 undefined */
+  riskCapPct?: number;
+  /** 급락 시 대응 (I03) */
+  crashPolicyCode?: string;
+  crashPolicy?: string;
+  /** 운용 이양 (I04 + I05) */
+  handover?: string;
+  /** 옛 B11 운용지침 */
+  stance?: string;
+  status: ClauseStatus;
+}
+
 export interface ExpenseDesign {
   accounts: AccountLayer[];
   transfers: TransferRow[];
@@ -260,6 +300,8 @@ export interface ExpenseDesign {
     series: { year: number; balance: number }[];
     careStartYear?: number;
   };
+  /** 제7조. 투자 챕터를 선언하지 않았으면 null — 조항을 비워 두지 않고 생략한다. */
+  invest: InvestPrinciples | null;
   flags: Flag[];
   completeness: number;
   missing: number;
@@ -274,7 +316,10 @@ export interface DesignSet {
 /* ── 공백 ─────────────────────────────────────────────── */
 
 export interface Gap {
+  /** 질문 단위 공백은 질문 id, 챕터 단위 공백은 "chapter:<id>" */
   qid: string;
+  /** 챕터 단위 공백 — 건너뛴 챕터 전체가 "선언되지 않은 판단 영역" 이다 */
+  chapter?: Chapter;
   doc: DocKey;
   clause: string;
   what: string;
@@ -322,7 +367,10 @@ export interface Scenario {
   id: string;
   name: string;
   caption: string;
+  /** @deprecated 보류 트랙 데모용. 통합 플로우는 chapters 를 본다. */
   tracks: Track[];
+  /** 이 시나리오가 성립하려면 선언돼 있어야 하는 챕터 (하나라도) */
+  chapters: Chapter[];
 }
 
 export interface ScenarioResult {

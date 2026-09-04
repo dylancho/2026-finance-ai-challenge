@@ -11,6 +11,7 @@ import {
   textOf,
 } from "../profile";
 import { personLabel, won } from "../format";
+import { hasChapter, isUnified } from "../questions";
 
 const NOT_SET = "— 아직 정해지지 않았습니다.";
 
@@ -31,7 +32,7 @@ function decideType(p: Profile) {
   let code = "self_benefit";
   let name = "치매대비 자익신탁 (특정금전신탁 기반)";
 
-  if (p.track === "estate") {
+  if (estateMode(p)) {
     if (continuous === "yes") {
       code = "successive";
       name = "수익자연속신탁";
@@ -179,8 +180,20 @@ const ASSET_LABEL: Record<string, string> = {
   business: "사업체·지분",
 };
 
+/** 상속 의사가 선언됐는가 — 유언대용·수익자연속 구조로 판정하는 모드. */
+function estateMode(p: Profile): boolean {
+  return p.track === "estate" || (isUnified(p) && hasChapter(p, "estate"));
+}
+
+/** 본인이 미래를 대비해 미리 정하는 모드 (옛 트랙 B, 또는 의료·요양 챕터 선언). */
+function futureMode(p: Profile): boolean {
+  return p.track === "future" || (isUnified(p) && hasChapter(p, "medical"));
+}
+
 export function buildTrustDesign(p: Profile): TrustDesign | null {
-  if (p.track === "daily") return null;
+  // 신탁 초안은 상속 또는 의료·요양 영역을 선언했을 때만 만든다.
+  // 코어만 답한 경우 신탁 용어를 한 번도 보여주지 않는다.
+  if (isUnified(p) && !hasChapter(p, "estate") && !hasChapter(p, "medical")) return null;
   if (p.track === "caregiver") {
     // 대리 트랙은 대상자의 의사능력에 따라 신탁 신규 설정 가능 여부가 갈린다.
     const signable = choiceOf(p, "C03");
@@ -258,9 +271,9 @@ export function buildTrustDesign(p: Profile): TrustDesign | null {
   const partyBody: string[] = [
     `위탁자: ${p.subject === "family" ? `${p.subjectRelation ?? "가족"} (본인 아님)` : "본인"}`,
     "수탁자: 신탁업 인가를 받은 금융기관 (추후 선정)",
-    `수익자(1차): ${p.track === "estate" ? "위탁자 본인 (생존 중)" : "위탁자 본인"}`,
+    `수익자(1차): ${estateMode(p) ? "위탁자 본인 (생존 중)" : "위탁자 본인"}`,
   ];
-  if (p.track === "estate") {
+  if (estateMode(p)) {
     const cont = choiceOf(p, "D04");
     partyBody.push(
       cont === "yes"
@@ -286,7 +299,7 @@ export function buildTrustDesign(p: Profile): TrustDesign | null {
     sources: ["B12", "B13", "B14", "D11", "D04"],
   });
 
-  if (primary && !backup && p.track === "future") {
+  if (primary && !backup && futureMode(p)) {
     flags.push({
       level: "warn",
       title: "예비 관리자가 지정되지 않았습니다",
@@ -474,7 +487,7 @@ export function buildTrustDesign(p: Profile): TrustDesign | null {
   const heirs = amountsOf(p, "D01");
   const heirCount = (heirs.child ?? 0) + (heirs.spouse ?? 0);
   const lawKnown = choiceOf(p, "D06");
-  if (p.track === "estate" && alloc.length && heirCount > 1) {
+  if (estateMode(p) && alloc.length && heirCount > 1) {
     const skew = alloc.length < heirCount;
     if (skew || lawKnown === "know_ignore" || lawKnown === "unknown") {
       flags.push({

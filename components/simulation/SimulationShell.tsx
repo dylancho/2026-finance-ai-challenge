@@ -19,6 +19,7 @@ import {
   saveLedgerState,
   setProof,
 } from "../../lib/ledger";
+import { insightFor } from "../../lib/insight";
 import {
   applyAuthority,
   buildInstruments,
@@ -72,7 +73,7 @@ export default function SimulationShell() {
 
   /* ── 30년 축 ── */
   const insight = useMemo(
-    () => (profile && ledgerState.ledger ? analyze(ledgerState.ledger, profile.track) : null),
+    () => (profile && ledgerState.ledger ? insightFor(ledgerState.ledger, profile) : null),
     [profile, ledgerState.ledger],
   );
 

@@ -1,14 +1,15 @@
 import type { Question } from "../types";
 
 /**
- * Track D — 상속·증여 연계
- * 유언대용신탁·수익자연속신탁 중심. 16문항.
+ * 상속 챕터 (선택) — 옛 Track D 를 그대로 이관했다.
+ * 유언대용신탁·수익자연속신탁 중심. 16문항. 질문 ID(D*)와 mapsTo 는 불변이다.
  */
 export const estateQuestions: Question[] = [
   /* ── D-1 상속인과 재산 ─────────────────────────── */
   {
     id: "D01",
     track: "estate",
+    chapter: "estate",
     section: "상속인과 재산",
     prompt: "상속인이 될 분들은 어떻게 되나요?",
     helper: "인원까지 적어 주시면 법정상속분과 유류분을 함께 계산해 드립니다.",
@@ -25,6 +26,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D02",
     track: "estate",
+    chapter: "estate",
     section: "상속인과 재산",
     prompt: "남기실 재산은 어떻게 되나요?",
     helper: "자산 종류에 따라 신탁 가능 여부와 세금 구조가 다릅니다.",
@@ -42,6 +44,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D03",
     track: "estate",
+    chapter: "estate",
     section: "상속인과 재산",
     prompt: "특정 재산을 특정한 분에게 남기고 싶으세요?",
     helper: "여기서 정한 배분이 잔여재산 귀속 조항(제11조)이 됩니다.",
@@ -53,6 +56,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D04",
     track: "estate",
+    chapter: "estate",
     section: "구조 설계",
     prompt: "배우자가 먼저 받고, 그다음 자녀에게 넘어가길 원하세요?",
     helper:
@@ -69,6 +73,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D05",
     track: "estate",
+    chapter: "estate",
     section: "구조 설계",
     prompt: "살아 있는 동안 미리 나눠주고 싶으세요?",
     helper: "생전 증여는 세금과 시점이, 사후 이전은 분쟁 가능성이 각각 다른 변수입니다.",
@@ -83,6 +88,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D06",
     track: "estate",
+    chapter: "estate",
     section: "구조 설계",
     prompt: "유류분에 대해 알고 계신가요?",
     helper:
@@ -98,6 +104,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D07",
     track: "estate",
+    chapter: "estate",
     section: "구조 설계",
     prompt: "상속인 중 특별히 더 지원이 필요한 분이 계신가요?",
     helper: "장애·미성년·투병 중인 상속인이 있으면 지급 방식 자체를 다르게 설계해야 합니다.",
@@ -113,6 +120,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D08",
     track: "estate",
+    chapter: "estate",
     section: "구조 설계",
     prompt: "사업체나 지분을 가지고 계신가요?",
     helper: "지분은 분할 상속 시 경영권이 흩어집니다. 별도 설계가 필요한 항목입니다.",
@@ -129,6 +137,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D09",
     track: "estate",
+    chapter: "estate",
     section: "내 노후",
     prompt: "그래도 내가 쓸 생활비는 매달 얼마가 필요할까요?",
     helper: "미리 나눠주고 정작 본인 노후자금이 부족해지는 경우가 적지 않습니다.",
@@ -139,12 +148,13 @@ export const estateQuestions: Question[] = [
     presets: [1_500_000, 2_000_000, 3_000_000],
     mapsTo: [
       { doc: "trust", clause: "제5조", label: "위탁자 생활비 유보" },
-      { doc: "expense", clause: "§1", label: "생활계좌" },
+      { doc: "expense", clause: "제1조", label: "생활계좌" },
     ],
   },
   {
     id: "D10",
     track: "estate",
+    chapter: "estate",
     section: "내 노후",
     prompt: "언제부터 실행하고 싶으세요?",
     helper: "실행 시기에 따라 로드맵의 단계가 달라집니다.",
@@ -160,6 +170,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D11",
     track: "estate",
+    chapter: "estate",
     section: "내 노후",
     prompt: "재산 관리를 맡길 사람은 누구인가요?",
     helper: "생전에는 관리자, 사후에는 집행자 역할을 겸하는 경우가 많습니다.",
@@ -169,6 +180,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D12",
     track: "estate",
+    chapter: "estate",
     section: "내 노후",
     prompt: "내 뜻대로 집행되는지 확인해 줄 사람은 누구인가요?",
     helper: "관리자와 다른 사람이어야 견제가 됩니다. 신탁감독인에 해당합니다.",
@@ -178,6 +190,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D13",
     track: "estate",
+    chapter: "estate",
     section: "내 노후",
     prompt: "절대 처분하지 말아야 할 재산이 있나요?",
     helper: "금지행위 조항(제8조)이 됩니다.",
@@ -194,6 +207,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D14",
     track: "estate",
+    chapter: "estate",
     section: "내 노후",
     prompt: "상속인들 사이에 다툼이 예상되나요?",
     helper: "예상되는 경우 신탁 구조가 유언보다 분쟁 방지에 유리한 편입니다.",
@@ -208,6 +222,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D15",
     track: "estate",
+    chapter: "estate",
     section: "내 노후",
     prompt: "세금 부담에 대해 어떻게 생각하고 계신가요?",
     helper: "NEXT는 세액을 계산하지 않습니다. 다만 어떤 항목을 세무 전문가와 확인해야 하는지 짚어 드립니다.",
@@ -222,6 +237,7 @@ export const estateQuestions: Question[] = [
   {
     id: "D16",
     track: "estate",
+    chapter: "estate",
     section: "내 노후",
     prompt: "가족에게 남기고 싶은 말씀이 있나요?",
     helper: "설계서 서문에 그대로 실립니다.",

@@ -41,6 +41,10 @@ export default function LoginShell() {
           <button className="btn lg" onClick={() => signIn()}>
             로그인하고 시작하기
           </button>
+          {/* 심사·시연용. 로그인 화면에서 멈추지 않도록 한 번에 통과시킨다. */}
+          <button className="btn outline lg" onClick={() => signIn("둘러보는 분")}>
+            로그인 없이 둘러보기
+          </button>
         </div>
 
         <p className="login-note mono">

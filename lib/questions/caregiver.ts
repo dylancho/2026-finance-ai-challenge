@@ -20,7 +20,7 @@ export const caregiverQuestions: Question[] = [
       { value: "sibling", label: "형제자매" },
       { value: "other", label: "그 외 친족" },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "§1", label: "청구권자 적격" }],
+    mapsTo: [{ doc: "guardianship", clause: "제1조", label: "청구권자 적격" }],
   },
   {
     id: "C02",
@@ -38,7 +38,7 @@ export const caregiverQuestions: Question[] = [
       { value: "hospital", label: "입원 중이거나 요양시설에 계신다" },
       { value: "none", label: "특별한 변화는 아직 없다" },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "§1", label: "의사능력 판단 근거" }],
+    mapsTo: [{ doc: "guardianship", clause: "제1조", label: "의사능력 판단 근거" }],
   },
   {
     id: "C03",
@@ -58,7 +58,7 @@ export const caregiverQuestions: Question[] = [
       },
       { value: "unknown", label: "잘 모르겠습니다" },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "§1", label: "제도 판정" }],
+    mapsTo: [{ doc: "guardianship", clause: "제1조", label: "제도 판정" }],
   },
   {
     id: "C04",
@@ -76,8 +76,8 @@ export const caregiverQuestions: Question[] = [
       { value: "none", label: "아직 급한 것은 없다" },
     ],
     mapsTo: [
-      { doc: "guardianship", clause: "§5", label: "긴급 조치" },
-      { doc: "expense", clause: "§4", label: "즉시 차단 항목" },
+      { doc: "guardianship", clause: "제5조", label: "긴급 조치" },
+      { doc: "expense", clause: "제4조", label: "즉시 차단 항목" },
     ],
   },
 
@@ -94,7 +94,7 @@ export const caregiverQuestions: Question[] = [
     step: 1,
     unit: "명",
     presets: [1, 2, 3, 4],
-    mapsTo: [{ doc: "guardianship", clause: "§5", label: "이해관계인" }],
+    mapsTo: [{ doc: "guardianship", clause: "제5조", label: "이해관계인" }],
   },
   {
     id: "C06",
@@ -113,7 +113,7 @@ export const caregiverQuestions: Question[] = [
         warn: "가족 간 다툼이 있으면 법원이 가족 대신 전문가 후견인을 선임하는 경우가 있습니다.",
       },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "§5", label: "절차 리스크" }],
+    mapsTo: [{ doc: "guardianship", clause: "제5조", label: "절차 리스크" }],
   },
   {
     id: "C07",
@@ -122,7 +122,7 @@ export const caregiverQuestions: Question[] = [
     prompt: "후견인이 된다면 누가 하시겠어요?",
     helper: "본인일 수도, 다른 가족일 수도, 전문가일 수도 있습니다.",
     type: "person",
-    mapsTo: [{ doc: "guardianship", clause: "§2", label: "후견인 후보" }],
+    mapsTo: [{ doc: "guardianship", clause: "제2조", label: "후견인 후보" }],
   },
   {
     id: "C12",
@@ -137,7 +137,7 @@ export const caregiverQuestions: Question[] = [
       { value: "no", label: "아직 말씀드리지 않았습니다" },
       { value: "cannot", label: "말씀드려도 이해가 어려운 상태입니다" },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "§1", label: "본인 동의" }],
+    mapsTo: [{ doc: "guardianship", clause: "제1조", label: "본인 동의" }],
   },
 
   /* ── C-3 재산과 지출 ───────────────────────────── */
@@ -158,8 +158,8 @@ export const caregiverQuestions: Question[] = [
       { value: "unknown", label: "파악이 안 됩니다" },
     ],
     mapsTo: [
-      { doc: "guardianship", clause: "§5", label: "재산목록" },
-      { doc: "expense", clause: "§6", label: "지속가능성" },
+      { doc: "guardianship", clause: "제5조", label: "재산목록" },
+      { doc: "expense", clause: "제6조", label: "지속가능성" },
     ],
   },
   {
@@ -178,7 +178,7 @@ export const caregiverQuestions: Question[] = [
       { value: "hospital", label: "병원 정기 치료비" },
       { value: "rent", label: "월세·대출 이자" },
     ],
-    mapsTo: [{ doc: "expense", clause: "§2", label: "자동이체 매트릭스" }],
+    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 매트릭스" }],
   },
   {
     id: "C10",
@@ -191,7 +191,7 @@ export const caregiverQuestions: Question[] = [
     max: 10_000_000,
     step: 100_000,
     presets: [400_000, 700_000, 1_500_000, 2_500_000],
-    mapsTo: [{ doc: "expense", clause: "§6", label: "월 수입" }],
+    mapsTo: [{ doc: "expense", clause: "제6조", label: "월 수입" }],
   },
 
   /* ── C-4 준비 상태 ─────────────────────────────── */
@@ -210,7 +210,7 @@ export const caregiverQuestions: Question[] = [
       { value: "resident", label: "주민등록등본" },
       { value: "none", label: "아직 없습니다" },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "§5", label: "구비서류" }],
+    mapsTo: [{ doc: "guardianship", clause: "제5조", label: "구비서류" }],
   },
   {
     id: "C13",
@@ -229,7 +229,7 @@ export const caregiverQuestions: Question[] = [
       { value: "medical", label: "의료행위 동의" },
       { value: "facility", label: "요양시설 계약" },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "§3", label: "사무범위" }],
+    mapsTo: [{ doc: "guardianship", clause: "제3조", label: "사무범위" }],
   },
   {
     id: "C14",
@@ -240,6 +240,6 @@ export const caregiverQuestions: Question[] = [
     type: "open",
     optional: true,
     placeholder: "예: 형이 아버지 통장을 혼자 관리하는 게 불안합니다.",
-    mapsTo: [{ doc: "guardianship", clause: "§5", label: "우선 검토사항" }],
+    mapsTo: [{ doc: "guardianship", clause: "제5조", label: "우선 검토사항" }],
   },
 ];

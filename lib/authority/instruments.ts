@@ -113,11 +113,11 @@ const MANDATE_STEPS: AuthorityStep[] = [
 
 /**
  * 지출설계서 전체를 위임장에 묶지 않는다.
- * 이상거래 차단(§4)과 한도 축소(§3)는 위임 없이 지금 당장 신청할 수 있고,
+ * 이상거래 차단(제4조)과 한도 축소(제3조)는 위임 없이 지금 당장 신청할 수 있고,
  * 신탁이 막힌 사용자에게 서비스가 권하는 즉시 조치가 바로 그것이다.
  * 대행이 필요한 항목만 건다.
  */
-const MANDATE_COVERS = ["expense:§2", "expense:§6"];
+const MANDATE_COVERS = ["expense:제2조", "expense:제6조"];
 
 export function buildInstruments(
   p: Profile,

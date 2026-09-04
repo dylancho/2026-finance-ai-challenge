@@ -131,10 +131,17 @@ export default function PersonaCard({ insight, persona, pending }: Props) {
           )}
         </div>
 
-        {pending ? (
-          <p className="muted">이력을 읽는 중입니다…</p>
+        {persona ? (
+          <>
+            <p className="lg-read-text">{persona.text}</p>
+            {/* 룰 문장이 이미 서 있으므로 화면을 비우지 않는다.
+                판정층이 오면 이 자리 문장이 갈아끼워진다. */}
+            {pending && persona.source === "rule" && (
+              <p className="muted lg-read-pending">AI가 이력을 다시 읽고 있습니다…</p>
+            )}
+          </>
         ) : (
-          <p className="lg-read-text">{persona?.text}</p>
+          <p className="muted">이력을 읽는 중입니다…</p>
         )}
 
         {d && (

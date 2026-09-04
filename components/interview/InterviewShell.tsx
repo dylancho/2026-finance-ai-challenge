@@ -5,20 +5,27 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import QuestionInput from "./QuestionInput";
 import ObservationCard from "./ObservationCard";
+import ChapterProposal from "./ChapterProposal";
 import Badge from "../common/Badge";
 import {
   activeQuestions,
+  chapterCompleted,
+  chapterQuestions,
+  CHAPTER_META,
+  CHAPTER_ORDER,
   findQuestion,
+  flowMeta,
   isAnswered,
+  isUnified,
+  OPTIONAL_CHAPTERS,
   overallProgress,
   sectionProgress,
-  TRACK_META,
 } from "../../lib/questions";
+import { markChapterCompleted } from "../../lib/chapters";
 import { engine } from "../../lib/ai/engine";
 import { answerToLabel, docName } from "../../lib/ai/rules";
 import { demoProfile, readProfile, saveProfile, setAnswer } from "../../lib/profile";
 import {
-  analyze,
   buildContrasts,
   contrastFor,
   applyDemoLedger,
@@ -28,8 +35,10 @@ import {
   saveLedgerState,
   setResolution,
 } from "../../lib/ledger";
+import { insightFor } from "../../lib/insight";
 import type {
   AnswerValue,
+  Chapter,
   Contrast,
   Extraction,
   LedgerState,
@@ -44,8 +53,32 @@ interface Bubble {
   text: string;
   helper?: string;
   source?: "rule" | "llm";
+  /** 질문·답변·반영 안내 말풍선은 질문 id 로 묶인다. 되돌아가면 새로 붙이지 않고 이 자리를 쓴다. */
+  qid?: string;
+  kind?: "question" | "answer" | "reply";
 }
 
+/** 같은 id 의 말풍선이 있으면 제자리에서 바꾸고, 없으면 뒤에 붙인다. */
+function upsertBubble(prev: Bubble[], b: Bubble): Bubble[] {
+  const i = prev.findIndex((x) => x.id === b.id);
+  if (i < 0) return [...prev, b];
+  const next = [...prev];
+  next[i] = b;
+  return next;
+}
+
+const isChapter = (v: string | null): v is Chapter =>
+  !!v && (CHAPTER_ORDER as string[]).includes(v);
+
+/**
+ * 인터뷰.
+ *
+ * 통합 플로우는 챕터 단위로 진행한다: 코어(필수) → 챕터 제안 → 고른 챕터 → 다시 제안.
+ * 챕터를 끝내면 Profile.chaptersCompleted 에 기록하고, 설계서의 공백 카드에서
+ * ?chapter= 로 재진입하면 그 챕터만 답한 뒤 설계서로 돌아간다.
+ *
+ * 보류 트랙 데모(?demo=B/C/D)는 옛 트랙 질문 목록을 한 줄로 진행한다.
+ */
 export default function InterviewShell() {
   const router = useRouter();
 
@@ -57,40 +90,70 @@ export default function InterviewShell() {
   const [jumpTo, setJumpTo] = useState<string | null>(null);
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
   const [ledgerState, setLedgerState] = useState<LedgerState>(emptyLedgerState());
+  /** 통합 플로우에서 지금 진행 중인 챕터 */
+  const [chapter, setChapter] = useState<Chapter>("core");
+  /** 홈 카테고리 버튼에서 넘어온 관심 챕터 */
+  const [focus, setFocus] = useState<Chapter | null>(null);
+  /** 코어(또는 챕터)를 마치고 다음 챕터를 고르는 화면 */
+  const [proposing, setProposing] = useState(false);
+  /** 설계서의 공백 카드에서 챕터 하나만 채우러 들어온 경우 — 끝나면 설계서로 복귀 */
+  const [reentry, setReentry] = useState(false);
   const streamRef = useRef<HTMLDivElement>(null);
-  const askedRef = useRef<string | null>(null);
+  /** 이미 말풍선을 붙인 질문 id. 되돌아가면 새로 붙이지 않고 그 말풍선으로 스크롤한다. */
+  const askedRef = useRef<Set<string>>(new Set());
+  const bubbleEls = useRef<Map<string, HTMLDivElement>>(new Map());
+  /** 지금 보고 있는 질문의 말풍선 id — 강조와 스크롤 목표 */
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const completedRef = useRef<Chapter | null>(null);
 
   /* ── 초기화 ── */
   useEffect(() => {
     // 정적 프리렌더 페이지에서는 useSearchParams 가 최초 렌더에 비어 있을 수 있어
     // 마운트 후 실제 URL 을 읽는다. (?demo=, ?q= 딥링크가 /start 로 튕기는 문제)
     const query = new URLSearchParams(window.location.search);
+    const focusParam = query.get("focus");
+    if (isChapter(focusParam) && focusParam !== "core") setFocus(focusParam);
+
+    let p: Profile | null = null;
     const demo = query.get("demo");
     if (demo) {
       const d = demoProfile(demo);
       if (d) {
         saveProfile(d);
-        setProfile(d);
         setLedgerState(applyDemoLedger(demo));
-        const dq = query.get("q");
-        if (dq) setJumpTo(dq);
-        return;
+        p = d;
       }
     }
-    const p = readProfile();
-    if (!p.track) {
-      router.replace("/start");
-      return;
+    if (!p) {
+      const stored = readProfile();
+      if (!stored.track) {
+        router.replace("/start");
+        return;
+      }
+      setLedgerState(readLedgerState());
+      p = stored;
     }
     setProfile(p);
-    setLedgerState(readLedgerState());
-    const q = query.get("q");
-    if (q) setJumpTo(q);
+
+    const dq = query.get("q");
+    const chapterParam = query.get("chapter");
+    if (isUnified(p)) {
+      if (isChapter(chapterParam)) {
+        setChapter(chapterParam);
+        setReentry(chapterParam !== "core");
+      } else if (dq) {
+        const target = findQuestion(dq);
+        if (target?.chapter) setChapter(target.chapter);
+      }
+    }
+    if (dq) setJumpTo(dq);
   }, [router]);
+
+  const unified = !!profile && isUnified(profile);
 
   /* ── 관찰 (이력이 연동돼 있을 때만) ── */
   const insight = useMemo(
-    () => (profile && ledgerState.ledger ? analyze(ledgerState.ledger, profile.track) : null),
+    () => (profile && ledgerState.ledger ? insightFor(ledgerState.ledger, profile) : null),
     [profile, ledgerState.ledger],
   );
 
@@ -113,42 +176,137 @@ export default function InterviewShell() {
     [],
   );
 
+  /** 지금 진행 중인 질문 순서. 통합 플로우는 현재 챕터, 보류 트랙은 트랙 전체. */
+  const activeList = useMemo(() => {
+    if (!profile) return [];
+    return isUnified(profile) ? chapterQuestions(profile, chapter) : activeQuestions(profile);
+  }, [profile, chapter]);
+
   const current: Question | null = useMemo(() => {
     if (!profile) return null;
     if (jumpTo) {
+      const inActive = activeList.find((q) => q.id === jumpTo);
+      if (inActive) return inActive;
+      // showIf 로 빠졌거나 다른 챕터의 질문에 딥링크로 들어온 경우까지는 허용한다.
       const q = findQuestion(jumpTo);
-      if (q && q.track === profile.track) return q;
+      if (q && (isUnified(profile) ? !!q.chapter : q.track === profile.track)) return q;
     }
     return (
-      activeQuestions(profile).find(
-        (q) => !isAnswered(profile, q.id) && !skipped.has(q.id),
-      ) ?? null
+      activeList.find((q) => !isAnswered(profile, q.id) && !skipped.has(q.id)) ?? null
     );
-  }, [profile, jumpTo, skipped]);
+  }, [profile, activeList, jumpTo, skipped]);
 
-  /* ── 질문 제시 ── */
-  useEffect(() => {
-    if (!current) return;
-    if (askedRef.current === current.id) return;
-    askedRef.current = current.id;
+  /* ── 앞뒤 이동 ──
+   * jumpTo 를 "지금 보고 있는 질문" 의 단일 오버라이드로 쓴다.
+   * jumpTo 가 비면 언제나 "답 안 한 첫 질문" 으로 돌아온다. 이것이 복귀 지점이다. */
+  const cursor = useMemo(
+    () => (current ? activeList.findIndex((q) => q.id === current.id) : -1),
+    [activeList, current],
+  );
+  const prevQuestion = cursor > 0 ? activeList[cursor - 1] : null;
+  const nextQuestion = cursor >= 0 ? activeList[cursor + 1] ?? null : null;
+
+  /** 이미 답한 질문을 보고 있으면 편집 모드다. */
+  const editing = !!current && !!profile && isAnswered(profile, current.id);
+
+  const goTo = useCallback((qid: string) => {
+    setJumpTo(qid);
+    setPending([]);
+    setFreeText("");
+    setProposing(false);
+  }, []);
+
+  /** 복귀 지점(답 안 한 첫 질문)으로 돌아간다. */
+  const resume = useCallback(() => {
+    setJumpTo(null);
+    setPending([]);
+    setFreeText("");
+  }, []);
+
+  const goToSection = useCallback(
+    (section: string) => {
+      if (!profile) return;
+      const inSection = activeList.filter((q) => q.section === section);
+      if (!inSection.length) return;
+      const target = inSection.find((q) => !isAnswered(profile, q.id)) ?? inSection[0];
+      goTo(target.id);
+    },
+    [activeList, profile, goTo],
+  );
+
+  /** 챕터 제안 화면 또는 왼쪽 챕터 목록에서 챕터를 골랐다. */
+  const startChapter = useCallback((ch: Chapter) => {
+    setChapter(ch);
+    setProposing(false);
+    setSkipped(new Set());
+    setJumpTo(null);
+    setPending([]);
     setBubbles((prev) => [
       ...prev,
       {
-        id: `q-${current.id}-${prev.length}`,
+        id: `ch-${ch}-${prev.length}`,
         role: "ai",
-        text: current.prompt,
-        helper: current.helper,
+        text: `${CHAPTER_META[ch].label} 영역으로 넘어갑니다. ${CHAPTER_META[ch].caption}`,
       },
     ]);
+  }, []);
+
+  /* ── 챕터 완료 처리 ──
+   * 현재 챕터에 더 물을 질문이 없으면 완료로 기록한다. 재진입이면 설계서로 돌아가고,
+   * 아니면 남은 챕터를 제안한다. 같은 챕터를 두 번 처리하지 않도록 ref 로 막는다. */
+  useEffect(() => {
+    if (!profile || !isUnified(profile) || current || proposing) return;
+    if (completedRef.current === chapter) return;
+    completedRef.current = chapter;
+
+    const next = chapterCompleted(profile, chapter)
+      ? profile
+      : saveProfile(markChapterCompleted(profile, chapter));
+    if (next !== profile) setProfile(next);
+
+    if (reentry) {
+      router.push("/plan");
+      return;
+    }
+    const remaining = OPTIONAL_CHAPTERS.filter((ch) => !chapterCompleted(next, ch));
+    if (remaining.length) setProposing(true);
+  }, [profile, current, chapter, proposing, reentry, router]);
+
+  /* ── 질문 제시 ──
+   * 처음 보는 질문만 말풍선을 붙인다. 이미 물어본 질문으로 돌아가면 그 말풍선을
+   * 강조하고 거기로 스크롤한다 — 되돌아갈 때마다 스트림이 늘어나지 않는다. */
+  useEffect(() => {
+    if (!current) return;
+    const id = `q-${current.id}`;
+    if (!askedRef.current.has(current.id)) {
+      askedRef.current.add(current.id);
+      setBubbles((prev) =>
+        upsertBubble(prev, {
+          id,
+          role: "ai",
+          text: current.prompt,
+          helper: current.helper,
+          qid: current.id,
+          kind: "question",
+        }),
+      );
+    }
+    setFocusId(id);
     setPending([]);
   }, [current]);
 
+  /* 새 말풍선이 붙으면 아래로, 예전 질문을 보고 있으면 그 말풍선으로 스크롤한다. */
   useEffect(() => {
-    streamRef.current?.scrollTo({
-      top: streamRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [bubbles, pending]);
+    const stream = streamRef.current;
+    if (!stream) return;
+    const lastQuestion = [...bubbles].reverse().find((b) => b.kind === "question");
+    const target = focusId ? bubbleEls.current.get(focusId) : undefined;
+    if (target && lastQuestion && lastQuestion.id !== focusId) {
+      target.scrollIntoView({ block: "center", behavior: "smooth" });
+    } else {
+      stream.scrollTo({ top: stream.scrollHeight, behavior: "smooth" });
+    }
+  }, [bubbles, pending, thinking, focusId]);
 
   /* ── 건너뛰기 ──
    * 답으로 저장하지 않는다. optional 질문에 빈 답을 저장하면 isAnswered 가
@@ -156,10 +314,9 @@ export default function InterviewShell() {
    * 이 세션 동안만 기억하므로 새로고침하면 다시 물어본다. */
   const skip = useCallback((q: Question) => {
     setSkipped((prev) => new Set(prev).add(q.id));
-    setBubbles((prev) => [
-      ...prev,
-      { id: `s-${q.id}-${prev.length}`, role: "user", text: "건너뜀" },
-    ]);
+    setBubbles((prev) =>
+      upsertBubble(prev, { id: `a-${q.id}`, role: "user", text: "건너뜀", qid: q.id, kind: "answer" }),
+    );
     setPending([]);
     setJumpTo(null);
   }, []);
@@ -171,34 +328,49 @@ export default function InterviewShell() {
         skip(q);
         return;
       }
+      const wasAnswered = !!profile && isAnswered(profile, q.id);
       setProfile((prev) => {
         if (!prev) return prev;
         const next = saveProfile(setAnswer(prev, q.id, value));
         return next;
       });
-      setBubbles((prev) => [
-        ...prev,
-        {
-          id: `a-${q.id}-${prev.length}`,
-          role: "user",
-          text: echo ?? answerToLabel(value, q),
-        },
-      ]);
+      // 건너뛴 질문에 뒤늦게 답한 경우, 다시 건너뜀 상태로 남겨두지 않는다.
+      setSkipped((prev) => {
+        if (!prev.has(q.id)) return prev;
+        const next = new Set(prev);
+        next.delete(q.id);
+        return next;
+      });
+      // 답변·반영 안내 말풍선은 질문마다 하나씩이다. 고치면 그 자리에서 바뀐다.
       const ref = q.mapsTo[0];
-      setBubbles((prev) => [
-        ...prev,
-        {
-          id: `r-${q.id}-${prev.length}`,
-          role: "ai",
-          text: ref
-            ? `${docName(ref.doc)} ${ref.clause} ${ref.label}에 반영했습니다.`
-            : "기록했습니다.",
-        },
-      ]);
+      const verb = wasAnswered ? "갱신했습니다" : "반영했습니다";
+      setBubbles((prev) =>
+        upsertBubble(
+          upsertBubble(prev, {
+            id: `a-${q.id}`,
+            role: "user",
+            text: echo ?? answerToLabel(value, q),
+            qid: q.id,
+            kind: "answer",
+          }),
+          {
+            id: `r-${q.id}`,
+            role: "ai",
+            text: ref
+              ? `${docName(ref.doc)} ${ref.clause} ${ref.label}을(를) ${verb}.`
+              : wasAnswered
+                ? "수정했습니다."
+                : "기록했습니다.",
+            qid: q.id,
+            kind: "reply",
+          },
+        ),
+      );
       setPending([]);
+      // 편집을 마치면 복귀 지점(답 안 한 첫 질문)으로 돌아간다.
       setJumpTo(null);
     },
-    [skip],
+    [skip, profile],
   );
 
   /* ── 자유 입력 ── */
@@ -244,12 +416,14 @@ export default function InterviewShell() {
     );
   }
 
-  const meta = TRACK_META[profile.track];
-  const sections = sectionProgress(profile);
-  const progress = overallProgress(profile);
-  const done = !current;
+  const meta = flowMeta(profile);
+  const sections = sectionProgress(profile, activeList);
+  const progress = overallProgress(profile, activeList);
+  const done = !current && !proposing;
+  const remainingChapters = OPTIONAL_CHAPTERS.filter((ch) => !chapterCompleted(profile, ch));
+  const headline = unified ? CHAPTER_META[chapter].label : meta.name;
 
-  /* 조항 피드 */
+  /* 조항 피드 — 코어 + 선언한 챕터에서 답한 것 전부 */
   const feed = activeQuestions(profile)
     .filter((q) => isAnswered(profile, q.id))
     .flatMap((q) =>
@@ -265,26 +439,60 @@ export default function InterviewShell() {
 
   return (
     <div className="interview shell-wide">
-      {/* 좌: 섹션 진행 */}
+      {/* 좌: 챕터 + 섹션 진행 */}
       <aside className="iv-nav">
-        <h4>{meta.short} · 진행</h4>
+        {unified && (
+          <>
+            <h4>영역</h4>
+            <ul className="iv-chapters">
+              {CHAPTER_ORDER.map((ch) => {
+                const doneCh = chapterCompleted(profile, ch);
+                const here = ch === chapter && !proposing;
+                return (
+                  <li key={ch} className={here ? "here" : doneCh ? "done" : ""}>
+                    <button
+                      type="button"
+                      className="iv-sec"
+                      onClick={() => (here ? resume() : startChapter(ch))}
+                      title={`${CHAPTER_META[ch].label} 영역으로 이동`}
+                    >
+                      <span className="dot" aria-hidden />
+                      <span className="nm">{CHAPTER_META[ch].label}</span>
+                      <span className="cnt">
+                        {doneCh ? "완료" : ch === "core" ? "필수" : "선택"}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+        <h4>{unified ? CHAPTER_META[chapter].short : meta.short} · 진행</h4>
         <ul className="iv-sections">
           {sections.map((s) => (
             <li
               key={s.section}
               className={s.complete ? "done" : s.active ? "active" : ""}
             >
-              <span className="dot" aria-hidden />
-              <span>{s.section}</span>
-              <span className="cnt">
-                {s.done}/{s.total}
-              </span>
+              <button
+                type="button"
+                className="iv-sec"
+                onClick={() => goToSection(s.section)}
+                title={`${s.section} 섹션으로 이동`}
+              >
+                <span className="dot" aria-hidden />
+                <span className="nm">{s.section}</span>
+                <span className="cnt">
+                  {s.done}/{s.total}
+                </span>
+              </button>
             </li>
           ))}
         </ul>
         <div className="iv-progress">
           <div className="t">
-            <span>전체</span>
+            <span>{unified ? "이 영역" : "전체"}</span>
             <span>
               {progress.done}/{progress.total}
             </span>
@@ -293,7 +501,7 @@ export default function InterviewShell() {
             <i style={{ width: `${Math.round(progress.ratio * 100)}%` }} />
           </div>
         </div>
-        {progress.done > 0 && (
+        {feed.length > 0 && (
           <Link
             href="/plan"
             className="btn outline sm"
@@ -314,16 +522,28 @@ export default function InterviewShell() {
             <div>
               <div className="name">NEXT AI</div>
               <div className="sec">
-                {current ? current.section : "모든 질문 완료"} · {meta.name}
+                {proposing
+                  ? "다음 영역 고르기"
+                  : current
+                    ? current.section
+                    : "모든 질문 완료"}{" "}
+                · {headline}
               </div>
             </div>
           </div>
-          {current && <Badge tone="info">{current.id}</Badge>}
+          {current && !proposing && <Badge tone="info">{current.id}</Badge>}
         </div>
 
         <div className="iv-stream" ref={streamRef}>
           {bubbles.map((b) => (
-            <div key={b.id} className={`msg ${b.role} fade-in`}>
+            <div
+              key={b.id}
+              className={`msg ${b.role} fade-in${b.id === focusId ? " here" : ""}`}
+              ref={(el) => {
+                if (el) bubbleEls.current.set(b.id, el);
+                else bubbleEls.current.delete(b.id);
+              }}
+            >
               {b.role === "ai" && (
                 <div className="avatar" aria-hidden>
                   NX
@@ -373,18 +593,80 @@ export default function InterviewShell() {
             </div>
           )}
 
-          {done ? (
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link href="/plan" className="btn">
-                설계서 확인하기
-              </Link>
-              <Link href="/simulation" className="btn outline">
-                시뮬레이션 돌려보기
-              </Link>
-            </div>
+          {proposing ? (
+            <ChapterProposal profile={profile} focus={focus} onPick={startChapter} />
+          ) : done ? (
+            <>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <Link href="/plan" className="btn">
+                  설계서 확인하기
+                </Link>
+                <Link href="/simulation" className="btn outline">
+                  시뮬레이션 돌려보기
+                </Link>
+                {unified && (
+                  <Link href="/events" className="btn outline">
+                    상황이 바뀌었을 때
+                  </Link>
+                )}
+                {unified && remainingChapters.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn outline"
+                    onClick={() => setProposing(true)}
+                  >
+                    다른 영역 더 답하기
+                  </button>
+                )}
+                {activeList.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn outline"
+                    onClick={() => goTo(activeList[activeList.length - 1].id)}
+                  >
+                    답변 다시 보기
+                  </button>
+                )}
+              </div>
+              <p className="iv-hint">
+                {unified && remainingChapters.length === 0
+                  ? "모든 영역에 답하셨습니다. "
+                  : ""}
+                오른쪽 조항이나 왼쪽 섹션을 누르면 그 질문으로 돌아가 답을 고칠 수 있습니다.
+              </p>
+            </>
           ) : (
             current && (
               <>
+                <div className="iv-move">
+                  <button
+                    type="button"
+                    className="btn ghost sm"
+                    onClick={() => prevQuestion && goTo(prevQuestion.id)}
+                    disabled={!prevQuestion}
+                    title={prevQuestion ? `${prevQuestion.id} 로 돌아가기` : "첫 질문입니다"}
+                  >
+                    ← 이전 질문
+                  </button>
+                  {editing && (
+                    <>
+                      <button
+                        type="button"
+                        className="btn ghost sm"
+                        onClick={() => nextQuestion && goTo(nextQuestion.id)}
+                        disabled={!nextQuestion}
+                      >
+                        다음 질문 →
+                      </button>
+                      <span className="iv-editing">
+                        이미 답하신 질문입니다
+                        <button type="button" className="btn ghost sm" onClick={resume}>
+                          작성하던 곳으로 ↩
+                        </button>
+                      </span>
+                    </>
+                  )}
+                </div>
                 <QuestionInput
                   key={current.id}
                   question={current}
@@ -432,7 +714,7 @@ export default function InterviewShell() {
 
       {/* 우: 관측 카드 + 조항 피드 */}
       <aside className="iv-feed">
-        {current && insight && ledgerState.ledger && (
+        {current && !proposing && insight && ledgerState.ledger && (
           <ObservationCard
             observation={observationFor(current.id, insight, ledgerState.ledger)}
             contrast={contrastFor(contrasts, current.id)}
@@ -448,11 +730,20 @@ export default function InterviewShell() {
           </p>
         ) : (
           feed.map((f) => (
-            <div className="feed-item set" key={f.key}>
-              <div className="ref">{f.ref}</div>
+            <button
+              type="button"
+              className={`feed-item set${current?.id === f.qid ? " here" : ""}`}
+              key={f.key}
+              onClick={() => goTo(f.qid)}
+              title={`${f.qid} 질문으로 돌아가 이 조항을 고칩니다`}
+            >
+              <div className="ref">
+                {f.ref}
+                <span className="edit">수정 →</span>
+              </div>
               <div className="lab">{f.label}</div>
               <div className="val">{f.value}</div>
-            </div>
+            </button>
           ))
         )}
       </aside>

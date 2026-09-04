@@ -6,28 +6,30 @@ import { useRouter } from "next/navigation";
 import LedgerChart from "./LedgerChart";
 import PersonaCard from "./PersonaCard";
 import Badge from "../common/Badge";
-import { TRACK_META } from "../../lib/questions";
+import { flowMeta, isUnified } from "../../lib/questions";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import {
-  analyze,
   attachLedger,
   buildContrasts,
   applyDemoLedger,
   emptyLedgerState,
   generateLedger,
   narrate,
+  rulePersona,
   readLedgerState,
   saveLedgerState,
   tracksInvestment,
 } from "../../lib/ledger";
+import { insightFor } from "../../lib/insight";
 import { won } from "../../lib/format";
 import type { LedgerState, Persona, Profile } from "../../lib/types";
 
 /**
  * Phase 1 — 적재와 복제.
  *
- * 게이트 뒤에 온다. 트랙을 알아야 무엇을 뽑을지 정할 수 있고, caregiver 의
- * "대리인은 대상자 마이데이터를 열 수 없다" 경고도 트랙을 알아야 띄울 수 있다.
+ * 게이트(상황 입력) 뒤에 온다. 통합 플로우는 챕터와 무관하게 소비·고정비·베이스라인·
+ * 투자 성향을 모두 뽑는다 — 투자 챕터를 나중에 답해도 대조할 이력이 있어야 한다.
+ * 보류된 caregiver 데모는 "대리인은 대상자 마이데이터를 열 수 없다" 경고만 띄운다.
  */
 
 export default function LedgerShell() {
@@ -37,10 +39,13 @@ export default function LedgerShell() {
   const [loading, setLoading] = useState(false);
   const [persona, setPersona] = useState<Persona | null>(null);
   const [narrating, setNarrating] = useState(false);
+  /** 홈 카테고리 버튼에서 넘어온 관심 챕터. 인터뷰까지 그대로 넘긴다. */
+  const [focus, setFocus] = useState<string | null>(null);
 
   /* ── 초기화 ── */
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
+    setFocus(query.get("focus"));
     const demo = query.get("demo");
     if (demo) {
       const d = demoProfile(demo);
@@ -64,7 +69,7 @@ export default function LedgerShell() {
   const ledger = state.ledger;
 
   const insight = useMemo(
-    () => (ledger && profile ? analyze(ledger, profile.track) : null),
+    () => (ledger && profile ? insightFor(ledger, profile) : null),
     [ledger, profile],
   );
 
@@ -80,6 +85,10 @@ export default function LedgerShell() {
   useEffect(() => {
     if (!insight || !profile) return;
     let alive = true;
+    // 룰 문장을 먼저 세운다. 판정층은 실측 15초가 걸려서, 기다리는 동안 화면을
+    // 비워두면 심사 중에 그 시간이 고스란히 빈 카드로 보인다. /plan 이 이미
+    // 쓰는 방식과 같다 — 규칙 기반 문장이 먼저 서고 AI 판정이 갈아끼운다.
+    setPersona(rulePersona(insight));
     setNarrating(true);
     narrate(insight, contrasts, profile.track)
       .then((r) => {
@@ -100,13 +109,17 @@ export default function LedgerShell() {
     if (!profile) return;
     setLoading(true);
     // 실제 마이데이터 연동이 들어갈 자리. 지금은 시드 고정 합성 이력을 만든다.
-    const seed = `${profile.track}-${profile.subject}-${profile.capacity}`;
-    const preset =
-      profile.track === "estate"
+    // 통합 플로우의 시드는 트랙이 아니라 상황(capacity) + 고정 상수로 만든다.
+    // 보류 트랙 데모(B/C/D)의 시드 경로는 그대로 둔다.
+    const unified = isUnified(profile);
+    const seed = unified
+      ? `unified-${profile.capacity}`
+      : `${profile.track}-${profile.subject}-${profile.capacity}`;
+    const preset = unified
+      ? "cautious"
+      : profile.track === "estate"
         ? "holder"
-        : profile.track === "daily"
-          ? "spender"
-          : "panic_seller";
+        : "panic_seller";
     window.setTimeout(() => {
       const l = generateLedger(seed, {
         preset,
@@ -126,10 +139,12 @@ export default function LedgerShell() {
     );
   }
 
-  const meta = TRACK_META[profile.track];
-  const willExtract = tracksInvestment(profile.track)
-    ? ["소비 패턴", "고정비 구조", "이상거래 베이스라인", "투자 대응 성향"]
-    : ["소비 패턴", "고정비 구조", "이상거래 베이스라인"];
+  const meta = flowMeta(profile);
+  const willExtract =
+    isUnified(profile) || tracksInvestment(profile.track)
+      ? ["소비 패턴", "고정비 구조", "이상거래 베이스라인", "투자 대응 성향"]
+      : ["소비 패턴", "고정비 구조", "이상거래 베이스라인"];
+  const interviewHref = focus ? `/interview?focus=${encodeURIComponent(focus)}` : "/interview";
 
   return (
     <div className="shell-wide lg">
@@ -158,7 +173,7 @@ export default function LedgerShell() {
             설계서를 만들고, 부족한 부분은 통장 사본·거래내역 등 서류로 대신합니다.
           </p>
           <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
-            <Link href="/interview" className="btn">
+            <Link href={interviewHref} className="btn">
               인터뷰로 이동
             </Link>
           </div>
@@ -168,8 +183,8 @@ export default function LedgerShell() {
           <div className="lg-import-body">
             <h2>금융 이력 연동</h2>
             <p className="muted">
-              {meta.name} 트랙에서는 다음을 읽습니다. 여기서 읽은 것은 설계서를 만드는 근거가
-              아니라, 답변을 검증하는 대조군으로만 쓰입니다.
+              이력에서 다음을 읽습니다. 여기서 읽은 것은 설계서를 만드는 근거가 아니라,
+              답변을 검증하는 대조군으로만 쓰입니다.
             </p>
             <ul className="lg-extract">
               {willExtract.map((w) => (
@@ -184,7 +199,7 @@ export default function LedgerShell() {
             <button className="btn" onClick={connect} disabled={loading}>
               {loading ? "불러오는 중…" : "10년 이력 불러오기"}
             </button>
-            <Link href="/interview" className="btn ghost">
+            <Link href={interviewHref} className="btn ghost">
               건너뛰고 인터뷰 시작
             </Link>
           </div>
@@ -255,7 +270,7 @@ export default function LedgerShell() {
               >
                 이력 지우기
               </button>
-              <Link href="/interview" className="btn">
+              <Link href={interviewHref} className="btn">
                 인터뷰 시작
               </Link>
             </div>

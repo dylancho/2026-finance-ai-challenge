@@ -3030,6 +3030,416 @@ table.data tfoot td {
   }
 }
 
+/* ── 인터뷰: 앞뒤 이동 · 조항 수정 진입 ───────────── */
+
+/* 섹션 목록을 클릭 가능한 이동 버튼으로 바꾼다. li 의 색상 규칙은 그대로 상속받는다. */
+.iv-sections li {
+  display: block;
+  padding: 0;
+}
+
+.iv-sections .iv-sec {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 7px 0;
+  font-size: 13.5px;
+  color: inherit;
+  background: none;
+  border: 0;
+  text-align: left;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.iv-sections .iv-sec:hover {
+  background: var(--line-soft);
+}
+
+.iv-sections .iv-sec .nm {
+  flex: 1;
+}
+
+.iv-move {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.iv-move .btn.ghost:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.iv-editing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--warn);
+}
+
+.iv-hint {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: var(--faint);
+  line-height: 1.7;
+}
+
+/* 조항 피드 항목 = 그 조항을 만든 질문으로 가는 버튼 */
+button.feed-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--line);
+  border-radius: 0 6px 6px 0;
+  transition: background 0.15s ease;
+}
+
+button.feed-item.set {
+  border-left-color: var(--ok);
+}
+
+button.feed-item:hover {
+  background: var(--line-soft);
+}
+
+button.feed-item.here {
+  background: var(--blue-soft);
+  border-left-color: var(--blue);
+}
+
+button.feed-item .ref {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+button.feed-item .edit {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+button.feed-item:hover .edit,
+button.feed-item.here .edit {
+  opacity: 1;
+}
+
+/* 설계서: 이미 채워진 조항도 고치러 갈 수 있다 */
+.clause-edit {
+  margin-top: 10px;
+}
+
+.clause-edit a {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* 설계서 섹션 제목 옆의 "수정 →" 진입점 */
+.doc h4 .clause-jump {
+  margin-left: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--blue);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.doc h4 .clause-jump:hover {
+  text-decoration: underline;
+}
+
+/* 판정층이 오기 전, 룰 문장 아래 붙는 진행 표시 */
+.lg-read-pending {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* ── 통합 플로우: 챕터 (2026-09-03) ───────────────── */
+
+.iv-chapters {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.iv-chapters li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 6px 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.iv-chapters .iv-sec {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+}
+
+.iv-chapters .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  margin-top: 7px;
+  flex: none;
+}
+
+.iv-chapters li.done .dot {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.iv-chapters li.here .dot {
+  background: var(--blue);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+.iv-chapters li.done,
+.iv-chapters li.here {
+  color: var(--navy);
+  font-weight: 500;
+}
+
+.iv-chapters .cnt {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.chapter-propose h2 {
+  font-size: 22px;
+  margin: 8px 0 10px;
+}
+
+.chapter-propose .gate-cards {
+  margin: 18px 0 6px;
+}
+
+.chapter-propose .gate-nav {
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.chapter-done {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--faint);
+  margin-top: 6px;
+}
+
+.chapter-focus-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  vertical-align: middle;
+}
+
+.chapter-without {
+  color: var(--warn) !important;
+}
+
+.gate-focus {
+  font-size: 12px;
+  color: var(--blue);
+  margin: -6px 0 18px;
+}
+
+/* 설계서 상단 챕터 뱃지 */
+.chapter-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0 6px;
+}
+
+.chapter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.chapter-badge.declared {
+  border-color: var(--ok);
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.chapter-badge.missing {
+  border-style: dashed;
+}
+
+/* 챕터 단위 공백 카드 */
+.gap-item.chapter {
+  border-left-color: var(--navy);
+  background: var(--blue-soft);
+}
+
+/* ── 이벤트 → 판정 (2026-09-03) ────────────────────── */
+
+.ev-summary {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.ev-summary .src,
+.ev-note .src {
+  font-size: 10.5px;
+  color: var(--faint);
+  margin-left: 6px;
+}
+
+.ev-note {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--ink);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.ev-contrast {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+
+.ev-contrast .ct-col .k {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.cand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.cand {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 18px 16px;
+}
+
+.cand-head h3 {
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.cand-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cand-impact {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 13px;
+}
+
+.cand-impact .kv-row span:first-child {
+  color: var(--muted);
+}
+
+.cand-basis {
+  display: grid;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.cand-basis li {
+  padding-left: 12px;
+  position: relative;
+}
+
+.cand-basis li::before {
+  content: "·";
+  position: absolute;
+  left: 2px;
+}
+
+.cand-note {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+  border-left: 2px solid var(--blue);
+  padding-left: 10px;
+}
+
+.cand-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.cand-recorded {
+  font-size: 12px;
+  color: var(--ok);
+}
+
+/* 되돌아가 보고 있는 질문의 말풍선 강조 */
+.msg.here .bubble {
+  box-shadow: 0 0 0 2px var(--blue);
+}
+
 /* ── 전문가 연계 (Referral) ─────────────────────────────
  * 집행권한 축. docs/superpowers/specs/2026-09-03-authority-axis-design.md
  */

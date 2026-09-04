@@ -16,13 +16,14 @@ export function ClauseCard({ clause }: { clause: Clause }) {
         ))}
       </ul>
       {clause.note && <p className="clause-note">{clause.note}</p>}
-      {clause.status === "missing" && clause.sources.length > 0 && (
-        <p style={{ marginTop: 10 }}>
-          <Link
-            href={`/interview?q=${clause.sources[0]}`}
-            style={{ fontSize: 12.5, fontWeight: 600, textDecoration: "underline" }}
-          >
-            이 조항 채우러 가기 →
+      {clause.sources.length > 0 && (
+        <p className="clause-edit">
+          <Link href={`/interview?q=${clause.sources[0]}`}>
+            {clause.status === "missing"
+              ? "이 조항 채우러 가기 →"
+              : clause.status === "partial"
+                ? "이 조항 마저 채우기 →"
+                : "이 조항 수정하기 →"}
           </Link>
         </p>
       )}

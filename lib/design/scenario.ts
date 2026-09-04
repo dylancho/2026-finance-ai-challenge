@@ -14,7 +14,7 @@ import {
   personOf,
 } from "../profile";
 import { personLabel, won } from "../format";
-import { isAnswered } from "../questions";
+import { hasChapter, isAnswered, isUnified } from "../questions";
 
 export const SCENARIOS: Scenario[] = [
   {
@@ -22,47 +22,62 @@ export const SCENARIOS: Scenario[] = [
     name: "치매 진단",
     caption: "전문의 진단을 받고 금융 결정이 어려워지는 경우",
     tracks: ["future", "caregiver", "estate"],
+    chapters: ["medical", "estate"],
   },
   {
     id: "accident",
     name: "갑작스러운 사고",
     caption: "예고 없이, 준비할 시간 없이 찾아오는 경우",
     tracks: ["future", "caregiver", "estate"],
+    chapters: ["medical", "estate"],
   },
   {
     id: "care",
     name: "장기 요양시설 입소",
     caption: "매달 나가는 돈의 규모가 바뀌는 경우",
     tracks: ["future", "caregiver"],
+    chapters: ["medical"],
   },
   {
     id: "phishing",
     name: "보이스피싱 시도",
     caption: "누군가 계좌에 손을 대려 하는 경우",
     tracks: ["daily", "future", "caregiver", "estate"],
+    chapters: ["core"],
   },
   {
     id: "hospital",
     name: "장기 입원",
     caption: "본인이 직접 은행에 갈 수 없는 경우",
     tracks: ["daily", "future", "caregiver"],
+    chapters: ["core"],
   },
   {
     id: "shortfall",
     name: "자동이체 잔액 부족",
     caption: "가장 흔하게 벌어지는 일",
     tracks: ["daily"],
+    chapters: ["core"],
   },
   {
     id: "spouse_death",
     name: "배우자 사망",
     caption: "재산이 다음 사람에게 넘어가는 경우",
     tracks: ["estate"],
+    chapters: ["estate"],
   },
 ];
 
+/**
+ * 이 프로필에서 돌려볼 수 있는 시나리오.
+ * 통합 플로우: 코어 시나리오는 항상, 나머지는 해당 챕터를 선언했을 때만.
+ */
 export function scenariosFor(p: Profile): Scenario[] {
-  if (!p.track) return SCENARIOS;
+  if (isUnified(p)) {
+    return SCENARIOS.filter((s) =>
+      s.chapters.some((ch) => ch === "core" || hasChapter(p, ch)),
+    );
+  }
   return SCENARIOS.filter((s) => s.tracks.includes(p.track!));
 }
 
@@ -179,7 +194,7 @@ function dementiaNodes(ctx: Ctx): ScenarioNode[] {
           { doc: "trust", ref: "제5조", label: "정기지급", detail: `월 ${won(monthly)}` },
           {
             doc: "expense",
-            ref: "§2",
+            ref: "제2조",
             label: "자동이체 매트릭스",
             detail: `${ctx.design.expense.transfers.length}개 항목 · 월 ${won(ctx.design.expense.transferTotal)}`,
           },
@@ -322,7 +337,7 @@ function accidentNodes(ctx: Ctx): ScenarioNode[] {
         [
           {
             doc: "expense",
-            ref: "§2",
+            ref: "제2조",
             label: "자동이체 매트릭스",
             detail: `월 ${won(ctx.design.expense.transferTotal)}`,
           },
@@ -374,7 +389,7 @@ function accidentNodes(ctx: Ctx): ScenarioNode[] {
         `${personLabel(primary)}이(가) 정해진 범위 안에서 금융 사무를 처리합니다.`,
         [
           { doc: "trust", ref: "제3조", label: "1차 관리자", detail: personLabel(primary) },
-          { doc: "guardianship", ref: "§2", label: "후견인 후보", detail: personLabel(primary) },
+          { doc: "guardianship", ref: "제2조", label: "후견인 후보", detail: personLabel(primary) },
         ],
       ),
     );
@@ -432,7 +447,7 @@ function careNodes(ctx: Ctx): ScenarioNode[] {
         [
           {
             doc: "guardianship",
-            ref: "§3",
+            ref: "제3조",
             label: "신상보호 — 요양시설 계약",
             detail: "위임됨",
           },
@@ -491,7 +506,7 @@ function careNodes(ctx: Ctx): ScenarioNode[] {
         [
           {
             doc: "expense",
-            ref: "§6",
+            ref: "제6조",
             label: "지속가능성 추정",
             detail: `약 ${s.years}년`,
           },
@@ -527,7 +542,7 @@ function phishingNodes(ctx: Ctx): ScenarioNode[] {
         ctx,
         "이체를 시도합니다",
         `1회 한도 ${won(perTx)}에서 막힙니다. 잔액 전액이 한 번에 빠져나가지 않습니다.`,
-        [{ doc: "expense", ref: "§3", label: "1회 이체 한도", detail: won(perTx) }],
+        [{ doc: "expense", ref: "제3조", label: "1회 이체 한도", detail: won(perTx) }],
       ),
     );
   } else {
@@ -552,7 +567,7 @@ function phishingNodes(ctx: Ctx): ScenarioNode[] {
         [
           {
             doc: "expense",
-            ref: "§4",
+            ref: "제4조",
             label: "이상거래 — 신규 수취인",
             detail: "24시간 보류",
           },
@@ -582,7 +597,7 @@ function phishingNodes(ctx: Ctx): ScenarioNode[] {
         [
           {
             doc: "expense",
-            ref: "§5",
+            ref: "제5조",
             label: "알림·승인 체계",
             detail: personLabel(notify),
           },
@@ -626,7 +641,7 @@ function hospitalNodes(ctx: Ctx): ScenarioNode[] {
         ctx,
         "고정지출은 그대로 처리됩니다",
         `${design.expense.transfers.map((t) => t.item).join(" · ")} — 월 ${won(design.expense.transferTotal)}이 자동으로 나갑니다.`,
-        [{ doc: "expense", ref: "§2", label: "자동이체", detail: "정상 작동" }],
+        [{ doc: "expense", ref: "제2조", label: "자동이체", detail: "정상 작동" }],
       ),
     );
   } else {
@@ -655,7 +670,7 @@ function hospitalNodes(ctx: Ctx): ScenarioNode[] {
             ? "지정인의 승인을 거쳐 집행됩니다."
             : "정해진 절차에 따라 집행됩니다.",
         [
-          { doc: "expense", ref: "§1", label: "의료예비계좌", detail: "집행" },
+          { doc: "expense", ref: "제1조", label: "의료예비계좌", detail: "집행" },
           ...(med
             ? [
                 {
@@ -721,7 +736,7 @@ function shortfallNodes(ctx: Ctx): ScenarioNode[] {
     ok(ctx, "설정된 조치가 작동합니다", FAIL[onFail], [
       {
         doc: "expense",
-        ref: "§2",
+        ref: "제2조",
         label: "이체 실패 시 조치",
         detail: FAIL[onFail],
       },
@@ -734,7 +749,7 @@ function shortfallNodes(ctx: Ctx): ScenarioNode[] {
         ctx,
         "예비계좌 잔액이 줄어듭니다",
         `목표 잔액 ${won(design.expense.cashflow.medicalReserve)}에 미달하면 보전계좌에서 보충하도록 설계되어 있습니다.`,
-        [{ doc: "expense", ref: "§1", label: "3층 계좌 구조", detail: "보충 흐름" }],
+        [{ doc: "expense", ref: "제1조", label: "3층 계좌 구조", detail: "보충 흐름" }],
       ),
     );
   }
@@ -746,7 +761,7 @@ function shortfallNodes(ctx: Ctx): ScenarioNode[] {
         ctx,
         "기록이 남습니다",
         `${personLabel(notify)}에게 월간 요약이 전달되어 반복되는 패턴을 조기에 발견할 수 있습니다.`,
-        [{ doc: "expense", ref: "§5", label: "알림 체계", detail: "월간 요약" }],
+        [{ doc: "expense", ref: "제5조", label: "알림 체계", detail: "월간 요약" }],
       ),
     );
   }

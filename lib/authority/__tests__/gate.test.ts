@@ -20,14 +20,14 @@ describe("normalizeRef", () => {
     expect(normalizeRef("trust", "제5조 ②")).toBe("trust:제5조");
   });
   it("절 기호도 그대로 다룬다", () => {
-    expect(normalizeRef("expense", "§2")).toBe("expense:§2");
+    expect(normalizeRef("expense", "제2조")).toBe("expense:제2조");
   });
 });
 
 describe("canExecute", () => {
   it("covers 에 안 걸린 조항은 통과한다 — 집행 근거가 필요 없다", () => {
-    const r = canExecute("expense", "§4", [
-      inst({ kind: "bank_mandate", covers: ["expense:§2", "expense:§6"] }),
+    const r = canExecute("expense", "제4조", [
+      inst({ kind: "bank_mandate", covers: ["expense:제2조", "expense:제6조"] }),
     ]);
     expect(r.ok).toBe(true);
     expect(r.instrument).toBeUndefined();
@@ -70,7 +70,7 @@ describe("canExecute", () => {
   });
 
   it("한 조항을 여러 문서가 덮으면 하나라도 effective 면 통과한다", () => {
-    const r = canExecute("guardianship", "§2", [
+    const r = canExecute("guardianship", "제2조", [
       inst({ kind: "voluntary_guardianship", covers: ["guardianship:*"] }),
       inst({
         kind: "legal_guardianship",
@@ -82,7 +82,7 @@ describe("canExecute", () => {
   });
 
   it("전부 미체결이면 가장 진행된 것을 대표로 보여준다", () => {
-    const r = canExecute("guardianship", "§2", [
+    const r = canExecute("guardianship", "제2조", [
       inst({ kind: "voluntary_guardianship", covers: ["guardianship:*"] }),
       inst({
         kind: "legal_guardianship",
