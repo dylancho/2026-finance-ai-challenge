@@ -17,7 +17,7 @@
   --warn-soft: #fdf3e8;
   --danger: #b3261e;
   --danger-soft: #fdeeed;
-  --mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --radius: 10px;
   --shadow: 0 1px 2px rgba(12, 28, 54, 0.04), 0 8px 24px rgba(12, 28, 54, 0.05);
 }
@@ -34,7 +34,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-noto-kr), -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Malgun Gothic", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.7;
@@ -377,6 +377,29 @@ ul {
   letter-spacing: 0.14em;
   color: #8dabd8;
 }
+
+/* ── 랜딩: Smart Fraud Shield ─────────────────── */
+
+.fds-overview {
+  display: grid;
+  grid-template-columns: .78fr 1.22fr;
+  gap: 54px;
+  align-items: center;
+  margin: 0 0 88px;
+  padding: 50px 54px;
+  border-radius: 16px;
+  color: #dce8f7;
+  background: linear-gradient(130deg, #0c1c36 0%, #142c50 63%, #1b3a61 100%);
+  overflow: hidden;
+}
+.fds-overview-copy h2 { margin: 16px 0; color: #fff; font-size: clamp(26px, 3vw, 38px); }
+.fds-overview-copy > p { max-width: 32em; color: #b9cbe2; font-size: 14px; line-height: 1.85; margin-bottom: 24px; }
+.fds-overview .eyebrow { color: #8db5ee; }
+.fds-overview .fds-btn { background: #b9403b; }.fds-overview .fds-btn:hover:not(:disabled) { background: #962d2a; }
+.fds-overview-card { border: 1px solid rgba(190, 214, 244, .21); border-radius: 12px; overflow: hidden; background: rgba(2, 13, 31, .34); }
+.fds-live { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid rgba(190, 214, 244, .16); font: 600 10.5px var(--mono); letter-spacing: .1em; color: #a9c6e9; }.fds-live i { width: 7px; height: 7px; border-radius: 50%; background: #e35a54; box-shadow: 0 0 0 4px rgba(227, 90, 84, .16); }.fds-live b { margin-left: auto; color: #ffb5af; font-size: 11px; }
+.fds-scenario { margin: 14px 16px; padding: 11px 13px; border-radius: 7px; background: rgba(226, 79, 72, .12); border: 1px solid rgba(239, 132, 125, .22); }.fds-scenario span { color: #f0a09a; font-size: 11px; font-weight: 700; }.fds-scenario p { margin-top: 2px; color: #edf3fc; font-size: 12.5px; line-height: 1.65; }
+.fds-timeline { list-style: none; margin: 0; padding: 0 16px 14px; }.fds-timeline li { position: relative; display: grid; grid-template-columns: 29px 1fr; gap: 10px; padding: 0 0 13px; }.fds-timeline li:not(:last-child)::before { content: ""; position: absolute; width: 1px; height: calc(100% - 20px); top: 22px; left: 14px; background: rgba(171, 200, 234, .28); }.fds-timeline li > span { display: grid; place-items: center; width: 29px; height: 29px; color: #a9c8ee; border: 1px solid rgba(169, 200, 238, .36); border-radius: 50%; font: 600 9px var(--mono); z-index: 1; background: #122a4a; }.fds-timeline li:nth-child(n+3) > span { color: #ffc0bb; border-color: rgba(255, 167, 159, .45); }.fds-timeline b { display: block; margin: 2px 0; color: #fff; font-size: 13px; }.fds-timeline p { color: #aac0d9; font-size: 11.5px; line-height: 1.55; }
 
 .hero-panel h3 {
   color: #fff;
@@ -2055,6 +2078,56 @@ table.data tfoot td {
   margin-top: 22px;
 }
 
+/* ── Smart Fraud Shield ───────────────────────── */
+
+.fds-trigger { display: inline-flex; }
+.fds-btn { background: #842b28; }
+.fds-btn:hover:not(:disabled) { background: #69201f; }
+
+.fds-modal {
+  width: min(940px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: var(--paper);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(12, 28, 54, .28);
+}
+.fds-head { display: flex; justify-content: space-between; gap: 20px; padding: 28px 30px 20px; }
+.fds-head h2 { font-size: 24px; margin-top: 7px; }
+.fds-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--line-soft); font-size: 25px; line-height: 1; color: var(--muted); }
+.fds-verdict { margin: 0 30px; padding: 18px 20px; border-radius: 10px; border: 1px solid; }
+.fds-verdict > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.fds-verdict strong { font-size: 25px; color: var(--navy); letter-spacing: -.03em; }
+.fds-verdict strong small { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+.fds-verdict p { margin-top: 7px; font-size: 13.5px; }
+.fds-status { padding: 3px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.fds-verdict.blocked { background: var(--danger-soft); border-color: #efc3c0; }.fds-verdict.blocked .fds-status { background: #f7d7d5; color: var(--danger); }
+.fds-verdict.review { background: var(--warn-soft); border-color: #ebd3b5; }.fds-verdict.review .fds-status { background: #f4dfc7; color: var(--warn); }
+.fds-verdict.allow { background: var(--ok-soft); border-color: #c7e6d7; }.fds-verdict.allow .fds-status { background: #d6eee2; color: var(--ok); }
+.fds-transaction { display: grid; grid-template-columns: repeat(4, 1fr); margin: 20px 30px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.fds-transaction div { padding: 13px 15px; border-right: 1px solid var(--line); }.fds-transaction div:last-child { border: 0; }
+.fds-transaction span, .fds-transaction b { display: block; }.fds-transaction span { color: var(--muted); font-size: 11px; margin-bottom: 3px; }.fds-transaction b { color: var(--navy); font-family: var(--mono); font-size: 12px; }
+.fds-analysis { padding: 22px 30px 28px; background: #f8fafc; border-top: 1px solid var(--line); }
+.fds-approval { margin: 0 30px 20px; padding: 15px 16px; border: 1px solid #ead4ab; border-radius: 10px; background: #fffaf0; }
+.fds-approval > div:first-child { display: flex; gap: 10px; align-items: flex-start; }.fds-pending-dot { flex: 0 0 auto; width: 9px; height: 9px; margin-top: 7px; border-radius: 50%; background: #d28a23; box-shadow: 0 0 0 4px #f8e6c7; }.fds-approval p { color: var(--warn); font-size: 12px; font-weight: 700; }.fds-approval b, .fds-approval small { display: block; }.fds-approval b { color: var(--navy); font-size: 13px; }.fds-approval small { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+.fds-approval-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }.fds-approval-actions .btn { padding: 8px 11px; font-size: 12px; }.fds-check-result { margin-top: 10px; padding-top: 9px; border-top: 1px solid #ecdcbf; color: var(--ok) !important; font-size: 12px !important; }
+.fds-detail-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0; border: 0; background: transparent; text-align: left; }.fds-detail-toggle h3 { font-size: 18px; margin-top: 3px; }.fds-detail-toggle b { color: var(--blue); font-size: 13px; }
+.fds-section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 14px; }.fds-section-head h3 { font-size: 18px; margin-top: 3px; }.fds-section-head > span { color: var(--muted); font-size: 12px; }
+.fds-detail-toggle + .fds-signals { margin-top: 14px; }
+.fds-signals { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.fds-signal { background: var(--paper); border: 1px solid var(--line); border-left: 3px solid #b6c1cf; border-radius: 8px; padding: 13px 14px; }.fds-signal.warning { border-left-color: var(--warn); }.fds-signal.critical { border-left-color: var(--danger); }
+.fds-signal-top { display: flex; justify-content: space-between; align-items: center; }.fds-signal h4 { font-size: 14px; }.fds-signal-top span { color: var(--ok); font: 600 12px var(--mono); }.fds-signal.warning .fds-signal-top span { color: var(--warn); }.fds-signal.critical .fds-signal-top span { color: var(--danger); }
+.fds-signal > p { font-size: 12.5px; line-height: 1.65; color: var(--muted); margin: 6px 0 10px; }.fds-signal dl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }.fds-signal dt { color: var(--faint); font-size: 10.5px; }.fds-signal dd { margin: 1px 0 0; color: var(--navy); font-size: 11.5px; font-weight: 600; }
+.fds-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 30px; }.fds-footer p { font-size: 12.5px; color: var(--muted); }.fds-footer b { color: var(--navy); }
+.fds-error { padding: 30px; width: min(460px, 100%); }.fds-error h2 { margin: 7px 0; }.fds-error p:not(.eyebrow) { color: var(--muted); margin-bottom: 20px; }
+
+/* ── 금융 보호 전용 페이지 ─────────────────────── */
+.fraud-entry { padding-top: 70px; padding-bottom: 90px; }.fraud-entry-hero { position: relative; overflow: hidden; max-width: 980px; margin: 0 auto; padding: 76px 11% 68px; text-align: center; background: radial-gradient(circle at 50% 0%, #234b7c, var(--navy) 61%); border-radius: 18px; color: #d7e5f5; }.fraud-entry-hero .eyebrow { color: #98bfef; }.fraud-entry-orb { display: grid; place-items: center; width: 52px; height: 52px; margin: 20px auto; border-radius: 50%; color: #b9d5f6; border: 1px solid rgba(185, 213, 246, .45); font: 600 15px var(--mono); box-shadow: 0 0 0 12px rgba(151, 190, 238, .08); }.fraud-entry-hero h1 { color: #fff; font-size: clamp(30px, 4.2vw, 48px); letter-spacing: -.045em; }.fraud-entry-hero > p { max-width: 620px; margin: 18px auto 24px; color: #c1d2e8; line-height: 1.9; font-size: 14px; }.fraud-entry-hero .btn { background: #fff; color: var(--navy); }.fraud-entry-hero small { display: block; margin-top: 15px; color: #98b3d1; font-size: 11.5px; }.fraud-entry-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 900px; margin: 18px auto 0; }.fraud-entry-steps div { padding: 17px; border: 1px solid var(--line); border-radius: 10px; }.fraud-entry-steps span { display: block; color: var(--blue); font: 600 11px var(--mono); }.fraud-entry-steps b { display: block; margin: 3px 0; color: var(--navy); font-size: 14px; }.fraud-entry-steps p { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.fraud-page { padding-top: 56px; padding-bottom: 84px; }.fraud-intro { display: grid; grid-template-columns: 1fr 285px; gap: 60px; align-items: end; padding-bottom: 46px; }.fraud-intro h1 { font-size: clamp(31px, 4vw, 49px); letter-spacing: -.045em; margin: 13px 0 18px; }.fraud-intro > div > p:last-child { max-width: 43em; color: var(--muted); line-height: 1.85; }.fraud-intro aside { padding: 18px; border-radius: 10px; background: var(--ok-soft); border: 1px solid #c7e6d7; }.fraud-intro aside span, .fraud-intro aside b, .fraud-intro aside p { display: block; }.fraud-intro aside span { color: var(--ok); font-size: 11px; font-weight: 700; }.fraud-intro aside b { color: var(--navy); margin: 3px 0; }.fraud-intro aside p { color: var(--muted); font-size: 12px; }
+.fraud-learning { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: 20px 24px; border: 1px solid var(--line); border-radius: 11px; }.fraud-learning > div { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }.fraud-learning span { color: var(--muted); font-size: 12px; }.fraud-learning b { padding: 4px 9px; border-radius: 99px; background: var(--blue-soft); color: var(--blue); font-size: 11.5px; }.fraud-learning > p { max-width: 31em; color: var(--muted); font-size: 12.5px; }
+.fraud-record { margin-top: 50px; }.fraud-record-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }.fraud-record-head h2, .fraud-process h2 { margin-top: 3px; font-size: 24px; }.fraud-record-head > span { color: var(--muted); font: 12px var(--mono); }.fraud-record-card { padding: 28px 30px; border: 1px solid var(--line); border-left: 5px solid; border-radius: 12px; box-shadow: var(--shadow); }.fraud-record-card.blocked { border-left-color: var(--danger); }.fraud-record-card.allowed { border-left-color: var(--ok); }.fraud-record-status { display: flex; justify-content: space-between; align-items: center; }.fraud-record-status span { padding: 3px 8px; border-radius: 99px; font-weight: 700; font-size: 12px; }.blocked .fraud-record-status span { color: var(--danger); background: var(--danger-soft); }.allowed .fraud-record-status span { color: var(--ok); background: var(--ok-soft); }.fraud-record-status b { color: var(--navy); font: 600 12px var(--mono); }.fraud-record-card h3 { margin: 13px 0 4px; font-size: 21px; }.fraud-record-card > p { color: var(--muted); font-size: 13px; }.fraud-record-actions { display: flex; gap: 8px; margin-top: 20px; }.fraud-record-actions .btn { padding: 9px 13px; font-size: 12px; }.fraud-record-actions .btn:last-child { margin-left: auto; }
+.fraud-process { margin-top: 52px; padding: 30px; border-radius: 12px; background: var(--navy); }.fraud-process .eyebrow { color: #8db5ee; }.fraud-process h2 { color: #fff; margin-bottom: 20px; }.fraud-process ol { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; list-style: none; margin: 0; padding: 0; counter-reset: process; }.fraud-process li { position: relative; padding: 34px 14px 0; color: #c5d5e8; font-size: 12px; line-height: 1.6; counter-increment: process; }.fraud-process li::before { content: "0" counter(process); position: absolute; top: 0; left: 14px; color: #95b9eb; font: 600 11px var(--mono); }.fraud-process li:not(:last-child)::after { content: "→"; position: absolute; right: -9px; top: 30px; color: #7295c3; }
+
 /* ── 반응형 ───────────────────────────────────── */
 
 @media (max-width: 1080px) {
@@ -2078,6 +2151,8 @@ table.data tfoot td {
     gap: 40px;
     padding: 56px 0 64px;
   }
+  .fds-overview { grid-template-columns: 1fr; gap: 32px; }
+  .fraud-intro { grid-template-columns: 1fr; gap: 24px; }.fraud-intro aside { max-width: 360px; }.fraud-process ol { grid-template-columns: repeat(3, 1fr); }
   .track-row {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2105,6 +2180,7 @@ table.data tfoot td {
   .cta-band {
     padding: 34px 24px;
   }
+  .fds-overview { margin-bottom: 58px; padding: 34px 24px; }
   .multi-amount-row {
     grid-template-columns: 1fr;
     gap: 5px;
@@ -2121,6 +2197,13 @@ table.data tfoot td {
   .modal {
     padding: 24px 22px;
   }
+  .fds-head, .fds-analysis { padding-left: 20px; padding-right: 20px; }
+  .fds-verdict, .fds-transaction, .fds-approval { margin-left: 20px; margin-right: 20px; }
+  .fds-transaction, .fds-signals { grid-template-columns: 1fr; }
+  .fds-transaction div { border-right: 0; border-bottom: 1px solid var(--line); }.fds-transaction div:last-child { border-bottom: 0; }
+  .fds-footer { align-items: stretch; flex-direction: column; padding: 18px 20px; }.fds-footer .btn { width: 100%; }
+  .fraud-page { padding-top: 38px; }.fraud-learning { align-items: flex-start; flex-direction: column; gap: 12px; }.fraud-record-card { padding: 22px; }.fraud-record-actions { flex-wrap: wrap; }.fraud-record-actions .btn:last-child { margin-left: 0; }.fraud-process { padding: 25px 22px; }.fraud-process ol { grid-template-columns: 1fr; }.fraud-process li { padding: 5px 0 5px 42px; }.fraud-process li::before { top: 5px; left: 0; }.fraud-process li:not(:last-child)::after { content: "↓"; top: auto; left: 4px; bottom: -13px; }.fraud-record-head { align-items: start; }
+  .fraud-entry { padding-top: 32px; }.fraud-entry-hero { padding: 54px 24px; }.fraud-entry-steps { grid-template-columns: 1fr; }
   .iv-stream {
     max-height: none;
   }

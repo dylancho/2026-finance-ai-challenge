@@ -16,6 +16,7 @@ export default function Header() {
           </Link>
           <Link href="/plan">내 설계서</Link>
           <Link href="/simulation">시뮬레이션</Link>
+          <Link href="/fraud-shield">금융 보호</Link>
         </nav>
       </div>
     </header>
