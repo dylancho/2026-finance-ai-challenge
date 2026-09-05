@@ -37,6 +37,7 @@ export default function Home() {
 
               {/* FDS 이상 거래 차단 엔진 실시간 시뮬레이션 버튼 */}
               <Link href="/fraud-shield" className="btn fds-btn">금융 보호 서비스 보기</Link>
+              <Link href="/monthly-review" className="btn outline">이번 달 보호 룰 설정</Link>
             </div>
 
             <p className="hero-note">
