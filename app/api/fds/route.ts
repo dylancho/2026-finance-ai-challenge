@@ -8,6 +8,7 @@ import {
   topReasons,
   type FraudScore,
 } from "../../../lib/fraud/score";
+import { parsePolicy, RULE_LABEL, TIMEOUT_LABEL } from "../../../lib/fraud/policy";
 
 export const runtime = "nodejs";
 
@@ -31,6 +32,7 @@ const SYSTEM = `당신은 한국 금융 서비스 NEXT의 이상거래 보호 �
 - status 와 risk_score 를 바꾸거나 새로 계산하지 마세요. 받은 값을 그대로 전제로 씁니다.
 - 받지 않은 사실을 지어내지 마세요. 신호에 없는 정황(전화 내용, 상대방 신원 등)을 단정하지 않습니다.
 - 사용자를 평가하거나 훈계하지 마세요. 사용자는 피해자일 수 있습니다.
+- policy 는 사용자가 인터뷰에서 직접 선언한 보호 원칙입니다. policyNote 가 있으면 그 원칙이 이 판정을 결정한 것이니 decision 에 "직접 정해 두신 원칙에 따라" 라는 뜻을 담아 언급하세요.
 - 특정 금융회사·상품명을 쓰지 마세요.
 - 번역투("~에 대해", "~를 통해", "~에 있어")와 대시(—)는 쓰지 마세요.
 - 존댓말. 담백한 문어체. 이모지 금지.
@@ -106,6 +108,13 @@ async function narrate(score: FraudScore): Promise<{ narrative: Narrative; narra
                 transaction: score.transaction,
                 baseline: score.baseline,
                 signals: score.signals,
+                policy: {
+                  rule: RULE_LABEL[score.policy.rule],
+                  newAccountThreshold: score.policy.newAccountThreshold,
+                  watchedSignals: score.policy.signals,
+                  onGuardianTimeout: TIMEOUT_LABEL[score.policy.onTimeout],
+                },
+                policyNote: score.policyNote ?? null,
               },
               null,
               1,
@@ -117,6 +126,7 @@ async function narrate(score: FraudScore): Promise<{ narrative: Narrative; narra
             "- risk_score: 0~100. 신호별 score 의 합.",
             "- signals[].level: critical > warning > normal. observed 는 이번 거래, baseline 은 평소 기준.",
             "- baseline.knownAccounts: 평소 거래하던 수취계좌.",
+            "- policy: 사용자가 선언한 보호 원칙. policyNote 가 있으면 점수와 무관하게 그 원칙이 status 를 정했다.",
           ].join("\n"),
         },
       ],
@@ -160,7 +170,7 @@ export async function POST(req: Request) {
   }
 
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const score = scoreTransaction(parseTransaction(body));
+  const score = scoreTransaction(parseTransaction(body), parsePolicy(body.policy));
   const { narrative, narrator } = await narrate(score);
 
   return NextResponse.json({
@@ -169,6 +179,8 @@ export async function POST(req: Request) {
     transaction: score.transaction,
     baseline: score.baseline,
     signals: score.signals,
+    policy: score.policy,
+    policy_note: score.policyNote,
     decision: narrative.decision,
     guardian_message: narrative.guardianMessage,
     summary_reasons: narrative.summaryReasons,

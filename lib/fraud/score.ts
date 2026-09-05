@@ -7,6 +7,8 @@
  * 숫자는 여기서만 계산한다. 판정층이 숫자를 고쳐 쓰면 화면의 근거와 어긋난다.
  */
 
+import { DEFAULT_POLICY, type FraudPolicy } from "./policy";
+
 export type SignalLevel = "critical" | "warning" | "normal";
 export type FraudStatus = "BLOCKED" | "REVIEW" | "ALLOW";
 
@@ -37,6 +39,10 @@ export interface FraudScore {
   transaction: FraudTransaction;
   baseline: typeof BASELINE;
   signals: FraudSignal[];
+  /** 적용된 보호 원칙(금융 보호 챕터). 어떤 원칙이 상태를 결정했는지 서술에 쓴다. */
+  policy: FraudPolicy;
+  /** 원칙이 룰 점수 판정을 바꿨으면 그 이유 */
+  policyNote?: string;
 }
 
 /** 데모용 사용자 기준선. 실제 서비스라면 최근 3개월 거래 로그에서 학습한다. */
@@ -77,19 +83,40 @@ function level(score: number): SignalLevel {
   return score >= 18 ? "critical" : score > 0 ? "warning" : "normal";
 }
 
-export function scoreTransaction(tx: FraudTransaction): FraudScore {
+export function scoreTransaction(tx: FraudTransaction, policy: FraudPolicy = DEFAULT_POLICY): FraudScore {
   const ratio = tx.amount / BASELINE.p95Amount;
   const hour = hourOf(tx.requestTime);
+  const watch = new Set(policy.signals);
+  // 사용자가 보지 않기로 한 신호는 점수를 매기지 않는다 (S03).
   const scores = {
     amount: ratio >= 10 ? 30 : ratio >= 4 ? 20 : ratio >= 2 ? 10 : 0,
     recipient: tx.isNewTargetAccount ? 19 : 0,
-    time: hour < 9 || hour > 20 ? 14 : 0,
-    pin: tx.pinErrorCount >= 2 ? 13 : tx.pinErrorCount === 1 ? 6 : 0,
-    biometric: tx.biometricAnomalyScore >= 0.7 ? 17 : tx.biometricAnomalyScore >= 0.4 ? 8 : 0,
-    device: tx.isNewDevice ? 7 : 0,
+    time: watch.has("time") && (hour < 9 || hour > 20) ? 14 : 0,
+    pin: watch.has("pin") ? (tx.pinErrorCount >= 2 ? 13 : tx.pinErrorCount === 1 ? 6 : 0) : 0,
+    biometric: watch.has("biometric")
+      ? tx.biometricAnomalyScore >= 0.7 ? 17 : tx.biometricAnomalyScore >= 0.4 ? 8 : 0
+      : 0,
+    device: watch.has("device") && tx.isNewDevice ? 7 : 0,
   };
   const risk = Math.min(99, Object.values(scores).reduce((sum, v) => sum + v, 0));
-  const status: FraudStatus = risk >= 65 ? "BLOCKED" : risk >= 35 ? "REVIEW" : "ALLOW";
+  let status: FraudStatus = risk >= 65 ? "BLOCKED" : risk >= 35 ? "REVIEW" : "ALLOW";
+  let policyNote: string | undefined;
+
+  // 보호 원칙(S01·S02)은 점수와 별개로 상태의 하한을 정한다.
+  if (tx.isNewTargetAccount) {
+    if (policy.rule === "block") {
+      if (status !== "BLOCKED") policyNote = "선언한 원칙: 신규 개인 계좌 송금은 금액과 관계없이 우선 차단";
+      status = "BLOCKED";
+    } else if (tx.amount >= policy.newAccountThreshold) {
+      const floor: FraudStatus = policy.rule === "guardian" ? "BLOCKED" : "REVIEW";
+      if (status === "ALLOW" || (status === "REVIEW" && floor === "BLOCKED")) {
+        policyNote = `선언한 원칙: 신규 개인 계좌로 ${policy.newAccountThreshold.toLocaleString("ko-KR")}원 이상은 ${
+          policy.rule === "guardian" ? "보호자 승인 후 진행" : "본인 재인증 후 진행"
+        }`;
+        status = floor;
+      }
+    }
+  }
   const won = (n: number) => `${n.toLocaleString("ko-KR")}원`;
 
   const signals: FraudSignal[] = [
@@ -130,7 +157,7 @@ export function scoreTransaction(tx: FraudTransaction): FraudScore {
     },
   ];
 
-  return { status, risk_score: risk, transaction: tx, baseline: BASELINE, signals };
+  return { status, risk_score: risk, transaction: tx, baseline: BASELINE, signals, policy, policyNote };
 }
 
 /** 판정층이 없을 때 쓰는 룰 기반 서술. Claude 가 실패해도 화면은 이걸로 완주한다. */

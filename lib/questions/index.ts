@@ -3,6 +3,7 @@ import { coreQuestions } from "./core";
 import { investQuestions } from "./invest";
 import { estateQuestions } from "./estate";
 import { medicalQuestions } from "./medical";
+import { safeQuestions } from "./safe";
 import { futureQuestions } from "./future";
 import { caregiverQuestions } from "./caregiver";
 
@@ -13,10 +14,11 @@ export const CHAPTER_BANK: Record<Chapter, Question[]> = {
   invest: investQuestions,
   estate: estateQuestions,
   medical: medicalQuestions,
+  safe: safeQuestions,
 };
 
-export const CHAPTER_ORDER: Chapter[] = ["core", "invest", "estate", "medical"];
-export const OPTIONAL_CHAPTERS: Chapter[] = ["invest", "estate", "medical"];
+export const CHAPTER_ORDER: Chapter[] = ["core", "invest", "estate", "medical", "safe"];
+export const OPTIONAL_CHAPTERS: Chapter[] = ["invest", "estate", "medical", "safe"];
 
 export interface ChapterMeta {
   label: string;
@@ -73,6 +75,16 @@ export const CHAPTER_META: Record<Chapter, ChapterMeta> = {
     required: false,
     docs: ["신탁설계서", "후견설계서"],
   },
+  safe: {
+    label: "금융 보호",
+    short: "보호",
+    caption: "한도 안의 금액이라도 처음 보는 계좌·새벽·인증 실패가 겹치면 어떻게 할지를 정합니다.",
+    withoutIt: "보이스피싱 정황이 겹쳐도 한도만 넘지 않으면 그대로 나갑니다.",
+    count: safeQuestions.length,
+    minutes: "2분",
+    required: false,
+    docs: ["지출설계서 제4조"],
+  },
 };
 
 /** 챕터 목록에 속한 질문. 순서는 CHAPTER_ORDER 를 따르고 챕터 안 순서는 파일 순서다. */
@@ -126,6 +138,8 @@ export function hasChapter(p: Profile, ch: Chapter): boolean {
         return p.track === "future" || p.track === "caregiver";
       case "invest":
         return p.track === "future";
+      case "safe":
+        return false;
     }
   }
   return chapterCompleted(p, ch) || chapterStarted(p, ch);

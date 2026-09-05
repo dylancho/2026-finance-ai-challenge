@@ -2131,10 +2131,10 @@ table.data tfoot td {
 .fraud-record { margin-top: 50px; }.fraud-record-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }.fraud-record-head h2, .fraud-process h2 { margin-top: 3px; font-size: 24px; }.fraud-record-head > span { color: var(--muted); font: 12px var(--mono); }.fraud-record-card { padding: 28px 30px; border: 1px solid var(--line); border-left: 5px solid; border-radius: 12px; box-shadow: var(--shadow); }.fraud-record-card.blocked { border-left-color: var(--danger); }.fraud-record-card.allowed { border-left-color: var(--ok); }.fraud-record-status { display: flex; justify-content: space-between; align-items: center; }.fraud-record-status span { padding: 3px 8px; border-radius: 99px; font-weight: 700; font-size: 12px; }.blocked .fraud-record-status span { color: var(--danger); background: var(--danger-soft); }.allowed .fraud-record-status span { color: var(--ok); background: var(--ok-soft); }.fraud-record-status b { color: var(--navy); font: 600 12px var(--mono); }.fraud-record-card h3 { margin: 13px 0 4px; font-size: 21px; }.fraud-record-card > p { color: var(--muted); font-size: 13px; }.fraud-record-actions { display: flex; gap: 8px; margin-top: 20px; }.fraud-record-actions .btn { padding: 9px 13px; font-size: 12px; }.fraud-record-actions .btn:last-child { margin-left: auto; }
 .fraud-process { margin-top: 52px; padding: 30px; border-radius: 12px; background: var(--navy); }.fraud-process .eyebrow { color: #8db5ee; }.fraud-process h2 { color: #fff; margin-bottom: 20px; }.fraud-process ol { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; list-style: none; margin: 0; padding: 0; counter-reset: process; }.fraud-process li { position: relative; padding: 34px 14px 0; color: #c5d5e8; font-size: 12px; line-height: 1.6; counter-increment: process; }.fraud-process li::before { content: "0" counter(process); position: absolute; top: 0; left: 14px; color: #95b9eb; font: 600 11px var(--mono); }.fraud-process li:not(:last-child)::after { content: "→"; position: absolute; right: -9px; top: 30px; color: #7295c3; }
 
-/* ── 인터뷰 마지막 단계: 금융 보호 룰 ───────── */
-.fds-step .monthly-scenario { margin: 0 0 16px; }
-.fds-step .monthly-updated { margin-top: 4px; }
-.fds-step .gate-nav { flex-wrap: wrap; }
+/* ── 인터뷰: 금융 보호 영역 완료 후 판정 미리보기 ─ */
+.fds-step { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.fds-step .monthly-updated { margin-top: 0; }
+.fds-step .gate-nav { flex-wrap: wrap; margin-top: 14px; }
 
 /* ── 반응형 ───────────────────────────────────── */
 

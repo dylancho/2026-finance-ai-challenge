@@ -10,6 +10,7 @@ import {
   type FraudStatus,
   type FraudTransaction,
 } from "../lib/fraud/score";
+import type { FraudPolicy } from "../lib/fraud/policy";
 
 export type FraudSignalUI = FraudSignal;
 
@@ -37,8 +38,8 @@ const STATUS: Record<FraudStatus, { label: string; className: string }> = {
 };
 
 /** 서버 없이도 같은 화면을 그리기 위한 룰 기반 리포트. API 가 실패하면 이걸로 대체한다. */
-export function ruleReport(tx: FraudTransaction, guardian = "김하나"): FraudReportUI {
-  const score = scoreTransaction(tx);
+export function ruleReport(tx: FraudTransaction, guardian = "김하나", policy?: FraudPolicy): FraudReportUI {
+  const score = scoreTransaction(tx, policy);
   return {
     status: score.status,
     risk_score: score.risk_score,

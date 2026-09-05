@@ -12,7 +12,7 @@ export type Subject = "self" | "family";
  * 인터뷰 챕터. core 는 필수, 나머지는 선택이다.
  * 챕터를 건너뛰면 그 영역은 "아직 선언하지 않은 것" 으로 남아 설계서에 공백으로 표시된다.
  */
-export type Chapter = "core" | "invest" | "estate" | "medical";
+export type Chapter = "core" | "invest" | "estate" | "medical" | "safe";
 export type Capacity = "full" | "declining" | "diagnosed" | "incident";
 
 export type DocKey = "trust" | "guardianship" | "expense";

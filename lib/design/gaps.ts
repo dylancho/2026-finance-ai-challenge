@@ -37,6 +37,13 @@ const CHAPTER_GAP: Record<
     consequence: "요양시설 입소 시 비용 상한과 재원 순서를 정할 수 없습니다.",
     severity: "high",
   },
+  safe: {
+    doc: "expense",
+    clause: "제4조 이상거래 룰셋",
+    what: "맥락 기반 보호 원칙이 선언되지 않았습니다",
+    consequence: "보이스피싱 정황이 겹쳐도 한도만 넘지 않으면 그대로 나갑니다.",
+    severity: "high",
+  },
 };
 
 export const chapterGapId = (ch: Chapter) => `chapter:${ch}`;

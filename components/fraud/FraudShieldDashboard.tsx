@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import FraudShieldModal, { ruleReport, type FraudReportUI } from "../FraudShieldModal";
 import { scoreTransaction, type FraudTransaction } from "../../lib/fraud/score";
+import { DEFAULT_POLICY, policyFromProfile, type FraudPolicy } from "../../lib/fraud/policy";
+import { readProfile } from "../../lib/profile";
 
 const PEOPLE = ["서연", "민준", "지우", "도윤", "하은", "준서"];
 
@@ -41,7 +43,16 @@ export default function FraudShieldDashboard() {
   const [index, setIndex] = useState(0);
   const [detail, setDetail] = useState<FraudReportUI | null>(null);
   const [loading, setLoading] = useState(false);
-  useEffect(() => setName(PEOPLE[Math.floor(Math.random() * PEOPLE.length)]), []);
+  /** 인터뷰의 금융 보호 영역에서 선언한 원칙. 없으면 기본값. */
+  const [policy, setPolicy] = useState<FraudPolicy>(DEFAULT_POLICY);
+  useEffect(() => {
+    setName(PEOPLE[Math.floor(Math.random() * PEOPLE.length)]);
+    try {
+      setPolicy(policyFromProfile(readProfile()) ?? DEFAULT_POLICY);
+    } catch {
+      /* 프로필이 없으면 기본 원칙 */
+    }
+  }, []);
 
   if (!entered) {
     return (
@@ -65,7 +76,7 @@ export default function FraudShieldDashboard() {
 
   const guardian = `${name}님의 보호자`;
   const tx = SCENARIOS[index];
-  const preview = scoreTransaction(tx);
+  const preview = scoreTransaction(tx, policy);
   const isBlocked = preview.status === "BLOCKED";
 
   // 룰 점수는 클라이언트에서 바로 나온다. 서버는 같은 점수 위에 Claude 해설을 얹는다.
@@ -76,14 +87,14 @@ export default function FraudShieldDashboard() {
       const res = await fetch("/api/fds", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(toBody(tx)),
+        body: JSON.stringify({ ...toBody(tx), policy }),
       });
       if (!res.ok) throw new Error(`fds ${res.status}`);
       const report = (await res.json()) as FraudReportUI;
       if (report.approval) report.approval = { ...report.approval, guardian };
       setDetail(report);
     } catch {
-      setDetail(ruleReport(tx, guardian));
+      setDetail(ruleReport(tx, guardian, policy));
     } finally {
       setLoading(false);
     }

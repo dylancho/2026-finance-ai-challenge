@@ -21,6 +21,7 @@ import {
 import { personLabel, won } from "../format";
 import { hasChapter, isUnified } from "../questions";
 import { ASSET_CLASS_LABEL, RISK_CAP_PCT } from "../questions/invest";
+import { policyFromProfile, RULE_LABEL, TIMEOUT_LABEL } from "../fraud/policy";
 
 /**
  * 자산 소진 추정. 수익률·물가를 반영하지 않은 단순 인출 계산이다.
@@ -324,6 +325,51 @@ export function buildExpenseDesign(p: Profile): ExpenseDesign {
     if (incident) active = true; // 이미 피해가 있었다면 전부 켠다
     return { ...r, active };
   });
+
+  /* ── 맥락 룰 (금융 보호 챕터) ──
+   * 한도 기준 룰 아래에 맥락 기준 룰을 더한다. 챕터를 선언하지 않았으면 조항에 나타나지 않는다.
+   * /api/fds 의 판정 엔진이 같은 policy 를 읽으므로, 여기 적힌 조치와 실제 판정이 어긋나지 않는다. */
+  const policy = policyFromProfile(p);
+  if (policy) {
+    const guardian = notifyPerson ? personLabel(notifyPerson) : "보호자";
+    const SIGNAL_TEXT: Record<string, string> = {
+      time: "평소 이용하지 않는 시간대",
+      pin: "비밀번호 오입력 반복",
+      biometric: "터치 패턴 이탈",
+      device: "처음 쓰는 기기",
+    };
+    const action =
+      policy.rule === "block"
+        ? "즉시 차단"
+        : policy.rule === "reauth"
+          ? "보류 후 본인 재인증"
+          : `보류 후 ${guardian} 승인`;
+    fraudRules.push(
+      {
+        key: "ctx_new_account",
+        condition: `처음 보는 개인 계좌로 ${won(policy.newAccountThreshold)} 이상 이체`,
+        action: `${action} (${RULE_LABEL[policy.rule]})`,
+        notify: guardian,
+        active: true,
+      },
+      {
+        key: "ctx_signals",
+        condition: policy.signals.length
+          ? `신규 계좌 이체에 ${policy.signals.map((k) => SIGNAL_TEXT[k]).join("·")} 신호가 겹침`
+          : "맥락 신호 감시 없음 (금액·계좌만 봄)",
+        action: policy.signals.length ? `위험도 합산 후 ${action}` : "금액 기준만 적용",
+        notify: policy.signals.length ? `${guardian} (판정 근거 첨부)` : "본인",
+        active: policy.signals.length > 0,
+      },
+      {
+        key: "ctx_timeout",
+        condition: `차단 후 ${guardian}이(가) 12시간 무응답`,
+        action: TIMEOUT_LABEL[policy.onTimeout],
+        notify: policy.onTimeout === "hold" ? `${guardian} 재알림` : "본인",
+        active: true,
+      },
+    );
+  }
 
   /* ── 승인·알림 ── */
   const approval = {

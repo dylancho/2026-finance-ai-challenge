@@ -51,7 +51,7 @@ describe("질문 체계 — ID 불변", () => {
     expect(QUESTION_BANK.future.find((q) => q.id === "B09")).toBe(findQuestion("B09"));
   });
 
-  it("questionsFor 는 챕터 순서(core → invest → estate → medical)를 지킨다", () => {
+  it("questionsFor 는 챕터 순서(core → invest → estate → medical → safe)를 지킨다", () => {
     const qs = questionsFor(["estate", "core"]);
     expect(qs[0].id).toBe("A09");
     expect(qs[qs.length - 1].id).toBe("D16");
@@ -141,7 +141,7 @@ describe("공백·시나리오", () => {
     const p = unified();
     const gaps = findGaps(p, buildDesign(p));
     const chapterGaps = gaps.filter((g) => g.chapter);
-    expect(chapterGaps.map((g) => g.chapter).sort()).toEqual(["estate", "invest", "medical"]);
+    expect(chapterGaps.map((g) => g.chapter).sort()).toEqual(["estate", "invest", "medical", "safe"]);
     expect(chapterGaps.find((g) => g.chapter === "invest")?.what).toContain("투자 원칙이 선언되지 않았습니다");
     expect(chapterGaps.find((g) => g.chapter === "estate")?.consequence).toContain("법정상속");
   });
