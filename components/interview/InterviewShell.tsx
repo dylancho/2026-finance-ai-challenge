@@ -6,7 +6,9 @@ import Link from "next/link";
 import QuestionInput from "./QuestionInput";
 import ObservationCard from "./ObservationCard";
 import ChapterProposal from "./ChapterProposal";
+import FraudShieldStep from "./FraudShieldStep";
 import Badge from "../common/Badge";
+import { useAuth } from "../auth/AuthProvider";
 import {
   activeQuestions,
   chapterCompleted,
@@ -81,6 +83,7 @@ const isChapter = (v: string | null): v is Chapter =>
  */
 export default function InterviewShell() {
   const router = useRouter();
+  const { session } = useAuth();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
@@ -105,6 +108,8 @@ export default function InterviewShell() {
   /** 지금 보고 있는 질문의 말풍선 id — 강조와 스크롤 목표 */
   const [focusId, setFocusId] = useState<string | null>(null);
   const completedRef = useRef<Chapter | null>(null);
+  /** 마지막 단계(금융 보호) 안내 말풍선은 한 번만 붙인다. */
+  const safeIntroRef = useRef(false);
 
   /* ── 초기화 ── */
   useEffect(() => {
@@ -272,6 +277,22 @@ export default function InterviewShell() {
     if (remaining.length) setProposing(true);
   }, [profile, current, chapter, proposing, reentry, router]);
 
+  /* ── 마지막 단계 안내 ──
+   * 더 물을 질문이 없고 챕터 제안도 아닐 때, 금융 보호 룰을 정하는 단계로 넘어간다고 알린다. */
+  useEffect(() => {
+    if (!profile || current || proposing || safeIntroRef.current) return;
+    safeIntroRef.current = true;
+    setBubbles((prev) => [
+      ...prev,
+      {
+        id: "safe-intro",
+        role: "ai",
+        text: "설계서 질문은 여기까지입니다. 마지막으로, 평소와 다른 거래가 들어왔을 때 NEXT가 어떻게 할지 정해 두겠습니다.",
+        helper: "설계서와는 별개로, 평소 거래 습관을 학습해 위험 신호가 겹칠 때만 거래를 멈춥니다.",
+      },
+    ]);
+  }, [profile, current, proposing]);
+
   /* ── 질문 제시 ──
    * 처음 보는 질문만 말풍선을 붙인다. 이미 물어본 질문으로 돌아가면 그 말풍선을
    * 강조하고 거기로 스크롤한다 — 되돌아갈 때마다 스트림이 늘어나지 않는다. */
@@ -422,6 +443,11 @@ export default function InterviewShell() {
   const done = !current && !proposing;
   const remainingChapters = OPTIONAL_CHAPTERS.filter((ch) => !chapterCompleted(profile, ch));
   const headline = unified ? CHAPTER_META[chapter].label : meta.name;
+  const userName = (session.signedIn && session.name) || "사용자";
+  /* 보호자: A07(이상 상황 시 알릴 사람)에서 이름을 적었으면 그 사람 */
+  const a07 = profile.answers.A07;
+  const guardianName =
+    a07 && a07.kind === "person" ? a07.people.find((p) => p.name?.trim())?.name?.trim() : undefined;
 
   /* 조항 피드 — 코어 + 선언한 챕터에서 답한 것 전부 */
   const feed = activeQuestions(profile)
@@ -597,7 +623,8 @@ export default function InterviewShell() {
             <ChapterProposal profile={profile} focus={focus} onPick={startChapter} />
           ) : done ? (
             <>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <FraudShieldStep name={userName} guardian={guardianName} />
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 22 }}>
                 <Link href="/plan" className="btn">
                   설계서 확인하기
                 </Link>

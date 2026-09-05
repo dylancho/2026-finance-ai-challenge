@@ -90,42 +90,6 @@ export default function Home() {
           </ol>
         </section>
 
-        <section className="fds-overview" aria-labelledby="fds-overview-title">
-          <div className="fds-overview-copy">
-            <div className="eyebrow">SMART FRAUD SHIELD</div>
-            <h2 id="fds-overview-title">
-              한도 초과만 보지 않고,
-              <br />
-              평소와 다른 맥락을 봅니다.
-            </h2>
-            <p>
-              신규 수취계좌, 접속 시간, 비밀번호 입력 행동, 터치 패턴을 함께 분석합니다.
-              의심 거래는 먼저 멈추고, 보호자가 확인한 뒤에만 다시 진행됩니다.
-            </p>
-            <Link href="/fraud-shield" className="btn fds-btn">
-              내 금융 보호 현황 보기
-            </Link>
-          </div>
-          <div className="fds-overview-card">
-            <div className="fds-live">
-              <i />
-              <span>LIVE PROTECTION</span>
-              <b>위험도 99%</b>
-            </div>
-            <div className="fds-scenario">
-              <span>감지된 상황</span>
-              <p>새벽 2:15 · 신규 개인 계좌 · 비밀번호 2회 오류 · 행동 패턴 89% 이탈</p>
-            </div>
-            <ol className="fds-timeline">
-              <li><span>01</span><div><b>거래 탐지</b><p>평소 거래 이력이 없는 신규 수취계좌 이체를 감지합니다.</p></div></li>
-              <li><span>02</span><div><b>AI 맥락 분석</b><p>금액·시간·인증·사용자 행동 패턴을 함께 대조합니다.</p></div></li>
-              <li><span>03</span><div><b>1차 거래 동결</b><p>복수 고위험 신호가 겹치면 이체를 즉시 일시 정지합니다.</p></div></li>
-              <li><span>04</span><div><b>보호자에게 비상 승인 요청</b><p>등록된 보호자에게 거래 맥락과 승인 요청을 보냅니다.</p></div></li>
-              <li><span>05</span><div><b>확인 전까지 출금 제한</b><p>보호자 확인 전에는 출금과 이체가 재개되지 않습니다.</p></div></li>
-            </ol>
-          </div>
-        </section>
-
         <section className="cta-band">
           <div>
             <h2>미래를 예측하는 대신, 내 뜻을 미리 준비하세요.</h2>

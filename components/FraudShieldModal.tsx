@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   fallbackDecision,
   scoreTransaction,
@@ -53,13 +54,20 @@ export function ruleReport(tx: FraudTransaction, guardian = "김하나"): FraudR
   };
 }
 
+/**
+ * 모달은 body 에 포털로 띄운다.
+ * 인터뷰 패널처럼 transform 애니메이션이 끝난 채 남아 있는 조상 아래에서는
+ * position: fixed 가 그 조상에 갇혀 화면 뒤로 깔린다.
+ */
 export default function FraudShieldModal({ report, onClose }: Props) {
   const [showDetails, setShowDetails] = useState(false);
   const [resendCount, setResendCount] = useState(0);
   const [checked, setChecked] = useState(false);
-  if (!report) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!report || !mounted) return null;
   if (report.error) {
-    return (
+    return createPortal(
       <div className="backdrop" role="dialog" aria-modal="true">
         <section className="fds-modal fds-error">
           <p className="eyebrow">SMART FRAUD SHIELD</p>
@@ -67,7 +75,8 @@ export default function FraudShieldModal({ report, onClose }: Props) {
           <p>{report.error}</p>
           <button className="btn" onClick={onClose}>닫기</button>
         </section>
-      </div>
+      </div>,
+      document.body,
     );
   }
   const status = STATUS[report.status];
@@ -75,7 +84,7 @@ export default function FraudShieldModal({ report, onClose }: Props) {
   const pending = report.status !== "ALLOW";
   const aiNarrated = report.narrator && report.narrator !== "rule";
 
-  return (
+  return createPortal(
     <div className="backdrop" role="dialog" aria-modal="true" aria-label="스마트 이상거래 분석 결과">
       <section className="fds-modal">
         <header className="fds-head">
@@ -155,6 +164,7 @@ export default function FraudShieldModal({ report, onClose }: Props) {
           <button className="btn" onClick={onClose}>분석 결과 확인</button>
         </footer>
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }
