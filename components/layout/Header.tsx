@@ -27,6 +27,7 @@ export default function Header() {
                 <Link href="/plan">내 설계서</Link>
                 <Link href="/simulation">미리보기</Link>
                 <Link href="/events">상황 변화</Link>
+                <Link href="/fraud-shield">금융 보호</Link>
                 <button className="nav-signout" onClick={signOut}>
                   로그아웃
                 </button>
