@@ -1,105 +1,175 @@
 import Link from "next/link";
-import { Wallet, TrendingUp, ScrollText } from "lucide-react";
+import { Wallet, TrendingUp, ScrollText, ShieldCheck } from "lucide-react";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import StartLink from "../components/landing/StartLink";
+import Reveal from "../components/landing/Reveal";
+import FeatureSection from "../components/landing/FeatureSection";
+import FraudSection from "../components/landing/FraudSection";
+import { ChatMock, LedgerMock, PlanMock, SimulationMock } from "../components/landing/mocks";
 
-// 세 버튼 모두 같은 게이트 → 이력 → 코어 인터뷰로 들어간다. 누른 카테고리는
+/**
+ * 랜딩 (온보딩).
+ *
+ * 세로로 긴 한 페이지. 내릴수록 기능이 하나씩 나타난다. 첫 화면은 문장 하나와 시작 버튼,
+ * 그 아래 기능 섹션 다섯 개, 마지막에 시작 CTA. 목업은 이미지가 아니라 실제 화면과 같은
+ * 마크업이라 기능이 바뀌면 여기도 같이 바뀐다. 없는 기능은 적지 않는다.
+ */
+
+// 네 버튼 모두 같은 게이트 → 이력 → 코어 인터뷰로 들어간다. 누른 카테고리는
 // focus 로 전달되어, 코어를 마친 뒤 챕터 제안 화면에서 그 챕터가 맨 위에 선택돼 있다.
 const CATEGORIES: { label: string; icon: typeof Wallet; focus: string }[] = [
   { label: "일상 관리", icon: Wallet, focus: "core" },
   { label: "자산·투자 관리", icon: TrendingUp, focus: "invest" },
   { label: "상속 준비", icon: ScrollText, focus: "estate" },
-];
-
-/** 실제로 구현된 것만 적는다. 없는 기능을 약속하지 않는다. */
-const STAGES: { title: string; items: string[] }[] = [
-  {
-    title: "내 생각을 알려주세요",
-    items: [
-      "평소 돈을 어떻게 쓰고 관리해왔는지 살펴보고, 앞으로도 지키고 싶은 원칙을 정해요",
-      "예를 들어 \"주식은 급하게 팔지 않기\", \"매달 생활비는 이 정도로 유지하기\"처럼 내 뜻을 구체적으로 남길 수 있어요",
-    ],
-  },
-  {
-    title: "내 뜻을 문서로 남겨요",
-    items: [
-      "정한 내용을 자산 관리, 생활비, 돌봄에 대한 문서로 정리해드려요",
-      "아직 정하지 않은 내용도 함께 확인하며, 더 준비해야 할 부분을 쉽게 알려드려요",
-    ],
-  },
-  {
-    title: "필요할 때, 정해둔 대로 도움을 받아요",
-    items: [
-      "평소와 다른 금융 활동이 나타나면 확인할 수 있도록 알려드려요",
-      "다만 서비스가 치매나 판단 능력을 진단하지는 않아요",
-      "진단서 등 필요한 확인을 거친 뒤에만, 미리 정해둔 내용에 따라 도움을 받을 수 있어요",
-    ],
-  },
+  { label: "금융 보호", icon: ShieldCheck, focus: "safe" },
 ];
 
 export default function Home() {
   return (
     <>
       <Header />
-      <main className="shell-wide">
-        <section className="hero">
-          <div className="eyebrow">AI Future Financial Decision Service</div>
-          <h1>앞으로를 위해, 지금 내 뜻을 남겨두세요</h1>
-          <p className="hero-sub">
-            나중에 기억하거나 판단하기 어려워지더라도
-            <br />
-            내 돈과 생활이 내가 원하는 방식대로 이어질 수 있도록 미리 준비할 수 있어요.
-          </p>
-          <div className="hero-actions">
-            <StartLink>시작하기</StartLink>
-            <Link href="/plan?demo=B" className="btn outline">
-              예시 보기
-            </Link>
+      <main className="ld">
+        {/* 01 히어로 */}
+        <section className="ld-hero" aria-label="소개">
+          <div className="ld-hero-bg" aria-hidden />
+          <div className="shell-wide">
+            <div className="ld-hero-copy">
+              <div className="eyebrow">AI Future Financial Decision Service</div>
+              <h1>
+                앞으로를 위해,
+                <br />
+                지금 내 뜻을 남겨두세요
+              </h1>
+              <p className="hero-sub">
+                나중에 기억하거나 판단하기 어려워지더라도
+                <br />
+                내 돈과 생활이 내가 원하는 방식대로 이어질 수 있도록 미리 준비할 수 있어요.
+              </p>
+              <div className="hero-actions">
+                <StartLink className="btn lg">시작하기</StartLink>
+                <Link href="/plan?demo=B" className="btn outline lg">
+                  완성된 설계서 예시
+                </Link>
+              </div>
+              <p className="hero-note">약 11문항 · 3분 · 실제 금융상품 가입이나 자산 이동은 없는 데모입니다.</p>
+            </div>
+            <div className="category-row ld-cats">
+              {CATEGORIES.map(({ label, icon: Icon, focus }) => (
+                <StartLink className="btn outline category-btn" focus={focus} key={label}>
+                  {label}
+                  <Icon className="category-icon" strokeWidth={1.5} aria-hidden="true" />
+                </StartLink>
+              ))}
+            </div>
+          </div>
+          <div className="ld-scroll-cue" aria-hidden>
+            <span />
           </div>
         </section>
 
-        <section className="section" id="service">
-          <div className="eyebrow" style={{ textAlign: "center" }}>
-            NEXT supports
-          </div>
-
-          <div className="category-row">
-            {CATEGORIES.map(({ label, icon: Icon, focus }) => (
-              <StartLink className="btn outline category-btn" focus={focus} key={label}>
-                {label}
-                <Icon className="category-icon" strokeWidth={1.5} aria-hidden="true" />
-              </StartLink>
-            ))}
-          </div>
-
-          <ol className="stage-list">
-            {STAGES.map((s, i) => (
-              <li className="stage-item" key={s.title}>
-                <div className="stage-num">{String(i + 1).padStart(2, "0")}</div>
-                <div className="stage-body">
-                  <h3>{s.title}</h3>
-                  <ul className="stage-sub">
-                    {s.items.map((text) => (
-                      <li key={text}>{text}</li>
-                    ))}
-                  </ul>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="cta-band">
-          <div>
-            <h2>미래를 예측하는 대신, 내 뜻을 미리 준비하세요.</h2>
-            <p>
-              필요한 내용만 차근차근 여쭤볼게요.
+        {/* 02 인터뷰 */}
+        <FeatureSection
+          id="interview"
+          step="02"
+          eyebrow="Interview"
+          title={
+            <>
+              설문이 아니라,
               <br />
-              약 11문항 · 3분이면 기본 설계서가 나옵니다. 필요한 부분만 더 답하시면 돼요.
+              문서를 쓰는 대화입니다.
+            </>
+          }
+          body="목적을 먼저 묻습니다. 공과금 관리가 필요한 분에게 치매와 후견 이야기를 꺼내지 않습니다. 답할 때마다 오른쪽에 조항이 하나씩 쌓이고, 선택지가 마땅치 않으면 그냥 말로 해도 AI가 뜻을 읽어 조항으로 옮깁니다."
+          mock={<ChatMock />}
+        />
+
+        {/* 03 설계서 */}
+        <FeatureSection
+          id="plan"
+          step="03"
+          eyebrow="Design documents"
+          title={
+            <>
+              대화가 끝나면
+              <br />
+              세 문서가 남습니다.
+            </>
+          }
+          body="신탁·후견·지출 설계서가 조항 단위로 정리됩니다. 아직 정하지 않은 영역은 비워 두지 않고 '선언되지 않음'으로 표시해, 무엇을 더 준비해야 하는지 바로 보입니다."
+          mock={<PlanMock />}
+          reverse
+          action={
+            <Link href="/plan?demo=B" className="btn outline">
+              설계서 예시 보기
+            </Link>
+          }
+        />
+
+        {/* 04 시뮬레이션·상황 변화 */}
+        <FeatureSection
+          id="simulation"
+          step="04"
+          eyebrow="Simulation · Events"
+          title={
+            <>
+              상황이 바뀌면
+              <br />
+              설계서가 먼저 답합니다.
+            </>
+          }
+          body="시장 급락, 입원, 큰돈이 필요한 날. 설계서에 상황을 적용하면 선택지마다 자산이 언제 소진되는지, 되돌릴 수 있는지, 선언한 원칙과 맞는지를 나란히 보여줍니다. 하나를 골라 주지는 않습니다."
+          mock={<SimulationMock />}
+          action={
+            <Link href="/simulation" className="btn outline">
+              시뮬레이션 보기
+            </Link>
+          }
+        />
+
+        {/* 05 금융 보호 — 스크롤 연동 */}
+        <FraudSection />
+
+        {/* 06 이력 대조·월간 점검 */}
+        <FeatureSection
+          id="ledger"
+          step="06"
+          eyebrow="Ledger · Monthly check-in"
+          title={
+            <>
+              말한 원칙과 실제 행동이
+              <br />
+              다르면, 묻습니다.
+            </>
+          }
+          body="거래 이력을 연동하면 인터뷰에서 선언한 원칙과 과거 행동을 나란히 놓습니다. 어긋나면 어느 쪽이 앞으로의 나인지 고르게 하고, 매월 한 번 짧은 상황으로 보호 원칙을 다시 확인합니다."
+          mock={<LedgerMock />}
+          reverse
+          action={
+            <Link href="/ledger" className="btn outline">
+              이력 대조 보기
+            </Link>
+          }
+        />
+
+        {/* 07 마무리 */}
+        <section className="ld-final" aria-label="시작">
+          <Reveal className="shell-wide ld-final-inner" threshold={0.3}>
+            <div className="eyebrow">Start</div>
+            <h2>
+              미래를 예측하는 대신,
+              <br />
+              내 뜻을 미리 준비하세요.
+            </h2>
+            <p>
+              필요한 내용만 차근차근 여쭤볼게요. 약 11문항, 3분이면 기본 설계서가 나옵니다.
+              <br />
+              필요한 부분만 더 답하시면 돼요.
             </p>
-          </div>
-          <StartLink>시작하기</StartLink>
+            <div className="hero-actions">
+              <StartLink className="btn lg light">시작하기</StartLink>
+            </div>
+          </Reveal>
         </section>
       </main>
       <Footer />
