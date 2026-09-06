@@ -2196,6 +2196,7 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 .ld-stage[data-mode="pending"] .ld-scene--ch,
 .ld-stage[data-mode="pending"] .ld-scene--tr,
 .ld-stage[data-mode="pending"] .ld-bill-anchor,
+.ld-stage[data-mode="pending"] .ld-s0-copy,
 .ld-stage[data-mode="pending"] .ld-laptop-col { visibility: hidden; }
 
 /* S0 고지서 오프닝 — 장면 안 겹: 문 → 비네트 → 베일 → 카피. 고지서는 장면 밖(노트북 위). */
