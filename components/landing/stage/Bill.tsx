@@ -1,11 +1,12 @@
 /**
- * S0 고지서 — 한국전력 주택용 전기요금 청구서를 닮은 가로형 종이(≈1.6:1).
+ * S0 고지서 — 한국전력 주택용 전기요금 청구서를 닮은 가로형 종이(1.9:1, 실물 비례).
  *
- * 실제 청구서(청록 머리띠, 왼쪽 천공 줄, 연한 하늘색 라벨 칸이 촘촘한 격자, 진한 구획 띠, 큼직한 청구금액 상자,
- * 둥근 파란 수납인, 바코드·전자납부번호)를 DOM/CSS 로만 재현한다 — 사진은 쓰지 않는다.
+ * 실제 청구서(누런 크림색 종이, 청록 머리띠, 왼쪽 천공 줄, 연한 하늘색 라벨 칸이 촘촘한 격자, 진한 구획 띠,
+ * 큼직한 청구금액 상자, 둥근 파란 수납인, 바코드·전자납부번호)를 DOM/CSS 로만 재현한다 — 사진은 쓰지 않는다.
  *
- * 문틈에 꽂혀 있을 때는 오른쪽 45% 만 보이므로, 그 부분(청구금액 상자·수납인·바코드)만으로도 "고지서" 로 읽혀야 한다.
- * 클로즈업(배율 1, 폭 620px)에서는 격자 글자가 읽히는 크기다.
+ * 가로로 긴 비례라 본문은 세 칸이다: 요금 내역 | 납부 안내 | 사용량 + 워드마크·수납인.
+ * 문틈에 꽂혀 있을 때는 오른쪽 45% 만 보이므로, 그 부분(청구금액 숫자·납기 스탬프·바코드·수납인)만으로도 "고지서" 로 읽혀야 한다.
+ * 클로즈업(배율 1, 폭 660px)에서는 격자 글자가 읽히는 크기다.
  *
  * 조각 세 개(공급자·금액·납기)가 FLIP 으로 노트북 속 집행 일지 줄로 날아간다.
  * 조각이 날아가는 동안 종이는 사라져야 하므로, 조각을 뺀 나머지에 data-bill-fade 를 붙였다.
@@ -35,6 +36,11 @@ const TAXES: [string, string][] = [
   ["전기요금계", "33,861"],
   ["부가가치세", "3,386"],
   ["전력산업기반기금", "1,253"],
+];
+const USAGE: [string, string, boolean?][] = [
+  ["당월 사용량", "212", true],
+  ["전월", "196"],
+  ["전년동월", "205"],
 ];
 
 /** 둥근 파란 수납인 — 테두리 글자는 textPath, 가운데는 "수납" */
@@ -91,24 +97,6 @@ export default function Bill() {
             <div className="ld-bill-sec" data-bill-fade>
               요 금 내 역
             </div>
-            <table className="ld-bill-use" data-bill-fade>
-              <thead>
-                <tr>
-                  <th>당월 사용량</th>
-                  <th>전월</th>
-                  <th>전년동월</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <b>212</b> kWh
-                  </td>
-                  <td>196 kWh</td>
-                  <td>205 kWh</td>
-                </tr>
-              </tbody>
-            </table>
             <dl className="ld-bill-lines" data-bill-fade>
               {CHARGES.map(([k, v]) => (
                 <div key={k}>
@@ -150,6 +138,25 @@ export default function Bill() {
               <i className="ld-bill-barcode" aria-hidden />
               <small className="mono">1203호 · 자동이체 신청 123-4567 · 납기 후 1.5% 가산</small>
             </div>
+          </div>
+
+          {/* 세 번째 칸: 사용량 표 + 아래에 워드마크·수납인. 모바일에서는 표를 숨기고 이 칸이 본문 아래 한 줄로 내려간다 */}
+          <div className="ld-bill-col ld-bill-col--use">
+            <div className="ld-bill-sec" data-bill-fade>
+              사 용 량
+            </div>
+            <table className="ld-bill-use" data-bill-fade>
+              <tbody>
+                {USAGE.map(([k, v, big]) => (
+                  <tr key={k}>
+                    <th>{k}</th>
+                    <td>
+                      {big ? <b>{v}</b> : v} kWh
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             <div className="ld-bill-foot">
               <span className="ld-bill-brand">
                 <i className="ld-bill-mark" data-bill-fade aria-hidden />
