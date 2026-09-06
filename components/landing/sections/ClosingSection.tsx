@@ -33,12 +33,12 @@ export default function ClosingSection() {
       <div className="shell-wide">
         <Reveal className="ld-closing-inner" threshold={0.4}>
           <h2>
-            오늘의 당신이,
+            오늘의 내가,
             <br />
-            미래의 당신을 지킵니다
+            미래의 나를 지켜요
           </h2>
-          <p>약 11문항, 3분. 실제 금융상품 가입이나 자산 이동은 없는 데모입니다.</p>
-          <StartLink className="btn light lg">지금 기록 시작하기</StartLink>
+          <p>약 11문항, 3분이면 돼요. 실제로 금융상품에 가입하거나 돈을 옮기지는 않아요.</p>
+          <StartLink className="btn light lg">지금 시작하기</StartLink>
         </Reveal>
       </div>
     </section>

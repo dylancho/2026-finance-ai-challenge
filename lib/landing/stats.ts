@@ -2,10 +2,10 @@ import { demoProfile } from "../profile";
 import { buildDesign, findGaps } from "../design";
 
 /**
- * 랜딩 S7 "당신의 설계서에는 지금 몇 개의 공백이 있습니까" 의 숫자.
+ * 랜딩 S7 "내 설계서에는 지금 빈칸이 몇 개일까요" 의 숫자.
  *
- * 조항 = 신탁 조항(set·partial) + 지출설계서의 한도·자동이체·활성 이상거래 룰 항목 수.
- * 공백 = findGaps. 년수 = 지출설계서 지속가능성 추정. 랜딩이 앱과 다른 숫자를 말하지 않도록
+ * 조항 = 신탁 조항(set·partial) + 지출설계서의 한도·자동이체·활성 보호 규칙 항목 수.
+ * 빈칸(gaps) = findGaps. 년수 = 지출설계서 지속가능성 추정. 랜딩이 앱과 다른 숫자를 말하지 않도록
  * 실제 설계서 빌더를 그대로 돌린다.
  */
 export interface LandingStats {

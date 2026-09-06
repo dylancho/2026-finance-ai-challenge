@@ -2,6 +2,7 @@
  * CSS 노트북 프레임. 화면 3종은 겹쳐 놓고 Stage 타임라인이 크로스페이드한다.
  * 내용은 지출설계서 §1(3층 계좌)·§2(자동이체)·§3(한도)·제4조(보류) 와 같은 말이다 —
  * 스크린샷이 아니라 컴포넌트라서 설계서가 바뀌면 여기도 같이 바뀐다.
+ * 화면 문구는 docs/writing-style.md 를 따른다. § 표기는 설계서 조항 번호라서 남긴다.
  */
 export function Laptop() {
   return (
@@ -13,7 +14,7 @@ export function Laptop() {
             <i />
             <i />
           </span>
-          <span className="ld-app-title">NEXT · 집행 일지</span>
+          <span className="ld-app-title">NEXT · 실행 기록</span>
           <span className="mono">지출설계서 v3</span>
         </div>
         <div className="ld-screens">
@@ -31,7 +32,7 @@ function LogScreen() {
   return (
     <div className="ld-screen ld-log" data-screen="log">
       <div className="ld-screen-h">
-        오늘의 집행 <small>2026-09-25</small>
+        오늘 한 일 <small>2026-09-25</small>
       </div>
       <ul>
         <li className="ld-log-line" data-line="0800">
@@ -39,14 +40,14 @@ function LogScreen() {
           <span className="body">
             {/* 조각이 도착하기 전: 수신 대기. 도착하면 조각 자리(target)와 나머지 글(rest)이 채워진다. */}
             <span className="ld-log-wait" data-log-wait>
-              고지서 수신 중<i>…</i>
+              고지서 받는 중<i>…</i>
             </span>
             <b data-target="co">한국전력</b>
             <span data-log-rest> 전기요금 </span>
             <b data-target="amt">38,500원</b>
             <span data-log-rest> · 납기 </span>
             <b data-target="due">9/25</b>
-            <span data-log-rest> · §2 자동이체 집행 완료</span>
+            <span data-log-rest> · §2 자동이체로 냈어요</span>
           </span>
           <span className="ok" data-log-rest>
             완료
@@ -55,14 +56,14 @@ function LogScreen() {
         <li className="ld-log-line" data-line="1000">
           <span className="mono t">[10:00]</span>
           <span className="body">
-            생활비 1,800,000원 · §1 생활계좌로 <b>분할 지급</b> (1/2회차)
+            생활비 1,800,000원 · 생활계좌로 <b>나눠 보냈어요</b> (1/2회차)
           </span>
           <span className="ok">완료</span>
         </li>
         <li className="ld-log-line warn" data-line="2347">
           <span className="mono t">[23:47]</span>
           <span className="body">
-            처음 보는 계좌로 <b>4,800,000원</b> 이체 시도 → <b>제4조 보류</b> · 1차 관리자 판단 요청
+            처음 보는 계좌로 <b>4,800,000원</b> 이체 시도 · <b>제4조 보류</b> · 1차 관리자에게 물었어요
           </span>
           <span className="hold">보류</span>
         </li>
@@ -79,21 +80,21 @@ function AccountsScreen() {
       </div>
       <div className="ld-tier ld-tier--3">
         <span className="k">③ 보전계좌</span>
-        <b>원금 보전 · 자동이체를 연결하지 않음</b>
+        <b>원금을 지키는 계좌 · 자동이체는 연결하지 않아요</b>
       </div>
       <div className="ld-tier-arrow" aria-hidden>
-        ↓ 월 1회, 정해진 금액만
+        ↓ 한 달에 한 번, 정해 둔 금액만
       </div>
       <div className="ld-tier ld-tier--2">
         <span className="k">② 지급계좌</span>
-        <b>월 지급액이 유입되고 자동이체가 빠져나가는 유일한 계좌</b>
+        <b>매달 생활비가 들어오고 자동이체가 나가는 유일한 계좌</b>
       </div>
       <div className="ld-tier-arrow" aria-hidden>
-        ↓ 생활비 분할 지급
+        ↓ 생활비를 나눠서 보내요
       </div>
       <div className="ld-tier ld-tier--1">
         <span className="k">① 생활계좌</span>
-        <b>본인이 자유롭게 쓰는 돈</b>
+        <b>내가 자유롭게 쓰는 돈</b>
       </div>
     </div>
   );
@@ -103,22 +104,22 @@ function LimitsScreen() {
   return (
     <div className="ld-screen ld-limits" data-screen="limits">
       <div className="ld-screen-h">
-        §3 한도 <small>본인이 정한 만큼만</small>
+        §3 한도 <small>내가 정한 만큼만</small>
       </div>
       <div className="ld-limit">
         <span>1회 이체 한도</span>
         <b>1,000,000원</b>
-        <small>초과 시 보류 후 확인 절차</small>
+        <small>넘으면 멈추고 먼저 확인해요</small>
       </div>
       <div className="ld-limit derived">
         <span>1일 누적 한도</span>
         <b>2,000,000원</b>
-        <small>1회 한도의 2배로 자동 산정</small>
+        <small>1회 한도의 2배로 자동 계산해요</small>
       </div>
       <div className="ld-limit">
         <span>처음 보내는 계좌</span>
-        <b>하루 뒤 집행</b>
-        <small>제4조 · 그 사이 취소할 수 있음</small>
+        <b>하루 뒤에 보내요</b>
+        <small>제4조 · 그 사이에 취소할 수 있어요</small>
       </div>
     </div>
   );
@@ -134,7 +135,8 @@ export function AlertCard() {
         <span className="mono">23:47</span>
       </div>
       <b>처음 보는 계좌 · 4,800,000원</b>
-      <small>1회 한도 초과 · 심야 · 신규 기기. 1차 관리자에게 판단을 요청했습니다.</small>
+      {/* 이 카드의 small 은 keep-all 이 없어 긴 문장이 낱말 중간에서 끊긴다 — 한 줄에 들어가는 길이로 */}
+      <small>한도 넘음 · 늦은 밤 · 새 기기 · 1차 관리자 확인 중</small>
       <div className="ld-alert-actions">
         <span>승인</span>
         <span className="deny">거절</span>
