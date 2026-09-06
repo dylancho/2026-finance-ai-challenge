@@ -18,7 +18,8 @@ import {
   multiOf,
   personOf,
 } from "../../lib/profile";
-import { bandLabel } from "../../lib/ledger";
+import { instrumentPlain } from "../../lib/authority";
+import { signalView, type SignalView } from "../ledger/BiomarkerCard";
 
 /*
  * 미리보기(/simulation)의 이야기 데이터 (2026-09-07).
@@ -62,13 +63,8 @@ export interface StoryRow {
   state?: { tone: "ok" | "warn" | "off"; text: string };
 }
 
-export interface SignalSummary {
-  score: number;
-  bandLabel: string;
-  band: BiomarkerReading["band"];
-  meaning: string;
-  signals: { label: string; baseline: string; observed: string }[];
-}
+/** 2장의 점수 블록 데이터. 2026-09-07 부터 이력 화면의 BiomarkerCard 와 같은 모양을 쓴다. */
+export type SignalSummary = SignalView;
 
 export interface Story {
   id: StoryId;
@@ -252,24 +248,7 @@ function buildNow(i: StoryInput): Story {
 /* ── 2장 · 신호가 보일 때 ─────────────────────────────── */
 
 function signalSummary(reading: BiomarkerReading | null): SignalSummary | null {
-  if (!reading) return null;
-  const meaning =
-    reading.band === "alert"
-      ? "평소와 뚜렷하게 달라진 지점이 보이는 구간입니다. 진단은 아니며, 진단서가 있어야 다음 시기로 넘어갑니다."
-      : reading.band === "watch"
-        ? "평소와 달라지기 시작한 지점이 보입니다. 아직은 알림만 보내는 단계입니다."
-        : "평소 패턴과 크게 다른 점이 없습니다. 이 시기는 아직 오지 않았습니다.";
-  return {
-    score: reading.score,
-    band: reading.band,
-    bandLabel: bandLabel(reading.band),
-    meaning,
-    signals: reading.signals.slice(0, 3).map((s) => ({
-      label: s.label,
-      baseline: s.baseline,
-      observed: s.observed,
-    })),
-  };
+  return reading ? signalView(reading) : null;
 }
 
 function buildSignal(i: StoryInput): Story {
@@ -535,27 +514,5 @@ export function countBlocked(stories: Story[]): number {
 
 /* ── 서류의 쉬운 이름과 "체결 전" 결과 ───────────────── */
 
-export function instrumentPlain(inst: Instrument): { name: string; consequence: string } {
-  switch (inst.kind) {
-    case "trust":
-      return {
-        name: `신탁계약 체결 (${inst.name})`,
-        consequence: "체결 전에는 생활비 지급·증액·의료비처럼 신탁에서 나가는 돈이 움직이지 않습니다.",
-      };
-    case "voluntary_guardianship":
-      return {
-        name: "임의후견계약 공증",
-        consequence: "공증하고 법원이 감독인을 정하기 전에는 요양시설 계약처럼 대신 결정하는 일이 안 됩니다.",
-      };
-    case "legal_guardianship":
-      return {
-        name: "법정후견 심판",
-        consequence: "법원 심판이 확정되기 전에는 대신 결정하는 일이 안 됩니다.",
-      };
-    default:
-      return {
-        name: "자동이체·대리인 등록",
-        consequence: "은행에 등록하기 전에는 공과금 자동이체를 대신 처리하지 못합니다.",
-      };
-  }
-}
+/** 2026-09-07 lib/authority/plain.ts 로 옮겼다. 의뢰서의 SignedDocsCard 와 같은 문장을 쓴다. */
+export { instrumentPlain };

@@ -258,7 +258,8 @@ ul {
 
 .nav-panel-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  /* 2026-09-07 미리보기가 빠져 다섯 칸. 카드 수와 같아야 빈 칸 없이 가운데 정렬된다 */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -4412,6 +4413,30 @@ body.ld-dark .nav-panel, body.ld-dark .nav-sheet { color: var(--ink); }
   color: var(--faint);
   line-height: 1.5;
 }
+/* ── 평소 패턴과 비교한 점수 (2026-09-07, 미리보기 2장의 블록을 옮김) ──
+ * 점수 블록(.sv-signal)은 미리보기 CSS 그대로. 틀은 성향 카드(.lg-persona)와 같은 선·모서리. */
+.lg-bio {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  padding: 8px 8px 0;
+}
+.lg-bio .sv-signal {
+  margin-bottom: 0;
+}
+.lg-bio-note {
+  margin: 0;
+  padding: 14px 16px 16px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--muted);
+  word-break: keep-all;
+}
+.lg-bio-note b {
+  color: var(--navy);
+  font-weight: 600;
+}
+
 .lg-read-text {
   font-size: 15px;
   line-height: 1.8;
@@ -6390,4 +6415,48 @@ button.feed-item.here .edit {
   font-size: 12px;
   color: var(--faint);
   line-height: 1.7;
+}
+
+/* 3단계 · 실제로 체결한 서류 (2026-09-07, 미리보기의 DocsCard 를 옮김)
+ * 체크 행(.sv-check)·칩(.sv-tag)은 미리보기 CSS 를 그대로 쓰고, 틀만 .rf-inst 와 같은 카드로 맞춘다. */
+.rf-docs {
+  margin-top: 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  padding: 20px 22px 8px;
+}
+.rf-docs-head {
+  margin-bottom: 6px;
+}
+.rf-docs-k {
+  font-size: 12px;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.rf-docs-head h3 {
+  font-size: 19px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 8px 0 0;
+  word-break: keep-all;
+}
+.rf-docs-lede {
+  margin-top: 8px;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--muted);
+  word-break: keep-all;
+}
+.rf-docs .sv-docs .sv-row {
+  border-top: 1px solid var(--line-soft);
+}
+.rf-docs .sv-docs .sv-row:first-child {
+  border-top: 0;
+}
+.rf-docs .sv-check .sv-tag {
+  white-space: normal;
+  text-align: right;
 }

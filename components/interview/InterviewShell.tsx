@@ -635,9 +635,6 @@ export default function InterviewShell() {
                 <Link href="/plan" className="btn">
                   설계서 확인하기
                 </Link>
-                <Link href="/simulation" className="btn outline">
-                  시뮬레이션 돌려보기
-                </Link>
                 {unified && (
                   <Link href="/events" className="btn outline">
                     상황이 바뀌었을 때

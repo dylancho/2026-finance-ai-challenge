@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import {
-  Eye,
   History,
   Menu,
   Play,
@@ -20,9 +19,10 @@ import { endTour, startTour, TOUR_PERSONA, useTour } from "../../lib/demo/tour";
 /**
  * 2026-09-06 헤더 개편.
  *
- * 브랜드 왼쪽 · 주요 기능 여섯 개 가운데 · 둘러보기/로그인(로그아웃) 오른쪽의 세 구역.
+ * 브랜드 왼쪽 · 주요 기능 다섯 개 가운데 · 둘러보기/로그인(로그아웃) 오른쪽의 세 구역.
+ * (2026-09-07 미리보기(/simulation)를 심사 동선에서 빼면서 여섯에서 다섯이 됐다. 라우트는 남아 있다.)
  * 가운데 메뉴에 마우스를 올리거나(키보드는 포커스) 하면 헤더 아래로 흰 패널이 내려와
- * 여섯 기능의 한 줄 설명을 한꺼번에 보여 준다 — 어느 항목에서 열어도 같은 패널이고,
+ * 다섯 기능의 한 줄 설명을 한꺼번에 보여 준다 — 어느 항목에서 열어도 같은 패널이고,
  * 올려 둔 항목의 카드만 강조된다. 패널은 absolute 라 본문을 밀지 않는다.
  *
  * 닫히는 조건: 포인터가 헤더·패널을 떠난 뒤 잠깐(항목→패널로 건너가는 사이 닫히지
@@ -41,7 +41,6 @@ const FEATURES: readonly Feature[] = [
   { href: "/start", label: "시작하기", desc: "지금 상태를 알리고 인터뷰로 설계를 시작합니다", Icon: Play },
   { href: "/ledger", label: "이력 연동", desc: "10년 금융 이력을 불러와 답변과 대조합니다", Icon: History },
   { href: "/plan", label: "내 설계서", desc: "지출·신탁·후견 설계서를 조항 단위로 봅니다", Icon: ScrollText },
-  { href: "/simulation", label: "미리보기", desc: "설계서대로라면 앞으로 돈이 어떻게 움직이는지 봅니다", Icon: Eye },
   { href: "/events", label: "상황 변화", desc: "진단·목돈·급락 같은 상황을 적으면 후보를 늘어놓습니다", Icon: Shuffle },
   { href: "/fraud-shield", label: "금융 보호", desc: "이상 거래를 원칙에 비춰 보류하고 알립니다", Icon: ShieldCheck },
 ];
@@ -177,7 +176,7 @@ export default function Header() {
           </Link>
 
           {/* ready 전에는 아무것도 렌더하지 않는다. 서버 렌더에는 세션이 없으므로
-              바로 그리면 로그인 상태가 한 번 깜빡이며 뒤집힌다. 여섯 기능은 로그인
+              바로 그리면 로그인 상태가 한 번 깜빡이며 뒤집힌다. 다섯 기능은 로그인
               여부와 무관하게 같은 곳으로 간다 — 각 화면이 세션을 요구하지 않는다. */}
           <nav className="nav nav-primary" aria-label="주요 기능" aria-busy={!ready}>
             {ready &&
@@ -214,7 +213,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* hover 패널. 어느 항목에서 열어도 여섯 카드를 다 보여 주고 올려 둔 것만 강조한다.
+        {/* hover 패널. 어느 항목에서 열어도 다섯 카드를 다 보여 주고 올려 둔 것만 강조한다.
             페이지 위에 얹히는 면이라 body.ld-dark 에서도 흰 바탕을 유지한다. */}
         <div
           id="header-nav-panel"
@@ -246,7 +245,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* 모바일 메뉴. 같은 여섯 항목 + 둘러보기·로그인(로그아웃). */}
+        {/* 모바일 메뉴. 같은 다섯 항목 + 둘러보기·로그인(로그아웃). */}
         {ready && (
           <div id="header-nav-sheet" className="nav-sheet" hidden={!menuOpen}>
             <nav className="shell-wide nav-sheet-list" aria-label="주요 기능">

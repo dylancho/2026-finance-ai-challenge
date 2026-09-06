@@ -1,5 +1,6 @@
 "use client";
 
+// 2026-09-07 헤더·설계서·인터뷰·의뢰서의 링크를 모두 뺐다(심사 동선에서 제외). 체결 서류 카드는 의뢰서 3단계로, 점수 카드는 이력 화면으로 옮겼고 이 라우트는 코드만 남겨 둔다.
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

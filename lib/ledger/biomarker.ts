@@ -225,6 +225,18 @@ export function evaluateTrigger(
   };
 }
 
+/**
+ * 구간별 한 문장 뜻풀이 (2026-09-07). 미리보기 2장에 있던 문장을 옮겨 이력 화면의
+ * 바이오마커 카드와 같이 쓴다. 진단이라 말하지 않고, 다음 시기로 넘어가는 조건(진단서)만 적는다.
+ */
+export function biomarkerMeaning(band: BiomarkerBand): string {
+  return band === "alert"
+    ? "평소와 뚜렷하게 달라진 지점이 보이는 구간입니다. 진단은 아니며, 진단서가 있어야 다음 시기로 넘어갑니다."
+    : band === "watch"
+      ? "평소와 달라지기 시작한 지점이 보입니다. 아직은 알림만 보내는 단계입니다."
+      : "평소 패턴과 크게 다른 점이 없습니다. 이 시기는 아직 오지 않았습니다.";
+}
+
 /** 경보 시점에 사용자에게 보여줄 요약 (단정 금지) */
 export function biomarkerSummary(reading: BiomarkerReading): string {
   const top = reading.signals[0];

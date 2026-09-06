@@ -5,6 +5,7 @@ import type { ScenarioResult, TriggerGate } from "../../lib/types";
 import { clauseHref, clauseLabel } from "../../lib/planLinks";
 import { PROOF_FRESH_DAYS } from "../../lib/ledger";
 import { WHO_LABEL, type Story, type StoryRow } from "./story";
+import { SignalBlock } from "../ledger/BiomarkerCard";
 
 /*
  * 시기 카드 한 장.
@@ -112,38 +113,6 @@ function Example({ result }: { result: ScenarioResult }) {
   );
 }
 
-function SignalBlock({ story }: { story: Story }) {
-  const s = story.signal;
-  if (!s) return null;
-  return (
-    <div className={`sv-signal ${s.band}`}>
-      <div className="sv-signal-head">
-        <div>
-          <div className="k">지금 내 이력에서는</div>
-          <div className="v">
-            평소 패턴과 비교한 점수 <b>{s.score}점</b>
-            <span className={`sv-tag ${s.band === "alert" ? "warn" : s.band === "watch" ? "warn" : "ok"}`}>{s.bandLabel}</span>
-          </div>
-        </div>
-      </div>
-      <p className="sv-signal-p">{s.meaning}</p>
-      {s.signals.length > 0 && (
-        <ul className="sv-signal-list">
-          {s.signals.map((x) => (
-            <li key={x.label}>
-              <span className="l">{x.label}</span>
-              <span className="v">
-                평소 {x.baseline} → 최근 {x.observed}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-      <p className="sv-signal-note">진단이 아닙니다. 평소와 달라진 지점을 표시할 뿐이며, 판정은 의료기관의 몫입니다.</p>
-    </div>
-  );
-}
-
 function ProofControl({
   gate,
   onProof,
@@ -211,7 +180,8 @@ export default function StoryCard({
 
       {story.id === "after" && !story.missing && <ProofControl gate={gate} onProof={onProof} />}
 
-      {story.id === "signal" && (story.signal ? <SignalBlock story={story} /> : null)}
+      {/* 2026-09-07 점수 블록은 이력 화면(components/ledger/BiomarkerCard)과 같은 것을 쓴다 */}
+      {story.id === "signal" && (story.signal ? <SignalBlock s={story.signal} /> : null)}
 
       {story.missing && (
         <div className="sv-missing">
