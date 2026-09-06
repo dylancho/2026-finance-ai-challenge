@@ -37,13 +37,20 @@ function LogScreen() {
         <li className="ld-log-line" data-line="0800">
           <span className="mono t">[08:00]</span>
           <span className="body">
-            <b data-target="co">한국전력</b> 전기요금 <b data-target="amt">38,500원</b>
-            <span data-log-rest>
-              {" "}
-              · 납기 <b data-target="due">9/25</b> · §2 자동이체 집행 완료
+            {/* 조각이 도착하기 전: 수신 대기. 도착하면 조각 자리(target)와 나머지 글(rest)이 채워진다. */}
+            <span className="ld-log-wait" data-log-wait>
+              고지서 수신 중<i>…</i>
             </span>
+            <b data-target="co">한국전력</b>
+            <span data-log-rest> 전기요금 </span>
+            <b data-target="amt">38,500원</b>
+            <span data-log-rest> · 납기 </span>
+            <b data-target="due">9/25</b>
+            <span data-log-rest> · §2 자동이체 집행 완료</span>
           </span>
-          <span className="ok">완료</span>
+          <span className="ok" data-log-rest>
+            완료
+          </span>
         </li>
         <li className="ld-log-line" data-line="1000">
           <span className="mono t">[10:00]</span>

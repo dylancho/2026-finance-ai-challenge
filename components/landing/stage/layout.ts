@@ -45,3 +45,19 @@ export function centerDelta(el: Box, root: Box): { x: number; y: number } {
   const c = center(el, root);
   return { x: root.offsetWidth / 2 - c.x, y: root.offsetHeight / 2 - c.y };
 }
+
+/**
+ * preserveAspectRatio="xMidYMid slice" 로 꽉 채운 SVG 의 viewBox 좌표 (px, py) 가
+ * 실제 화면(W×H)에서 어디에 오는지. 문 장면의 우편 투입구 위치를 DOM 고지서에 맞출 때 쓴다.
+ */
+export function sliceToScreen(
+  vw: number,
+  vh: number,
+  W: number,
+  H: number,
+  px: number,
+  py: number,
+): { x: number; y: number; s: number } {
+  const s = Math.max(W / vw, H / vh);
+  return { x: (W - vw * s) / 2 + px * s, y: (H - vh * s) / 2 + py * s, s };
+}

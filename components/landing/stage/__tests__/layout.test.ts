@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { layoutOffset, fitDelta, centerDelta, layoutCenter, type Box } from "../layout";
+import { layoutOffset, fitDelta, centerDelta, layoutCenter, sliceToScreen, type Box } from "../layout";
 
 const box = (l: number, t: number, w: number, h: number, parent: Box | null = null): Box => ({
   offsetLeft: l,
@@ -45,5 +45,16 @@ describe("layoutCenter", () => {
     const col = box(500, 100, 400, 600, root);
     const el = box(20, 30, 100, 40, col);
     expect(layoutCenter(el, root)).toEqual({ x: 570, y: 150 });
+  });
+});
+
+describe("sliceToScreen", () => {
+  it("가로가 남으면 세로에 맞춰 키우고 가로를 가운데로 자른다", () => {
+    // 1600×900 을 1000×900 에 slice → s=1, x 오프셋 -300
+    expect(sliceToScreen(1600, 900, 1000, 900, 800, 450)).toEqual({ x: 500, y: 450, s: 1 });
+  });
+  it("세로가 남으면 가로에 맞춰 키운다", () => {
+    // 1600×900 을 1600×1800 에 slice → s=2, x 오프셋 -800, y 오프셋 0
+    expect(sliceToScreen(1600, 900, 1600, 1800, 800, 450)).toEqual({ x: 800, y: 900, s: 2 });
   });
 });

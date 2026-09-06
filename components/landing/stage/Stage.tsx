@@ -6,7 +6,8 @@ import StartLink from "../StartLink";
 import Bill from "./Bill";
 import { Laptop, AlertCard } from "./Laptop";
 import Drawdown from "./Drawdown";
-import { centerDelta, layoutCenter } from "./layout";
+import { DoorBack, DOOR } from "./DoorScene";
+import { centerDelta, layoutCenter, sliceToScreen } from "./layout";
 import { T, TOTAL, isDark } from "./phases";
 
 /**
@@ -18,6 +19,10 @@ import { T, TOTAL, isDark } from "./phases";
  * 규칙: CSS 기본 상태가 완성 상태. GSAP 은 from 트윈으로 초기 상태를 만든다.
  * 그래서 reduced-motion(static) 에서는 타임라인 없이 완성 화면이 세로로 쌓여 보인다.
  * 위치 계산은 전부 함수형 값 — 리사이즈 시 ScrollTrigger 가 다시 계산한다.
+ *
+ * S0 의 고지서는 처음부터 문 투입구에 "꽂힌" DOM 고지서다. 스크롤이 곧 꺼내는 손이다.
+ * 투입구 구멍 선 아래를 clip-path 로 잘라 두었다가 빠져나오면서 풀어 준다.
+ * 고지서는 노트북 위 겹에 있어야 조각이 화면 위로 날아간다 — 그래서 S0 장면 밖, 스테이지 직속이다.
  */
 
 const BG = { dusk: "#1b1e27", ivory: "#f5f3ee", navy: "#0c1c36", dark: "#0a0e18" };
@@ -27,6 +32,11 @@ const BEATS = [
   { id: 2, h: "생활비는 나눠서, 안전하게", p1: "한 계좌에 다 두는 대신", p2: "세 층으로 나눠 필요한 만큼만 내려옵니다" },
   { id: 3, h: "한도는 당신이 정한 만큼만", p1: "한 번에 100만원을 정하면", p2: "하루 200만원이 자동으로 따라옵니다" },
 ];
+
+/** 투입구에 꽂혀 있을 때 고지서 배율 */
+const SLOT_SCALE = 0.46;
+/** 꽂혀 있을 때 틈 위로 보이는 비율 (고지서 높이 기준) */
+const PEEK = 0.36;
 
 export default function Stage() {
   const root = useRef<HTMLDivElement>(null);
@@ -44,18 +54,23 @@ export default function Stage() {
 
       const q = gsap.utils.selector(el);
       const one = (s: string) => q(s)[0] as HTMLElement;
-      const stillDoor = one(".ld-still--door");
-      const stillHand = one(".ld-still--hand");
+      const all = (s: string) => q(s) as HTMLElement[];
+      const doorBack = one(".ld-door--back");
+      const vignette = one(".ld-vignette");
       const veil = one(".ld-veil");
       const copy1 = one(".ld-s0-copy--1");
       const copy2 = one(".ld-s0-copy--2");
       const billWrap = one(".ld-bill-wrap");
-      const billBody = one("[data-bill-body]");
+      const bill = one(".ld-bill");
+      const billFade = all("[data-bill-fade]");
+      const billRows = all("[data-bill-row]");
       const laptopWrap = one(".ld-laptop-wrap");
       const laptop = one(".ld-laptop");
       const frags = ["co", "amt", "due"].map((k) => one(`[data-frag="${k}"]`));
       const targets = ["co", "amt", "due"].map((k) => one(`[data-target="${k}"]`));
-      const logRest = one("[data-log-rest]");
+      const logWait = one("[data-log-wait]");
+      const logRest = all("[data-log-rest]");
+      const line0800 = one('[data-line="0800"]');
       const line1000 = one('[data-line="1000"]');
       const line2347 = one('[data-line="2347"]');
       const scrLog = one('[data-screen="log"]');
@@ -71,6 +86,19 @@ export default function Stage() {
       const ddFill = one("[data-dd-fill]");
       const stamp = one(".ld-tr-stamp");
       const trCopy = one(".ld-tr-copy");
+
+      /* ── 좌표 함수 (리사이즈마다 다시 계산) ── */
+      // 투입구 구멍의 화면 좌표
+      const slit = () =>
+        sliceToScreen(DOOR.vw, DOOR.vh, el.clientWidth, el.clientHeight, DOOR.slotCenterX, DOOR.slit.top);
+      // 꽂혀 있을 때: 중심이 구멍 아래쪽에 있어 위 PEEK 만큼만 보인다
+      const slotX = () => slit().x - layoutCenter(billWrap, el).x;
+      const slotY = () =>
+        slit().y + billWrap.offsetHeight * SLOT_SCALE * (0.5 - PEEK) - layoutCenter(billWrap, el).y;
+      // 완전히 빠져나온 자리: 구멍 바로 위
+      const outY = () => slit().y - billWrap.offsetHeight * SLOT_SCALE * 0.58 - layoutCenter(billWrap, el).y;
+      // 꽂혀 있을 때 구멍 선 아래로 잘리는 높이 (고지서 로컬 px)
+      const clipIn = () => `inset(0px 0px ${Math.round(billWrap.offsetHeight * (1 - PEEK))}px 0px)`;
 
       // S0 동안 노트북은 화면 하단 중앙에 작게(0.8) 있다. 레이아웃 위치(우측 칼럼)와의 차이를 함수로 둔다.
       const S0_SCALE = 0.8;
@@ -107,22 +135,23 @@ export default function Stage() {
         (window as unknown as { __stageTl?: gsap.core.Timeline }).__stageTl = tl; // 브라우저 검증용
       }
 
-      /* ── S0. 고지서 오프닝 ── */
-      tl.from(stillHand, { autoAlpha: 0, duration: 5 }, T.s0Still);
-      tl.from(
+      /* ── S0-1. 투입구에서 고지서가 빠져나온다 (스크롤 = 꺼내는 손) ── */
+      tl.fromTo(
         billWrap,
-        {
-          scale: 0.38,
-          y: () => el.clientHeight * 0.18,
-          x: () => -el.clientWidth * 0.06,
-          autoAlpha: 0,
-          duration: 8,
-        },
-        T.s0Bill,
+        { x: slotX, y: slotY, scale: SLOT_SCALE, rotation: 1.5, clipPath: clipIn },
+        { y: outY, rotation: -1.5, clipPath: "inset(0px 0px 0px 0px)", duration: T.s0Bill, ease: "power1.out" },
+        T.s0Still,
       );
-      tl.to(veil, { opacity: 0.86, duration: 8 }, T.s0Bill);
-      tl.from(copy1, { autoAlpha: 0, y: 28, duration: 4 }, T.s0Bill + 4);
 
+      // 틈을 벗어나면 클립을 푼다 — 안 풀면 종이 박스 밖으로 날아가는 조각까지 잘린다
+      tl.set(billWrap, { clipPath: "none" }, T.s0Bill);
+
+      /* ── S0-2. 중앙으로 다가와 읽을 수 있는 크기가 된다 ── */
+      tl.to(billWrap, { x: 0, y: 0, scale: 1, rotation: -2, duration: 8, ease: "power1.inOut" }, T.s0Bill);
+      tl.to(veil, { opacity: 0.86, duration: 8 }, T.s0Bill);
+      tl.from(copy1, { autoAlpha: 0, y: 28, duration: 4 }, T.s0Bill + 3);
+
+      /* ── S0-3. 노트북이 떠오르고 카피가 바뀐다 ── */
       // 타임라인 0초의 set() 은 리프레시 때 되돌려지므로, S0 위치는 fromTo 의 from 으로 박는다.
       tl.fromTo(
         laptopWrap,
@@ -133,7 +162,12 @@ export default function Stage() {
       tl.to(copy1, { autoAlpha: 0, duration: 3 }, T.s0Laptop + 2);
       tl.from(copy2, { autoAlpha: 0, y: 28, duration: 4 }, T.s0Laptop + 5);
 
+      /* ── S0-4. 조각이 날아가 집행 일지에 안착한다 ── */
+      const FLIGHT = 5;
+      const GAP = 1.6;
+      tl.to(logWait, { autoAlpha: 0, duration: 1 }, T.s0Flip);
       frags.forEach((f, i) => {
+        const at = T.s0Flip + i * GAP;
         // 도착점: 노트북이 S0 위치(x,y 오프셋 + 0.8 배)에 있을 때 target 이 실제로 보이는 자리
         const d = () => {
           const lc = layoutCenter(laptopWrap, el);
@@ -145,23 +179,37 @@ export default function Stage() {
             scale: (targets[i].offsetWidth * S0_SCALE) / f.offsetWidth,
           };
         };
-        tl.to(
-          f,
-          { x: () => d().x, y: () => d().y, scale: () => d().scale, duration: 6 },
-          T.s0Flip + i * 0.6,
+        // 종이 조각처럼 떨어져 나온다: 배경·그림자를 얻고, 살짝 떠오른 뒤 포물선으로 떨어진다
+        tl.to(f, { backgroundColor: "#fff9ea", boxShadow: "0 18px 34px -10px rgba(0,0,0,.7)", duration: 1 }, at);
+        tl.to(f, { x: () => d().x, duration: FLIGHT }, at);
+        tl.to(f, { y: () => d().y - 40, duration: FLIGHT * 0.35, ease: "power2.out" }, at);
+        tl.to(f, { y: () => d().y, duration: FLIGHT * 0.65, ease: "power2.in" }, at + FLIGHT * 0.35);
+        tl.to(f, { scale: () => d().scale, rotation: i % 2 ? 6 : -6, duration: FLIGHT }, at);
+        // 안착: 조각이 사라지며 그 자리에 글자가 튀어 오르고, 줄이 한 번 번쩍인다
+        const land = at + FLIGHT;
+        tl.to(f, { autoAlpha: 0, duration: 0.6 }, land);
+        tl.from(targets[i], { autoAlpha: 0, scale: 1.6, duration: 1.2, ease: "back.out(2.5)" }, land);
+        tl.fromTo(
+          line0800,
+          { backgroundColor: "#dbe8fb", borderColor: "#8fb6ee" },
+          { backgroundColor: "#ffffff", borderColor: "#e6eaf0", duration: 2.2, immediateRender: false },
+          land,
         );
       });
-      tl.to(billBody, { autoAlpha: 0, duration: 4 }, T.s0Flip);
-      tl.to(frags, { autoAlpha: 0, duration: 1 }, T.s0Flip + 6.5);
-      tl.from(targets, { autoAlpha: 0, duration: 1 }, T.s0Flip + 6.5);
-      tl.from(logRest, { autoAlpha: 0, duration: 1.5 }, T.s0Flip + 7);
+      // 종이만 사라진다 — 조각은 남아서 날아간다
+      tl.to(billFade, { autoAlpha: 0, duration: 3 }, T.s0Flip + 1);
+      tl.to(billRows, { borderColor: "rgba(0,0,0,0)", duration: 3 }, T.s0Flip + 1);
+      tl.to(bill, { backgroundColor: "rgba(248,244,234,0)", boxShadow: "0 0 0 0 rgba(0,0,0,0)", duration: 3 }, T.s0Flip + 1);
+      const lastLand = T.s0Flip + (frags.length - 1) * GAP + FLIGHT;
+      tl.from(logRest, { autoAlpha: 0, x: -6, duration: 1.5, stagger: 0.2 }, lastLand + 0.4);
 
+      /* ── S0-5. 노트북 풀스크린 ── */
       tl.to(
         laptopWrap,
         { x: () => centerDelta(laptopWrap, el).x, y: fullY, scale: fullScale, duration: 8 },
         T.s0Full,
       );
-      tl.to([stillDoor, stillHand, veil, copy2, billWrap], { autoAlpha: 0, duration: 6 }, T.s0Full);
+      tl.to([doorBack, vignette, veil, copy2, billWrap], { autoAlpha: 0, duration: 6 }, T.s0Full);
       tl.to(el, { backgroundColor: BG.ivory, duration: 8 }, T.s0Full + 2);
 
       /* ── CH1. 일상관리 ── */
@@ -222,16 +270,12 @@ export default function Stage() {
 
   return (
     <div ref={root} className="ld-stage" data-mode={mode} aria-label="소개">
-      {/* S0 */}
+      {/* S0 — 문 → 비네트 → 베일 → 카피. 고지서는 아래 스테이지 직속(노트북 위 겹). */}
       <section className="ld-scene ld-scene--s0">
-        <div className="ld-still ld-still--door" aria-hidden>
-          <DoorArt />
-          <div className="ld-photo" style={{ backgroundImage: "url(/landing/s0-door.jpg)" }} />
+        <div className="ld-door ld-door--back" aria-hidden>
+          <DoorBack />
         </div>
-        <div className="ld-still ld-still--hand" aria-hidden>
-          <DoorArt hand />
-          <div className="ld-photo" style={{ backgroundImage: "url(/landing/s0-hand.jpg)" }} />
-        </div>
+        <div className="ld-vignette" aria-hidden />
         <div className="ld-veil" aria-hidden />
         <div className="ld-s0-copy ld-s0-copy--1">
           <h1>
@@ -250,10 +294,14 @@ export default function Stage() {
             원칙은 기억합니다
           </h2>
         </div>
+      </section>
+
+      {/* 고지서 — 투입구에서 나와 중앙으로, 조각이 노트북 위로 날아간다 */}
+      <div className="ld-bill-anchor">
         <div className="ld-bill-wrap">
           <Bill />
         </div>
-      </section>
+      </div>
 
       {/* 노트북 — S0·CH1·CH2 를 관통한다 */}
       <div className="ld-laptop-col">
@@ -274,32 +322,32 @@ export default function Stage() {
           </span>
         </div>
         <div className="ld-beats">
-        {BEATS.map((b) => (
-          <div className="ld-beat" data-beat={b.id} key={b.id}>
-            <h2>{b.h}</h2>
+          {BEATS.map((b) => (
+            <div className="ld-beat" data-beat={b.id} key={b.id}>
+              <h2>{b.h}</h2>
+              <p className="ld-cap">
+                <span>{b.p1}</span>
+                <span>{b.p2}</span>
+              </p>
+              <StartLink className="ld-cta" focus="core">
+                일상 관리 설계 시작 →
+              </StartLink>
+            </div>
+          ))}
+          <div className="ld-beat" data-beat={4}>
+            <h2>
+              이상한 순간,
+              <br />
+              시스템이 먼저 멈춥니다
+            </h2>
             <p className="ld-cap">
-              <span>{b.p1}</span>
-              <span>{b.p2}</span>
+              <span>한도 룰 7종과 맥락 룰 3종이 거래를 보고</span>
+              <span>어긋나면 보류하고, 12시간 무응답이면 2차로 넘깁니다</span>
             </p>
-            <StartLink className="ld-cta" focus="core">
-              일상 관리 설계 시작 →
+            <StartLink className="ld-cta" focus="safe">
+              금융 보호 설계 시작 →
             </StartLink>
           </div>
-        ))}
-        <div className="ld-beat" data-beat={4}>
-          <h2>
-            이상한 순간,
-            <br />
-            시스템이 먼저 멈춥니다
-          </h2>
-          <p className="ld-cap">
-            <span>한도 룰 7종과 맥락 룰 3종이 거래를 보고</span>
-            <span>어긋나면 보류하고, 12시간 무응답이면 2차로 넘깁니다</span>
-          </p>
-          <StartLink className="ld-cta" focus="safe">
-            금융 보호 설계 시작 →
-          </StartLink>
-        </div>
         </div>
       </section>
 
@@ -314,32 +362,5 @@ export default function Stage() {
         </h2>
       </section>
     </div>
-  );
-}
-
-/** 실사가 없을 때 보이는 임시 비주얼: 문틈과 종이. 사진이 오면 위에 덮인다. */
-function DoorArt({ hand = false }: { hand?: boolean }) {
-  return (
-    <svg className="ld-doorart" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden>
-      <rect width="1600" height="900" fill="#171a22" />
-      <rect x="0" y="0" width="700" height="900" fill="#20242e" />
-      <rect x="700" y="0" width="28" height="900" fill="#0d0f14" />
-      <rect x="728" y="0" width="872" height="900" fill="#262b36" />
-      <rect x="620" y="380" width="90" height="120" rx="6" fill="#3a404d" />
-      <g transform={hand ? "translate(690 300) rotate(-14)" : "translate(700 330) rotate(-6)"}>
-        <rect width="150" height="210" rx="4" fill="#efeadb" />
-        <rect x="18" y="26" width="90" height="10" rx="2" fill="#c9c2ae" />
-        <rect x="18" y="50" width="114" height="6" rx="2" fill="#d9d3c1" />
-        <rect x="18" y="66" width="100" height="6" rx="2" fill="#d9d3c1" />
-        <rect x="18" y="82" width="70" height="6" rx="2" fill="#d9d3c1" />
-      </g>
-      {hand && (
-        <path
-          d="M1010 560 C960 540 900 520 860 470 L830 430 C820 415 840 400 856 412 L900 450 L930 440 L960 455 L1000 470 C1060 500 1080 560 1010 560 Z"
-          fill="#8a7566"
-          opacity="0.9"
-        />
-      )}
-    </svg>
   );
 }
