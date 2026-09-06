@@ -35,7 +35,7 @@ import { emptyAuthorityState } from "../../lib/authority";
 type Step = 1 | 2 | 3;
 
 const STEPS: { n: Step; label: string }[] = [
-  { n: 1, label: "체결 대상 문서" },
+  { n: 1, label: "체결할 서류" },
   { n: 2, label: "의뢰서" },
   { n: 3, label: "전달" },
 ];
@@ -102,7 +102,7 @@ export default function ReferralShell() {
   if (!profile || !design || !referral) {
     return (
       <div className="shell-wide" style={{ padding: "80px 0" }}>
-        <p className="muted">의뢰서를 불러오는 중입니다…</p>
+        <p className="muted">의뢰서를 불러오고 있어요…</p>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function ReferralShell() {
   if (!profile.track) {
     return (
       <div className="shell-wide" style={{ padding: "80px 0" }}>
-        <p className="muted">아직 설계를 시작하지 않으셨습니다.</p>
+        <p className="muted">아직 설계를 시작하지 않았어요.</p>
         <Link href="/start" className="btn" style={{ marginTop: 16 }}>
           설계 시작하기
         </Link>
@@ -138,11 +138,11 @@ export default function ReferralShell() {
   return (
     <div className="shell-wide rf">
       <div className="plan-head">
-        <span className="eyebrow">전문가 연계</span>
+        <span className="eyebrow">전문가에게 전달</span>
         <h1>{referral.title}</h1>
         <p className="section-lede">
-          NEXT는 권한을 만들지 않습니다. 아래 문서가 정식으로 체결될 때 비로소 금융기관이 집행할 수
-          있는 근거가 생깁니다.
+          NEXT가 권한을 만들지는 않아요. 아래 서류를 정식으로 체결해야 금융기관이 움직일 수
+          있어요.
         </p>
       </div>
 
@@ -163,10 +163,10 @@ export default function ReferralShell() {
 
       {step === 1 && (
         <section>
-          <h2 className="rf-h2">설계서가 작동하려면 이 문서들이 체결되어야 합니다</h2>
+          <h2 className="rf-h2">설계서가 움직이려면 이 서류들을 체결해야 해요</h2>
           <p className="section-lede">
             {referral.executorNote ??
-              "각 문서마다 효력이 발생하는 시점이 다릅니다. 아래 단계를 모두 마쳐야 집행 근거가 생깁니다."}
+              "서류마다 효력이 생기는 시점이 달라요. 아래 단계를 모두 마쳐야 설계서대로 움직일 수 있어요."}
           </p>
           <div className="rf-inst-list">
             {instruments.map((i) => (
@@ -209,11 +209,11 @@ export default function ReferralShell() {
           {sent ? (
             <div className="rf-sent">
               <h2 className="rf-h2">
-                {auth.sentTo ? `${auth.sentTo}께 전달되었습니다` : "의뢰서가 정리되었습니다"}
+                {auth.sentTo ? `${auth.sentTo}께 전달했어요` : "의뢰서를 정리했어요"}
               </h2>
               <p className="section-lede">
-                문서 상태가 <b>전달됨</b>으로 바뀌었습니다. 전달했다고 해서 계약이 되는 것은
-                아닙니다. 전문가가 검토한 뒤 정식 절차를 밟아야 효력이 생깁니다.
+                서류 상태가 <b>전달됨</b>으로 바뀌었어요. 전달했다고 계약이 된 건 아니에요.
+                전문가가 검토하고 정식 절차를 밟아야 효력이 생겨요.
               </p>
 
               {guardian ? (
@@ -222,34 +222,34 @@ export default function ReferralShell() {
                     <span className="i">1</span>
                     <span className="t">
                       <b>보호자 {guardian.label}</b>
-                      <em>{guardian.channel}로 통보 · 방금 전달됨</em>
+                      <em>{guardian.channel}으로 알림 · 방금 전달</em>
                     </span>
                   </div>
                   <div className="row">
                     <span className="i">2</span>
                     <span className="t">
                       <b>{guardian.escalateTo}</b>
-                      <em>{guardian.escalateHours}시간 안에 응답이 없으면 이쪽으로 넘어갑니다</em>
+                      <em>{guardian.escalateHours}시간 안에 응답이 없으면 이쪽으로 넘어가요</em>
                     </span>
                   </div>
                   <p className="note">
-                    지출설계서에 정해 둔 승인·에스컬레이션 체계를 그대로 따릅니다.
-                    이 화면은 데모이므로 실제 발송은 하지 않습니다.
+                    지출설계서 제5조에 정해 둔 알림 순서를 그대로 따라요.
+                    예시 화면이라 실제로 보내지는 않아요.
                   </p>
                 </div>
               ) : null}
               <p className="attach" style={{ marginTop: 20 }}>
-                <b>데모 안내</b>
-                입력하신 내용은 어디로도 전송되지 않았습니다. 체결 상태는 이 브라우저에만
-                저장됩니다.
+                <b>예시 안내</b>
+                입력한 내용은 어디로도 보내지 않았어요. 체결 상태는 이 브라우저에만
+                저장돼요.
               </p>
             </div>
           ) : (
             <>
               <h2 className="rf-h2">의뢰서를 전달할 곳</h2>
               <p className="section-lede">
-                전달했다고 해서 계약이 되는 것은 아닙니다. 전문가가 검토한 뒤 정식 절차를 밟아야
-                효력이 생깁니다.
+                전달했다고 계약이 되는 건 아니에요. 전문가가 검토하고 정식 절차를 밟아야
+                효력이 생겨요.
               </p>
 
               <div className="rf-form">
@@ -265,12 +265,12 @@ export default function ReferralShell() {
                   />
                   {guardian ? (
                     <span className="rf-hint">
-                      설문에서 1차 관리자로 지정하신 분입니다. 비워두면 그대로 사용합니다.
+                      인터뷰에서 1차 관리자로 정한 분이에요. 비워 두면 이분에게 보내요.
                     </span>
                   ) : null}
                 </div>
                 <div className="field">
-                  <label htmlFor="rf-to">전달 대상</label>
+                  <label htmlFor="rf-to">보낼 곳</label>
                   <select id="rf-to" value={to} onChange={(e) => setTo(e.target.value)}>
                     {referral.recipients.map((r) => (
                       <option key={r}>{r}</option>
@@ -293,10 +293,10 @@ export default function ReferralShell() {
               </div>
 
               <p className="attach">
-                <b>전달하면 이렇게 됩니다</b>
-                문서 상태가 <b>초안 → 전달됨</b>으로 바뀝니다. 체결 여부는 앱이 아니라 전문가와의
-                절차에서 정해지므로, <b>효력 발생</b>으로의 전환은 바깥에서 벌어진 일을 앱에
-                알려주는 입력입니다.
+                <b>전달하면 이렇게 돼요</b>
+                서류 상태가 <b>초안</b>에서 <b>전달됨</b>으로 바뀌어요. 체결 여부는 앱이 아니라
+                전문가와 밟는 절차에서 정해져요. <b>효력 발생</b>으로 바꾸는 건 바깥에서 끝난
+                일을 앱에 알려 주는 입력이에요.
               </p>
 
             </>
@@ -312,7 +312,7 @@ export default function ReferralShell() {
             {sent ? (
               <>
                 <button className="btn outline" onClick={() => setStep(1)}>
-                  체결 대상 문서 보기
+                  체결할 서류 보기
                 </button>
                 <Link href="/plan" className="btn">
                   내 설계서 보기

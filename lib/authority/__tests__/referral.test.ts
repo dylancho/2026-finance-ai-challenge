@@ -264,7 +264,7 @@ describe("주거래 금융기관 안내", () => {
   it("이 값이 설문이 아니라 이력에서 왔음을 문서에 적는다", () => {
     const r = withLedger("B", [{ name: "신한은행", share: 0.7, trustDesk: true }]);
     expect(r.overview.find((o) => o.label === "판단 근거")?.value).toContain(
-      "금융이력",
+      "이력에서 읽은",
     );
   });
 });

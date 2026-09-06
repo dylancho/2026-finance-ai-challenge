@@ -3,7 +3,14 @@
 import { won } from "../../lib/format";
 import type { Referral } from "../../lib/authority/referral";
 
-/** 은행 WM·신탁부서·법무법인에 제출하는 문서. 인쇄를 전제로 한 레이아웃. */
+// 공백의 심각도는 코드값(high/medium/low)이다. 문서에는 영어 대문자 대신 한국어로 적는다 (2026-09-07).
+const SEVERITY_LABEL: Record<string, string> = {
+  high: "중요",
+  medium: "보통",
+  low: "낮음",
+};
+
+/** 은행 WM·신탁부서·법무법인에 제출하는 문서. 인쇄를 전제로 한 레이아웃. 본문은 합니다체. */
 export default function ReferralDoc({ r }: { r: Referral }) {
   const sections = groupBySection(r);
   let n = 0;
@@ -19,20 +26,20 @@ export default function ReferralDoc({ r }: { r: Referral }) {
           <dt>수신</dt>
           <dd>{r.recipients.join(" / ")}</dd>
           <dt>작성</dt>
-          <dd>NEXT (설문 응답 기반 자동 생성)</dd>
-          <dt>제출 주체</dt>
+          <dd>NEXT (설문 응답을 바탕으로 자동 생성)</dd>
+          <dt>제출하는 사람</dt>
           <dd>{r.executor}</dd>
           <dt>응답 문항</dt>
           <dd>
             {r.total}문항 중 {r.answered}문항 응답
           </dd>
         </dl>
-        <span className="rf-stamp">초안 — 법적 효력 없음</span>
+        <span className="rf-stamp">초안 · 법적 효력 없음</span>
       </header>
 
       {r.executorNote ? (
         <p className="rf-executor-note">
-          <b>제출 주체 안내</b>
+          <b>제출하는 사람에 관한 안내</b>
           {r.executorNote}
         </p>
       ) : null}
@@ -54,8 +61,8 @@ export default function ReferralDoc({ r }: { r: Referral }) {
       {r.detection ? (
         <section className="rf-sec">
           <h4>
-            <span className="no">{no()}</span>금융이력 이상 탐지 기록
-            <small>관측 기록이며 진단이 아닙니다</small>
+            <span className="no">{no()}</span>금융 이력에서 달라진 점
+            <small>기록이며 진단이 아닙니다</small>
           </h4>
 
           <div className={`rf-det${r.detection.fired ? " fired" : ""}`}>
@@ -64,8 +71,8 @@ export default function ReferralDoc({ r }: { r: Referral }) {
               <span className="bd">{r.detection.band}</span>
               <span className="st">
                 {r.detection.fired
-                  ? "전환 조건 충족"
-                  : "전환 조건 미충족 — 아래 항목이 필요합니다"}
+                  ? "시작 조건 충족"
+                  : "시작 조건 미충족. 아래 항목이 필요합니다"}
               </span>
             </div>
 
@@ -74,9 +81,9 @@ export default function ReferralDoc({ r }: { r: Referral }) {
                 <table className="rf-table">
                   <thead>
                     <tr>
-                      <th>관측 항목</th>
-                      <th>건강기 기준</th>
-                      <th>최근 관측</th>
+                      <th>항목</th>
+                      <th>평소 기준</th>
+                      <th>최근</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -100,7 +107,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
                     ? `${r.detection.proof.kind === "diagnosis" ? "의사 진단서" : "장기요양보험 등급 발행서"} · ${r.detection.proof.issuedAt} 발행${
                         r.detection.proofFresh ? "" : " (발행 1개월 초과)"
                       }`
-                    : "첨부되지 않음"}
+                    : "첨부 없음"}
                 </dd>
               </div>
             </dl>
@@ -114,9 +121,9 @@ export default function ReferralDoc({ r }: { r: Referral }) {
             ) : null}
 
             <p className="rf-det-note">
-              본 기록은 평소 금융 패턴과 달라진 지점을 정리한 것이며, 인지기능에 대한 판단이
-              아닙니다. 의학적 판정은 의료기관의 진단에 따릅니다. AI 경보만으로는 어떤 전환도
-              발동하지 않으며, 의사 진단서 또는 장기요양보험 등급 발행서가 함께 있어야 합니다.
+              본 기록은 평소 금융 패턴과 달라진 지점을 정리한 것이며, 인지기능을 판단한 것이
+              아닙니다. 의학적 판단은 의료기관의 진단에 따릅니다. AI 경보만으로는 어떤 절차도
+              시작되지 않으며, 의사 진단서 또는 장기요양보험 등급 발행서가 함께 있어야 합니다.
             </p>
           </div>
         </section>
@@ -125,8 +132,8 @@ export default function ReferralDoc({ r }: { r: Referral }) {
       {r.assetTables.length || r.roles.length ? (
         <section className="rf-sec">
           <h4>
-            <span className="no">{no()}</span>재산 및 관계 현황
-            <small>설문 응답 기준 · 실사 미실시</small>
+            <span className="no">{no()}</span>재산과 관계 현황
+            <small>설문 응답 기준이며 실사는 하지 않았습니다</small>
           </h4>
 
           {r.assetTables.map((t) => (
@@ -140,7 +147,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
                     <tr key={row.label}>
                       <td>{row.label}</td>
                       <td className="num">
-                        {row.amount ? won(row.amount) : "금액 미기재"}
+                        {row.amount ? won(row.amount) : "금액 없음"}
                       </td>
                     </tr>
                   ))}
@@ -175,8 +182,8 @@ export default function ReferralDoc({ r }: { r: Referral }) {
       {r.directives.length ? (
         <section className="rf-sec">
           <h4>
-            <span className="no">{no()}</span>확정된 지시사항
-            <small>각 항목에 근거 문항 번호 병기</small>
+            <span className="no">{no()}</span>정해진 지시 사항
+            <small>항목마다 근거 문항 번호를 함께 적었습니다</small>
           </h4>
           {r.directives.map((d) => (
             <div className="rf-clause" key={d.no}>
@@ -199,12 +206,12 @@ export default function ReferralDoc({ r }: { r: Referral }) {
 
       <section className="rf-sec">
         <h4>
-          <span className="no">{no()}</span>미확정 사항
+          <span className="no">{no()}</span>아직 정하지 않은 사항
         </h4>
         {r.open.length ? (
           r.open.map((g) => (
             <div className="rf-open" key={g.qid}>
-              <span className="sev">{g.severity.toUpperCase()}</span>
+              <span className="sev">{SEVERITY_LABEL[g.severity] ?? g.severity}</span>
               <span className="txt">
                 <b>
                   {g.clause} {g.what} <span className="qid">{g.qid}</span>
@@ -214,19 +221,19 @@ export default function ReferralDoc({ r }: { r: Referral }) {
             </div>
           ))
         ) : (
-          <p className="muted">미확정 사항이 없습니다.</p>
+          <p className="muted">아직 정하지 않은 사항이 없습니다.</p>
         )}
       </section>
 
       {r.contrasts.length ? (
         <section className="rf-sec">
           <h4>
-            <span className="no">{no()}</span>선언과 금융이력의 대조
+            <span className="no">{no()}</span>정한 것과 금융 이력 비교
           </h4>
           <ul className="rf-list">
             {r.contrasts.map((c) => (
               <li key={c.qid}>
-                <span className="qid">{c.qid}</span> {c.declared} ↔ {c.observed}
+                <span className="qid">{c.qid}</span> 정한 것: {c.declared} / 실제: {c.observed}
               </li>
             ))}
           </ul>
@@ -254,7 +261,7 @@ export default function ReferralDoc({ r }: { r: Referral }) {
         <section className="rf-sec">
           <h4>
             <span className="no">{no()}</span>참조 법령
-            <small>본 설계가 전제하는 제도의 근거</small>
+            <small>이 설계가 바탕으로 삼는 제도의 근거</small>
           </h4>
           <ul className="rf-statutes">
             {r.statutes.map((st) => (
@@ -328,7 +335,8 @@ function SectionRows({
         <tr key={a.qid} className={a.answer === null ? "none" : undefined}>
           <td className="qid">{a.qid}</td>
           <td>{a.prompt}</td>
-          <td>{a.answer ?? "미응답 — §4 참조"}</td>
+          {/* 절 번호는 실리는 절에 따라 달라지므로 "§4 참조" 처럼 번호를 박지 않는다. */}
+          <td>{a.answer ?? "미응답 (아직 정하지 않은 사항 참조)"}</td>
         </tr>
       ))}
     </>

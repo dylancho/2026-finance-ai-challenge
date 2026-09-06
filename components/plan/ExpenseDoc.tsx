@@ -16,6 +16,9 @@ import type { ExpenseDesign, FraudRule, Profile } from "../../lib/types";
  * 원칙: 카드 한 장에 원칙 하나. 큰 숫자 하나와 그 숫자를 설명하는 한 문장이 먼저 오고,
  * 표 대신 목록 행으로 세부를 보여준다. 조항 번호(제N조)는 의뢰서·시뮬레이션이 인용하므로
  * 작은 라벨로 남기고, 카드마다 id="exp-N" 앵커를 달아 다른 화면에서 바로 올 수 있게 한다.
+ *
+ * 2026-09-07 문체 가이드: 이 문서는 카드 제목과 한 문장이 곧 본문이라 신탁·후견과 달리
+ * 해요체로 쓴다. 조항 번호와 앵커는 그대로다.
  */
 
 const PAYOUT_LABEL: Record<string, string> = {
@@ -63,10 +66,10 @@ function CashflowHero({ cf, payout }: { cf: ExpenseDesign["cashflow"]; payout: s
       <div className="xd-no">월 현금흐름</div>
       {cf.living > 0 ? (
         <h2>
-          {payout}, 생활비 <em>{won(cf.living)}</em>이 나갑니다
+          {payout}, 생활비 <em>{won(cf.living)}</em>이 나가요
         </h2>
       ) : (
-        <h2>생활비가 아직 정해지지 않았습니다</h2>
+        <h2>생활비를 아직 정하지 않았어요</h2>
       )}
       <ul className="xd-facts" aria-label="월 수입·지출 요약">
         <li>
@@ -80,14 +83,14 @@ function CashflowHero({ cf, payout }: { cf: ExpenseDesign["cashflow"]; payout: s
               나오는지(예금, 제6조의 인출)까지 한 문장으로 적는다. */}
           {cf.net > 0 ? (
             <>
-              부족한 <b>{won(cf.net)}</b>은 예금에서 꺼내 씁니다
+              모자라는 <b>{won(cf.net)}</b>은 예금에서 꺼내 써요
             </>
           ) : cf.net < 0 ? (
             <>
-              매달 <b>{won(-cf.net)}</b>이 남습니다
+              매달 <b>{won(-cf.net)}</b>이 남아요
             </>
           ) : (
-            <>수입과 지출이 같습니다</>
+            <>수입과 지출이 같아요</>
           )}
         </li>
       </ul>
@@ -137,7 +140,7 @@ function RunwayChart({ s }: { s: ExpenseDesign["sustainability"] }) {
   const line = s.series.map((d) => `${px(d.year)},${py(d.balance)}`).join(" ");
   const area = `0,100 ${line} ${px(maxX)},100`;
 
-  // 주석은 한 점만. 소진 시점이 있으면 그것, 없으면 요양비 증액 시작, 그것도 없으면 마지막 잔액.
+  // 주석은 한 점만. 바닥나는 시점이 있으면 그것, 없으면 요양비 증액 시작, 그것도 없으면 마지막 잔액.
   const last = s.series[s.series.length - 1];
   const care =
     s.careStartYear !== undefined ? s.series.find((d) => d.year === s.careStartYear) : undefined;
@@ -145,7 +148,7 @@ function RunwayChart({ s }: { s: ExpenseDesign["sustainability"] }) {
     s.years !== null
       ? { year: s.years, balance: 0, text: `약 ${s.years}년 뒤 0원` }
       : care
-        ? { year: care.year, balance: care.balance, text: `${care.year}년 뒤 요양비 증액` }
+        ? { year: care.year, balance: care.balance, text: `${care.year}년 뒤 요양비 증가` }
         : { year: last.year, balance: last.balance, text: `${last.year}년 뒤 ${wonShort(last.balance)}` };
   const anchorEnd = mark.year > maxX * 0.6;
 
@@ -153,7 +156,7 @@ function RunwayChart({ s }: { s: ExpenseDesign["sustainability"] }) {
     <figure
       className="xd-chart"
       role="img"
-      aria-label={`자산 잔액 추이. ${s.years === null ? "30년 이상 유지" : `약 ${s.years}년 후 소진`} 추정.`}
+      aria-label={`자산 잔액 추이. ${s.years === null ? "30년 넘게 유지" : `약 ${s.years}년 뒤 바닥`} 추정.`}
     >
       <div className="xd-chart-top">
         {/* 시작 잔액. 주석이 왼쪽에 붙어 있으면 겹치므로 생략한다. */}
@@ -207,7 +210,7 @@ function RuleRows({ rules }: { rules: FraudRule[] }) {
               {r.action} · {r.notify}에게 알림
             </div>
           </div>
-          <span className={`xd-state ${r.active ? "on" : ""}`}>{r.active ? "켜짐" : "검토 가능"}</span>
+          <span className={`xd-state ${r.active ? "on" : ""}`}>{r.active ? "켜짐" : "꺼짐"}</span>
         </li>
       ))}
     </ul>
@@ -220,9 +223,9 @@ const RAIL: { n: number; label: string }[] = [
   { n: 1, label: "계좌 구조" },
   { n: 2, label: "자동이체" },
   { n: 3, label: "한도" },
-  { n: 4, label: "이상거래 규칙" },
+  { n: 4, label: "보호 규칙" },
   { n: 5, label: "승인·알림" },
-  { n: 6, label: "지속가능성" },
+  { n: 6, label: "얼마나 버티나" },
   { n: 7, label: "투자 원칙" },
 ];
 
@@ -307,9 +310,9 @@ export default function ExpenseDoc({
         <Link
           className="xd-rail-edit"
           href={editTarget ? `/interview?q=${editTarget.id}` : "/interview"}
-          title="인터뷰로 돌아가 답변을 고칩니다"
+          title="인터뷰로 돌아가 답을 고쳐요"
         >
-          답변 수정 →
+          답 수정 →
         </Link>
       </nav>
 
@@ -317,8 +320,8 @@ export default function ExpenseDoc({
         <CashflowHero cf={cf} payout={payout} />
 
         {design.flags.length > 0 && (
-          <section className="xd-card" aria-label="검토가 필요한 지점">
-            <div className="xd-no">검토가 필요한 지점</div>
+          <section className="xd-card" aria-label="다시 살펴볼 곳">
+            <div className="xd-no">다시 살펴볼 곳</div>
             <div className="xd-flags">
               {design.flags.map((f, i) => (
                 <FlagCard key={i} flag={f} />
@@ -330,8 +333,8 @@ export default function ExpenseDoc({
         {/* 제1조 */}
         <Clause
           n={1}
-          title="돈을 세 층으로 나눕니다"
-          lede="자동이체는 생활계좌에서만 나갑니다. 보전계좌에는 자동이체를 연결하지 않고, 꺼낼 때는 두 사람이 함께 승인합니다."
+          title="돈을 세 층으로 나눠요"
+          lede="자동이체는 생활계좌에서만 나가요. 보전계좌에는 자동이체를 연결하지 않고, 꺼낼 때는 두 사람이 함께 승인해요."
           profile={profile}
         >
           <div className="xd-tiers">
@@ -364,22 +367,19 @@ export default function ExpenseDoc({
           n={2}
           title={
             design.transfers.length
-              ? `고정지출 ${design.transfers.length}건, 매달 ${won(design.transferTotal)}이 자동으로 나갑니다`
-              : "등록된 고정지출이 없습니다"
+              ? `고정지출 ${design.transfers.length}건, 매달 ${won(design.transferTotal)}이 자동으로 나가요`
+              : "등록한 고정지출이 없어요"
           }
           lede={
             design.transfers.length ? (
               <>
-                모두 1층 생활계좌에서 매월 빠져나갑니다. 잔액이 모자라면 <b>{onFail}</b>
+                모두 1층 생활계좌에서 매달 나가요. 잔액이 모자라면 <b>{onFail}</b>.
                 {design.transfers[0].notify !== "미지정" && (
-                  <>
-                    하고, {design.transfers[0].notify}에게 알립니다
-                  </>
+                  <> {design.transfers[0].notify}에게도 알려요.</>
                 )}
-                .
               </>
             ) : (
-              "이 목록이 비어 있으면 그 시점에 누군가 손으로 처리해야 합니다."
+              "이 목록이 비어 있으면 그때 누군가 손으로 처리해야 해요."
             )
           }
           profile={profile}
@@ -394,7 +394,7 @@ export default function ExpenseDoc({
                       {t.cycle} · {t.from}
                     </div>
                   </div>
-                  <span className="xd-val">{t.amount ? won(t.amount) : "미기재"}</span>
+                  <span className="xd-val">{t.amount ? won(t.amount) : "금액 없음"}</span>
                 </li>
               ))}
               <li className="xd-row total">
@@ -415,11 +415,11 @@ export default function ExpenseDoc({
         {/* 제3조 */}
         <Clause
           n={3}
-          title={hasPerTx ? `한 번에 ${perTx!.value}까지만 보낼 수 있습니다` : "1회 이체 한도가 아직 없습니다"}
+          title={hasPerTx ? `한 번에 ${perTx!.value}까지만 보낼 수 있어요` : "1회 이체 한도가 아직 없어요"}
           lede={
             hasPerTx
-              ? "한도를 넘는 이체는 바로 나가지 않고 보류한 뒤 확인합니다. 한도 하나가 피해 규모의 상한을 정합니다."
-              : "한도가 없으면 한 번의 실수로 잔액 전부가 빠져나갈 수 있습니다. 이 항목 하나가 피해 규모의 상한을 정합니다."
+              ? "한도를 넘는 이체는 바로 나가지 않고 잠시 멈춘 뒤 확인해요. 이 한도 하나가 피해 규모의 상한을 정해요."
+              : "한도가 없으면 한 번의 실수로 잔액 전부가 빠져나갈 수 있어요. 이 항목 하나가 피해 규모의 상한을 정해요."
           }
           profile={profile}
         >
@@ -439,23 +439,23 @@ export default function ExpenseDoc({
         {/* 제4조 */}
         <Clause
           n={4}
-          title={`규칙 ${activeRules}개가 거래를 지켜봅니다`}
+          title={`규칙 ${activeRules}개가 거래를 지켜봐요`}
           lede={
             <>
-              금액·시간 같은 한도 기준 {limitRules.length}개
-              {ctxRules.length > 0 && <>와 거래의 맥락을 보는 기준 {ctxRules.length}개</>}
-              입니다. 걸리면 보류하거나 차단하고 {approval.first}에게 알립니다.
+              금액·시간을 보는 기준 {limitRules.length}개
+              {ctxRules.length > 0 && <>와 거래 상황을 보는 기준 {ctxRules.length}개</>}
+              예요. 걸리면 잠시 멈추거나 막고 {approval.first}에게 알려요.
             </>
           }
           profile={profile}
         >
           <div className="xd-chips" aria-label="규칙 요약">
             <span className="xd-chip">
-              한도 기준 <b>{limitRules.filter((r) => r.active).length}</b>
+              금액 기준 <b>{limitRules.filter((r) => r.active).length}</b>
             </span>
             {ctxRules.length > 0 && (
               <span className="xd-chip">
-                맥락 기준 <b>{ctxRules.filter((r) => r.active).length}</b>
+                상황 기준 <b>{ctxRules.filter((r) => r.active).length}</b>
               </span>
             )}
             {offRules > 0 && (
@@ -467,12 +467,12 @@ export default function ExpenseDoc({
           <details className="xd-more">
             <summary>규칙 {design.fraudRules.length}개 모두 보기</summary>
             <div className="xd-group">
-              <div className="xd-group-t">한도 기준</div>
+              <div className="xd-group-t">금액 기준</div>
               <RuleRows rules={limitRules} />
             </div>
             {ctxRules.length > 0 && (
               <div className="xd-group">
-                <div className="xd-group-t">맥락 기준</div>
+                <div className="xd-group-t">상황 기준</div>
                 <RuleRows rules={ctxRules} />
               </div>
             )}
@@ -484,10 +484,10 @@ export default function ExpenseDoc({
           n={5}
           title={
             approval.first !== "미지정"
-              ? `이상이 생기면 ${approval.first}에게 먼저 알립니다`
-              : "알림을 받을 사람이 아직 없습니다"
+              ? `이상한 일이 생기면 ${approval.first}에게 먼저 알려요`
+              : "알림을 받을 사람이 아직 없어요"
           }
-          lede={`${approval.channel}로 알리고, ${approval.escalateHours}시간 안에 응답이 없으면 다음 사람에게 넘어갑니다.`}
+          lede={`${approval.channel}으로 알리고, ${approval.escalateHours}시간 안에 응답이 없으면 다음 사람에게 넘어가요.`}
           profile={profile}
         >
           <ol className="xd-steps">
@@ -495,12 +495,12 @@ export default function ExpenseDoc({
               <span className="dot">1</span>
               <div>
                 <div className="l">1차 · {approval.first}</div>
-                <div className="s">{approval.channel}로 즉시 알림</div>
+                <div className="s">{approval.channel}으로 바로 알림</div>
               </div>
             </li>
             <li className="gap">
               <span className="dot line" aria-hidden />
-              <div className="s">{approval.escalateHours}시간 무응답이면</div>
+              <div className="s">{approval.escalateHours}시간 동안 응답이 없으면</div>
             </li>
             <li>
               <span className="dot">2</span>
@@ -517,19 +517,19 @@ export default function ExpenseDoc({
           n={6}
           title={
             !hasRunway
-              ? "자산과 월 지출이 입력되면 소진 시점을 추정합니다"
+              ? "자산과 월 지출을 넣으면 언제 바닥나는지 계산해요"
               : s.years === null
-                ? "지금 설계대로면 30년 뒤에도 자산이 남습니다"
-                : `지금 설계대로면 약 ${s.years}년 뒤 소진됩니다`
+                ? "지금대로면 30년 뒤에도 자산이 남아요"
+                : `지금대로면 약 ${s.years}년 뒤에 바닥나요`
           }
           lede={
             hasRunway ? (
               <>
-                보유 자산 {won(s.assets)}에서 매달 {won(s.monthlyNet)}씩 꺼내 쓸 때의 단순 계산입니다.{" "}
-                <b>수익률·물가·세금은 반영하지 않았습니다.</b>
+                가진 자산 {won(s.assets)}에서 매달 {won(s.monthlyNet)}씩 꺼내 쓴다고 보고 단순하게 계산했어요.{" "}
+                <b>수익률·물가·세금은 넣지 않았어요.</b>
               </>
             ) : (
-              "자산 규모와 월 지출이 모두 있어야 계산할 수 있습니다."
+              "자산 규모와 월 지출이 둘 다 있어야 계산할 수 있어요."
             )
           }
           profile={profile}
@@ -537,22 +537,22 @@ export default function ExpenseDoc({
           {hasRunway && <RunwayChart s={s} />}
         </Clause>
 
-        {/* 제7조 는 투자 챕터를 선언했을 때만 선다. 건너뛰면 조항을 비워 두지 않고 생략한다. */}
+        {/* 제7조 는 투자 영역을 답했을 때만 선다. 건너뛰면 조항을 비워 두지 않고 생략한다. */}
         {design.invest && (
           <Clause
             n={7}
             title={
               design.invest.status === "set"
-                ? "시장이 흔들려도 미리 정한 대로 움직입니다"
-                : "투자 원칙이 아직 다 정해지지 않았습니다"
+                ? "시장이 흔들려도 미리 정한 대로 움직여요"
+                : "투자 원칙을 아직 다 정하지 않았어요"
             }
-            lede="특정 상품이나 금융회사를 정하는 조항이 아닙니다. 상황이 바뀌었을 때 검토 후보를 만드는 기준입니다."
+            lede="특정 상품이나 금융회사를 정하는 조항이 아니에요. 상황이 바뀌었을 때 선택지를 만드는 기준이에요."
             profile={profile}
           >
             <ul className="xd-list">
               <li className="xd-row">
                 <div className="xd-row-main">
-                  <div className="l">손대지 않을 자산군</div>
+                  <div className="l">손대지 않을 자산</div>
                 </div>
                 <span
                   className={`xd-val ${!design.invest.forbiddenLabels.length && !profile.answers["I01"] ? "muted" : ""}`}
@@ -560,26 +560,26 @@ export default function ExpenseDoc({
                   {design.invest.forbiddenLabels.length
                     ? design.invest.forbiddenLabels.join(", ")
                     : profile.answers["I01"]
-                      ? "없음 (모두 그대로 둔다)"
-                      : "아직 정하지 않음"}
+                      ? "없음 (모두 그대로 둬요)"
+                      : "아직 정하지 않았어요"}
                 </span>
               </li>
               <li className="xd-row">
                 <div className="xd-row-main">
-                  <div className="l">위험자산 상한</div>
+                  <div className="l">위험자산은 최대</div>
                 </div>
                 <span className={`xd-val ${design.invest.riskCapPct === undefined ? "muted" : ""}`}>
                   {design.invest.riskCapPct !== undefined
                     ? `전체 자산의 ${design.invest.riskCapPct}%`
-                    : "아직 정하지 않음"}
+                    : "아직 정하지 않았어요"}
                 </span>
               </li>
               <li className="xd-row">
                 <div className="xd-row-main">
-                  <div className="l">시장이 25% 이상 급락하면</div>
+                  <div className="l">시장이 25% 넘게 급락하면</div>
                 </div>
                 <span className={`xd-val ${design.invest.crashPolicy ? "" : "muted"}`}>
-                  {design.invest.crashPolicy ?? "아직 정하지 않음"}
+                  {design.invest.crashPolicy ?? "아직 정하지 않았어요"}
                 </span>
               </li>
               <li className="xd-row">
@@ -587,13 +587,13 @@ export default function ExpenseDoc({
                   <div className="l">판단이 어려워지면 운용은</div>
                 </div>
                 <span className={`xd-val ${design.invest.handover ? "" : "muted"}`}>
-                  {design.invest.handover ?? "아직 정하지 않음"}
+                  {design.invest.handover ?? "아직 정하지 않았어요"}
                 </span>
               </li>
               {design.invest.stance && (
                 <li className="xd-row">
                   <div className="xd-row-main">
-                    <div className="l">운용지침</div>
+                    <div className="l">기본 방침</div>
                   </div>
                   <span className="xd-val">{design.invest.stance}</span>
                 </li>
@@ -603,8 +603,8 @@ export default function ExpenseDoc({
         )}
 
         <Disclaimer>
-          위 계좌 구조와 규칙은 설계 초안입니다. 실제 적용 가능한 한도·차단·알림 서비스의 명칭과
-          범위는 거래 금융기관마다 다르므로 개별 확인이 필요합니다.
+          위 계좌 구조와 규칙은 설계 초안입니다. 한도·차단·알림 서비스의 이름과 범위는
+          금융기관마다 다르므로 따로 확인이 필요합니다.
         </Disclaimer>
       </div>
 

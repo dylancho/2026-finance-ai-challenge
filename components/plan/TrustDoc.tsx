@@ -11,11 +11,11 @@ export default function TrustDoc({ design }: { design: TrustDesign }) {
     return (
       <div>
         <div className="blocked">
-          <h3>신탁설계서를 생성하지 않았습니다</h3>
+          <h3>신탁설계서는 만들지 않았어요</h3>
           <p>{design.blockedReason}</p>
         </div>
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>대신 검토할 수 있는 경로</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>대신 살펴볼 수 있는 길</h4>
         {design.type.alternatives.map((a) => (
           <div className="clause partial" key={a.name}>
             <header className="clause-head">
@@ -27,7 +27,7 @@ export default function TrustDoc({ design }: { design: TrustDesign }) {
           </div>
         ))}
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>판단 근거</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>이렇게 본 이유</h4>
         <div className="clause">
           <ul className="clause-body">
             {design.type.rationale.map((r, i) => (
@@ -44,7 +44,8 @@ export default function TrustDoc({ design }: { design: TrustDesign }) {
     <div className="doc">
       <div>
         <div className="verdict">
-          <div className="k">RECOMMENDED STRUCTURE — 검토 대상 구조</div>
+          {/* 영어 소제목(RECOMMENDED STRUCTURE)은 문체 가이드에 따라 뺐다. */}
+          <div className="k">검토할 구조</div>
           <h3>{design.type.name}</h3>
           <ul>
             {design.type.rationale.map((r, i) => (
@@ -52,10 +53,10 @@ export default function TrustDoc({ design }: { design: TrustDesign }) {
             ))}
           </ul>
           <div className="alts">
-            <div className="h">함께 검토할 수 있는 대안</div>
+            <div className="h">함께 살펴볼 다른 방법</div>
             {design.type.alternatives.map((a) => (
               <div className="a" key={a.name}>
-                <b>{a.name}</b> — {a.why}
+                <b>{a.name}</b> · {a.why}
               </div>
             ))}
           </div>
@@ -70,10 +71,10 @@ export default function TrustDoc({ design }: { design: TrustDesign }) {
               남기고, 나머지는 여기 하나로 모은다. */}
           <div className="clause-foot">
             <span className="m">
-              {design.clauses.length}개 조항 중 {setCount}개 설정
-              {missingCount > 0 ? ` · ${missingCount}개 미설정` : ""}
+              조항 {design.clauses.length}개 중 {setCount}개를 정했어요
+              {missingCount > 0 ? ` · ${missingCount}개는 아직이에요` : ""}
             </span>
-            <Link href="/interview">답변 고쳐서 다시 만들기 →</Link>
+            <Link href="/interview">답 고쳐서 다시 만들기 →</Link>
           </div>
         </div>
 
@@ -93,7 +94,7 @@ export default function TrustDoc({ design }: { design: TrustDesign }) {
                 marginBottom: 12,
               }}
             >
-              검토가 필요한 지점
+              다시 살펴볼 곳
             </h4>
             {design.flags.map((f, i) => (
               <FlagCard key={i} flag={f} />
@@ -112,7 +113,7 @@ export default function TrustDoc({ design }: { design: TrustDesign }) {
             ))}
           </div>
           <p style={{ fontSize: 11.5, color: "var(--faint)", marginTop: 12, lineHeight: 1.7 }}>
-            금융기관과 재산 구성에 따라 크게 달라집니다. 실제 견적은 상담이 필요합니다.
+            금융기관과 재산 구성에 따라 크게 달라져요. 실제 견적은 상담에서 받아야 해요.
           </p>
         </div>
       </aside>

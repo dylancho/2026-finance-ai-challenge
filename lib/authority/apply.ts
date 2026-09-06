@@ -36,8 +36,8 @@ export function applyAuthority(
         check.ok ? clause : { ...clause, locked: true },
       ),
       authority: {
-        reason: lead.reason ?? "집행 근거가 없습니다.",
-        instrumentName: lead.instrument?.name ?? "관련 문서",
+        reason: lead.reason ?? "체결한 서류가 없어요.",
+        instrumentName: lead.instrument?.name ?? "관련 서류",
         effectRule: lead.instrument?.effectRule ?? "",
         refs: blocked.map((b) => `${b.clause.ref} ${b.clause.label}`),
       },
@@ -47,7 +47,7 @@ export function applyAuthority(
   const verdict = blockedCount
     ? [
         ...result.verdict,
-        `이 흐름에서 ${blockedCount}개 단계가 집행되지 못했습니다. 조항은 정해져 있지만 그것을 집행할 계약이 아직 체결되지 않았기 때문입니다.`,
+        `이 흐름에서 ${blockedCount}개 단계가 멈췄어요. 조항은 정해져 있지만, 그것을 실행할 계약이 아직 체결되지 않았기 때문이에요.`,
       ]
     : result.verdict;
 

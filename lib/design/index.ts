@@ -32,7 +32,7 @@ export function readinessAxes(design: DesignSet) {
       pct: design.trust.completeness,
       missing: design.trust.missing,
       available: design.trust.available,
-      note: design.trust.available ? undefined : "신규 설정 곤란",
+      note: design.trust.available ? undefined : "새로 만들기 어려워요",
     });
   }
   if (design.guardianship) {

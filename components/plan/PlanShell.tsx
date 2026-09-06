@@ -88,7 +88,7 @@ export default function PlanShell() {
     [profile, insight, ledgerState],
   );
 
-  /* 판정층. 해소 버튼을 누를 때마다 다시 부르지 않도록 이력·트랙에만 반응한다. */
+  /* AI 해설. 해소 버튼을 누를 때마다 다시 부르지 않도록 이력·트랙에만 반응한다. */
   useEffect(() => {
     if (!profile || !insight || !ledgerState.ledger) return;
     let alive = true;
@@ -116,7 +116,7 @@ export default function PlanShell() {
 
   const resolve = (c: Contrast, r: Resolution) => {
     setLedgerState((s) => saveLedgerState(setResolution(s, c.qid, r)));
-    // "이력대로" 를 고른 경우에만 선언(Profile)을 갱신한다.
+    // "실제 해 온 대로" 를 고른 경우에만 답(Profile)을 갱신한다.
     // 이것이 Ledger 가 Profile 을 건드리는 유일한 경로다.
     if (r === "observed" && c.observedValue && profile) {
       const next = setAnswer(profile, c.qid, c.observedValue);
@@ -132,7 +132,7 @@ export default function PlanShell() {
   if (!profile || !profile.track || !design) {
     return (
       <div className="shell-wide" style={{ padding: "80px 0" }}>
-        <p className="muted">설계서를 불러오는 중입니다…</p>
+        <p className="muted">설계서를 불러오고 있어요…</p>
       </div>
     );
   }
@@ -142,7 +142,7 @@ export default function PlanShell() {
   const unified = isUnified(profile);
 
   const tabs: { key: TabKey; label: string; n?: string }[] = [];
-  if (design.trust) tabs.push({ key: "trust", label: "신탁설계서", n: design.trust.available ? `${design.trust.completeness}%` : "제한" });
+  if (design.trust) tabs.push({ key: "trust", label: "신탁설계서", n: design.trust.available ? `${design.trust.completeness}%` : "어려움" });
   if (design.guardianship)
     tabs.push({
       key: "guardianship",
@@ -150,39 +150,40 @@ export default function PlanShell() {
       n: `${design.guardianship.completeness}%`,
     });
   tabs.push({ key: "expense", label: "지출설계서", n: `${design.expense.completeness}%` });
-  tabs.push({ key: "gaps", label: "공백 목록", n: `${gaps.length}` });
+  tabs.push({ key: "gaps", label: "비어 있는 항목", n: `${gaps.length}` });
+  // 2026-09-07 문체 가이드: "이력 대조" 는 내부 용어라 사람 말로 바꿨다.
   tabs.push({
     key: "contrast",
-    label: "이력 대조",
+    label: "정한 것과 실제 비교",
     n: ledgerState.ledger ? `${openContrasts(contrasts).length}` : "—",
   });
 
   return (
     <div className="shell-wide">
       <div className="plan-head">
-        <div className="eyebrow">Your design documents</div>
+        <div className="eyebrow">내 설계서</div>
         <h1>미래의 나에게 남기는 금융 사용 설명서</h1>
         <p className="section-lede">
-          {meta.name} · {meta.docs.join(" · ")}. 아래 문서는 AI가 답변을 조항 단위로 정리한
-          초안이며 법적 효력이 없습니다.
+          {meta.name} · {meta.docs.join(" · ")}. 아래 문서는 AI가 답을 조항별로 정리한
+          초안이에요. 법적 효력은 없어요.
         </p>
 
         {unified && (
-          <div className="chapter-badges" aria-label="영역별 선언 상태">
+          <div className="chapter-badges" aria-label="영역별 답변 상태">
             {CHAPTER_ORDER.map((ch) => {
               const done = chapterCompleted(profile, ch);
               return done ? (
                 <span className="chapter-badge declared" key={ch}>
-                  ✓ {CHAPTER_META[ch].label} 선언됨
+                  ✓ {CHAPTER_META[ch].label} 정했어요
                 </span>
               ) : (
                 <Link
                   className="chapter-badge missing"
                   key={ch}
                   href={`/interview?chapter=${ch}`}
-                  title={`${CHAPTER_META[ch].label} 영역을 이어서 답합니다`}
+                  title={`${CHAPTER_META[ch].label} 영역을 이어서 답해요`}
                 >
-                  {CHAPTER_META[ch].label} 미선언 →
+                  {CHAPTER_META[ch].label} 아직이에요 →
                 </Link>
               );
             })}
@@ -200,7 +201,7 @@ export default function PlanShell() {
                 <i style={{ width: `${a.available ? a.pct : 0}%` }} />
               </div>
               <div className="sub">
-                {a.available ? `미결정 ${a.missing}항목` : a.note}
+                {a.available ? `아직 못 정한 항목 ${a.missing}개` : a.note}
               </div>
             </div>
           ))}
@@ -233,29 +234,29 @@ export default function PlanShell() {
             {gaps.length === 0 ? (
               <div className="clause set">
                 <header className="clause-head">
-                  <span className="ti">비어 있는 항목이 없습니다</span>
+                  <span className="ti">비어 있는 항목이 없어요</span>
                   <Badge tone="ok">완료</Badge>
                 </header>
                 <ul className="clause-body">
                   <li>
-                    모든 필수 질문에 답하셨습니다. 의뢰서에서 체결 절차를 확인하세요.
+                    필수 질문에 모두 답했어요. 이제 의뢰서에서 체결 절차를 확인해 주세요.
                   </li>
                 </ul>
               </div>
             ) : (
               <>
                 <p className="section-lede" style={{ marginBottom: 18 }}>
-                  아래 항목이 비어 있으면 미래의 특정 시점에 결정을 내릴 근거가 없습니다.
-                  설계서는 바로 그 지점에서 멈춥니다.
+                  아래 항목이 비어 있으면, 그 순간이 왔을 때 무엇을 할지 정해진 게 없어요.
+                  설계서는 거기서 멈춰요.
                 </p>
                 {gaps.map((g) =>
                   g.chapter ? (
-                    // 챕터 단위 공백 — 그 영역의 인터뷰로 들어간다. 기존 답은 보존되고,
+                    // 영역 단위 공백 — 그 영역의 인터뷰로 들어간다. 기존 답은 보존되고,
                     // 끝나면 설계서로 돌아와 다시 생성된다.
                     <div className={`gap-item chapter ${g.severity}`} key={g.qid}>
                       <div>
                         <div className="r mono">
-                          선언되지 않은 영역 · {CHAPTER_META[g.chapter].label}
+                          아직 답하지 않은 영역 · {CHAPTER_META[g.chapter].label}
                         </div>
                         <div className="w">{g.what}</div>
                         <div className="c">{g.consequence}</div>
@@ -295,9 +296,9 @@ export default function PlanShell() {
 
       <section className="cta-band">
         <div>
-          <h2>이제 실제 준비를 시작해볼까요?</h2>
+          <h2>이제 실제 준비를 시작해 볼까요?</h2>
           <p>
-            정리된 설계서를 가지고 상담하면, 처음부터 상황을 설명할 필요가 없습니다.
+            설계서를 들고 가면 처음부터 상황을 설명하지 않아도 돼요.
           </p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
