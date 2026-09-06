@@ -328,6 +328,8 @@ function crashCandidates(c: Ctx, dropPct: number): Candidate[] {
   const after = c.assets - loss;
   const out: Candidate[] = [];
   const designee = personOf(c.p, "I05") ?? firstPerson(c.p, "A07", "B12", "D11");
+  // 제7조 ③에 적어 둔 급락 원칙. 후보마다 "정해 둔 것과 같다/다르다" 를 한 줄로 밝힌다 (2026-09-07).
+  const declared = choiceOf(c.p, "I03");
 
   out.push({
     id: "cr-nothing",
@@ -335,7 +337,9 @@ function crashCandidates(c: Ctx, dropPct: number): Candidate[] {
     basis: [
       shareBasis,
       `${dropPct}% 하락 반영: 위험자산 ${won(risky)} 중 평가손 ${won(loss)}, 팔지 않으면 손실은 확정되지 않습니다`,
-      "제7조 ③에서 권한 선택지",
+      declared === "do_nothing"
+        ? "제7조 ③에 정해 둔 원칙 그대로입니다"
+        : "제7조 ③에 정한 원칙은 아니지만, 손실을 확정하지 않는 기준선으로 함께 둡니다",
     ],
     impact: { runwayYears: runway(c, after), riskExposure: riskyAfter },
     reversible: true,
@@ -379,7 +383,9 @@ function crashCandidates(c: Ctx, dropPct: number): Candidate[] {
     title: `${personLabel(designee)}와 상의한 뒤 정한다 (그때까지는 보유)`,
     basis: [
       designee
-        ? `제7조 ④, 제5조 지정인 ${personLabel(designee)}`
+        ? declared === "consult"
+          ? `제7조 ③에 정해 둔 원칙 — 상의 대상 ${personLabel(designee)}`
+          : `제7조 ④, 제5조 지정인 ${personLabel(designee)}`
         : "상의할 사람이 없습니다. 제5조 알림 대상을 먼저 정해야 합니다",
       "결정을 미루는 동안 숫자는 '아무것도 하지 않음'과 같습니다",
     ],
@@ -393,9 +399,10 @@ function crashCandidates(c: Ctx, dropPct: number): Candidate[] {
 
 /* ── 조립 ────────────────────────────────────────── */
 
+// lib/questions/invest.ts I03 라벨과 같은 문장. 설계서 제7조(lib/design/expense.ts)와도 맞춘다.
 const CRASH_POLICY_LABEL: Record<string, string> = {
-  do_nothing: "아무것도 하지 않는다",
-  reduce: "일부를 줄인다",
+  do_nothing: "팔지 않고 그대로 보유한다",
+  reduce: "위험자산 일부를 줄인다",
   all_safe: "전량 안전자산으로 바꾼다",
   consult: "지정한 사람과 상의한 뒤 정한다",
 };
@@ -404,13 +411,20 @@ function crashContrast(c: Ctx): DeclaredObserved | null {
   const declared = choiceOf(c.p, "I03");
   const d = c.insight?.decision;
   if (!declared && !d) return null;
+  const designee = personOf(c.p, "I05");
+  const declaredLabel =
+    declared === "consult" && designee
+      ? `${personLabel(designee)}의 의견을 듣고 정한다`
+      : declared
+        ? CRASH_POLICY_LABEL[declared]
+        : undefined;
   const sold = d?.reactions.filter((r) => r.sold) ?? [];
   const avgPortion = sold.length
     ? Math.round((sold.reduce((a, r) => a + r.portionSold, 0) / sold.length) * 100)
     : 0;
   return {
     title: "급락 때 하기로 한 것과 실제로 한 것",
-    declared: declared ? `제7조 ③ ${CRASH_POLICY_LABEL[declared]}` : "아직 정하지 않음",
+    declared: declaredLabel ? `제7조 ③ ${declaredLabel}` : "아직 정하지 않음",
     observed: d
       ? sold.length
         ? `하락 ${d.reactions.length}회 중 ${sold.length}회 매도 · 평균 ${d.reactionDays}일 만에 보유분 ${avgPortion}% 매도`

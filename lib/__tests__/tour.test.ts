@@ -51,12 +51,59 @@ describe("데모 K — 41문항 + 추가 문항이 모두 채워진 통합 프�
     expect(trust.available).toBe(true);
     expect(trust.type.code).toBe("successive");
     expect(trust.missing).toBe(0);
-    expect(trust.clauses.filter((c) => c.status === "missing")).toHaveLength(0);
+    // 2026-09-07: B14 를 채워 제3조도 "set" — 11개 조항 전부 설정, 완성도 100%
+    expect(trust.clauses.filter((c) => c.status !== "set")).toHaveLength(0);
+    expect(trust.completeness).toBe(100);
+    // 유류분 경고가 뜨지 않는다 (D06 알고 감안 · D03 배분 3행 = 상속인 수)
+    expect(trust.flags).toHaveLength(0);
     expect(guardianship).not.toBeNull();
     expect(guardianship.verdict.code).toBe("voluntary");
     expect(guardianship.completeness).toBe(100);
+    expect(guardianship.flags).toHaveLength(0);
     expect(expense.completeness).toBe(100);
+    expect(expense.flags).toHaveLength(0);
     expect(findGaps(p, buildDesign(p))).toHaveLength(0);
+  });
+
+  it("살림 숫자가 은퇴 부부답게 읽힌다 — 수입 250만, 생활비 190만, 고정비 94만, 매달 34만 부족", () => {
+    const expense = buildExpenseDesign(K());
+    expect(expense.cashflow).toMatchObject({
+      income: 2_500_000,
+      living: 1_900_000,
+      fixed: 940_000,
+      net: 340_000,
+    });
+    // 제6조: 30년 뒤에도 남지만(years null) 기울기는 보인다 — 7억 8,000만에서 3억 아래로
+    const s = expense.sustainability;
+    expect(s.years).toBeNull();
+    expect(s.series[s.series.length - 1].balance).toBeLessThan(300_000_000);
+    expect(s.series[s.series.length - 1].balance).toBeGreaterThan(250_000_000);
+  });
+
+  it("가족이 화면마다 같다 — 1차 배우자 이정숙, 2차·예비·발동 확인·운용 이양 모두 자녀 김도현", () => {
+    const p = K();
+    const expense = buildExpenseDesign(p);
+    const trust = buildTrustDesign(p)!;
+    const guardianship = buildGuardianshipDesign(p)!;
+    expect(expense.approval.first).toBe("배우자 (이정숙)");
+    expect(expense.approval.second).toBe("자녀 (김도현)");
+    expect(trust.clauses.find((c) => c.no === "제4조")!.body[1]).toContain("자녀 (김도현)");
+    expect(trust.clauses.find((c) => c.no === "제3조")!.body).toContain("관리자(예비): 자녀 (김도현)");
+    expect(guardianship.guardians.backup?.name).toBe("김도현");
+    expect(expense.invest?.handover).toBe("자녀 (김도현)에게 맡긴다");
+  });
+
+  it("투자 원칙이 원칙 문장으로 읽힌다 — '아무것도 하지 않는다' 가 어디에도 없다", () => {
+    const p = K();
+    const expense = buildExpenseDesign(p);
+    expect(expense.invest?.crashPolicyCode).toBe("consult");
+    expect(expense.invest?.crashPolicy).toBe("자녀 (김도현)의 의견을 듣고 정한다");
+    expect(JSON.stringify(expense.invest)).not.toContain("아무것도 하지 않는다");
+    const r = buildReferral(p, buildDesign(p));
+    expect(JSON.stringify(r.answers)).not.toContain("아무것도 하지 않는다");
+    // 상속인 수는 원이 아니라 명으로 실린다
+    expect(r.answers.find((a) => a.qid === "D01")!.answer).toBe("배우자 1명 / 자녀 2명");
+    expect(r.assetTables.map((t) => t.qid)).not.toContain("D01");
   });
 
   it("이상거래 룰은 한도 룰 7종이 전부 켜지고 맥락 룰 3종이 더해진다", () => {
@@ -68,13 +115,13 @@ describe("데모 K — 41문항 + 추가 문항이 모두 채워진 통합 프�
     expect(ctx.filter((r) => r.active)).toHaveLength(3);
   });
 
-  it("미리보기 시나리오가 공백 없이 끝까지 간다 (유류분 안내 노드는 D06 '잘 모른다' 의 의도된 한 건)", () => {
+  it("미리보기 시나리오가 공백 없이 끝까지 간다", () => {
     const p = K();
     const d = buildDesign(p);
     for (const s of scenariosFor(p)) {
       const r = runScenario(p, d, s.id)!;
       const gapQids = r.nodes.filter((n) => n.status === "gap").map((n) => n.gapQid);
-      expect(gapQids.filter((q) => q !== "D06")).toEqual([]);
+      expect(gapQids).toEqual([]);
     }
   });
 });

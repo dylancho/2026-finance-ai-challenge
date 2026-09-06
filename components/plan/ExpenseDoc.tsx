@@ -76,14 +76,18 @@ function CashflowHero({ cf, payout }: { cf: ExpenseDesign["cashflow"]; payout: s
           고정비 <b>{won(cf.fixed)}</b>
         </li>
         <li>
+          {/* 2026-09-07: "매달 N원 부족" 은 수치만 남겨 꾸며낸 숫자처럼 읽혔다. 부족분이 어디서
+              나오는지(예금, 제6조의 인출)까지 한 문장으로 적는다. */}
           {cf.net > 0 ? (
             <>
-              매달 <b>{won(cf.net)}</b> 부족
+              부족한 <b>{won(cf.net)}</b>은 예금에서 꺼내 씁니다
+            </>
+          ) : cf.net < 0 ? (
+            <>
+              매달 <b>{won(-cf.net)}</b>이 남습니다
             </>
           ) : (
-            <>
-              매달 <b>{won(-cf.net)}</b> 남음
-            </>
+            <>수입과 지출이 같습니다</>
           )}
         </li>
       </ul>

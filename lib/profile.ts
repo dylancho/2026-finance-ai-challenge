@@ -316,8 +316,8 @@ export const DEMO_PROFILES: Record<string, Profile> = {
    * 설계서와 의뢰서·이상감지가 빠짐없이 채워진 화면을 보여준다. 값은 문서의 표를 그대로 옮겼고,
    * 답변 형태와 선택지 value 는 lib/questions/* 의 정의를 따른다 (엔진이 문자열로 읽는다).
    *
-   * 7문항(B04·B05·B06·B12·B13·B19·B20)은 통합 인터뷰의 다섯 챕터에 없는 옛 트랙 B 문항이다.
-   * 신탁 제1조(목적)·제4조(지급개시 트리거)·제10조(변경·종료)와 후견의 1차·2차 관리자는 이
+   * 8문항(B04·B05·B06·B12·B13·B14·B19·B20)은 통합 인터뷰의 다섯 챕터에 없는 옛 트랙 B 문항이다.
+   * 신탁 제1조(목적)·제3조(단독 결정 상한)·제4조(지급개시 트리거)·제10조(변경·종료)와 후견의 1차·2차 관리자는 이
    * 문항으로만 채워지므로, 인터뷰 화면을 거치지 않는 데모에서만 함께 넣어 "완성된 설계서"
    * 를 보여준다. 실사용자는 지금 인터뷰로는 같은 완성도에 닿을 수 없다 — 문서가 팀 공유
    * 항목으로 남겨 둔 지점이다. 같은 이유로 B15·B16 두 문항을 더 넣었다 (맨 아래 주석).
@@ -331,8 +331,11 @@ export const DEMO_PROFILES: Record<string, Profile> = {
     capacity: "full",
     chaptersCompleted: ["core", "invest", "estate", "medical", "safe"],
     answers: {
-      /* ── 코어 11문항 — 축 ② 필수생활비 이체 ── */
-      A09: { kind: "amount", value: 2_800_000 },
+      /* ── 코어 11문항 — 축 ② 필수생활비 이체 ──
+       * 2026-09-07: 수입을 280만에서 250만(국민연금+개인연금)으로 내렸다. 280만이면 생활비 190만
+       * + 고정비 94만과 4만 차이라 "매달 4만원 부족" 이 꾸며낸 숫자처럼 읽혔다. 250만이면
+       * 매달 34만이 모자라 예금에서 꺼내 쓰는 그림이 되고, 제6조 소진 차트도 기울기가 보인다. */
+      A09: { kind: "amount", value: 2_500_000 },
       A10: { kind: "amount", value: 90_000_000 },
       // 관리비·공과금 32만은 옵션이 둘(utility·maintenance)이라 나눠 넣는다. 합계 94만.
       A01: {
@@ -358,32 +361,38 @@ export const DEMO_PROFILES: Record<string, Profile> = {
       A11: { kind: "person", people: [{ relation: "자녀", name: "김도현" }] },
       A08: { kind: "choice", value: "reserve" },
 
-      /* ── 투자 원칙 6문항 — B11 "팔지 않기" 가 이력의 매도와 대조된다 ── */
+      /* ── 투자 원칙 6문항 — B11 "팔지 않기" 가 이력의 매도와 대조된다 ──
+       * I03 은 "지정한 사람과 상의한 뒤 정한다" 다. 하락장마다 열흘 안에 던진 이력이 있는 사람이
+       * 스스로 정한 원칙으로 읽히고, 제7조에 상의 대상(자녀 김도현)이 이름으로 실린다. */
       I01: { kind: "multi", values: ["derivative", "crypto"] },
       I02: { kind: "choice", value: "low" },
-      I03: { kind: "choice", value: "do_nothing" },
+      I03: { kind: "choice", value: "consult" },
       I04: { kind: "choice", value: "designee" },
       I05: { kind: "person", people: [{ relation: "자녀", name: "김도현" }] },
       B11: { kind: "choice", value: "preserve" },
 
       /* ── 상속 의사 16문항 — 신탁 조항을 채운다 ── */
       D01: { kind: "multi", values: ["spouse", "child"], amounts: { spouse: 1, child: 2 } },
-      // 예금 9,000만은 코어 A10 과 같은 값으로 맞춘다. 총 7억 5,000만.
+      // 예금 9,000만은 코어 A10 과 같은 값으로 맞춘다. 합계 6억 9,000만.
       D02: {
         kind: "multi",
         values: ["deposit", "invest", "realestate"],
         amounts: { deposit: 90_000_000, invest: 120_000_000, realestate: 480_000_000 },
       },
+      // 배분 행은 상속인 수(3명)만큼 둔다. 두 행뿐이면 신탁 엔진이 "배분이 일부에 집중" 으로 읽어
+      // 유류분 경고를 띄우는데, 주택→배우자·금융자산→자녀 균등 구조는 유류분을 침해하지 않는다.
       D03: {
         kind: "allocation",
         rows: [
-          { asset: "주택", to: "배우자" },
-          { asset: "금융자산", to: "자녀 균등" },
+          { asset: "주택", to: "배우자 (이정숙)" },
+          { asset: "예금·적금", to: "자녀 2인 균등" },
+          { asset: "주식·펀드·채권", to: "자녀 2인 균등" },
         ],
       },
       D04: { kind: "choice", value: "yes" },
       D05: { kind: "choice", value: "after" },
-      D06: { kind: "choice", value: "unknown" },
+      // 은퇴한 임원이 유류분을 "처음 듣는다" 고 답하면 첫 화면이 경고로 시작한다. 알고 감안했다고 둔다.
+      D06: { kind: "choice", value: "know_ok" },
       D07: { kind: "choice", value: "none" },
       D08: { kind: "choice", value: "no" },
       D09: { kind: "amount", value: 1_900_000 },
@@ -412,12 +421,17 @@ export const DEMO_PROFILES: Record<string, Profile> = {
       S03: { kind: "multi", values: ["time", "pin", "device"] },
       S04: { kind: "choice", value: "reauth" },
 
-      /* ── 추가 7문항 — 신탁 제1·4·10조와 후견 관리자 (위 주석 참조) ── */
+      /* ── 추가 8문항 — 신탁 제1·3·4·10조와 후견 관리자 (위 주석 참조) ──
+       * B06 발동 확인자는 자녀 김도현이다. 지출설계서 제5조의 2차 승인자가 B06 을 먼저 읽으므로,
+       * 여기가 다른 사람이면 A11(자녀 김도현)과 어긋나 화면마다 2차 대상이 달라진다.
+       * 가족은 배우자 이정숙·자녀 김도현 둘로 통일한다. 감독은 D12 의 담당 법무사가 맡는다.
+       * B14(관리자 단독 결정 상한)가 없으면 제3조가 "일부 설정" 으로 남아 완성도 95% 에 멈춘다. */
       B04: { kind: "choice", value: "living" },
       B05: { kind: "choice", value: "doctor2" },
-      B06: { kind: "person", people: [{ relation: "형제자매", name: "김정호" }] },
+      B06: { kind: "person", people: [{ relation: "자녀", name: "김도현" }] },
       B12: { kind: "person", people: [{ relation: "배우자", name: "이정숙" }] },
       B13: { kind: "person", people: [{ relation: "자녀", name: "김도현" }] },
+      B14: { kind: "amount", value: 3_000_000 },
       B19: { kind: "choice", value: "supervisor" },
       B20: { kind: "choice", value: "self_supervisor" },
 
@@ -425,7 +439,8 @@ export const DEMO_PROFILES: Record<string, Profile> = {
        * 없으면 "부동산 매각" 과 "정기 감독" 단계가 공백으로 멈추고 /interview?q=B15 로 보내는데,
        * 통합 인터뷰에는 그 문항이 없어 막다른 길이 된다. D13(집 처분 금지)·D12(전문가 감독)와
        * 같은 뜻으로 채운다. */
-      B15: { kind: "multi", values: ["sell_estate", "loan", "gift"] },
+      // 정기예금 중도해지는 A06 에서 이미 차단하는 거래라 금지행위에도 같이 올린다.
+      B15: { kind: "multi", values: ["sell_estate", "loan", "gift", "break_deposit"] },
       B16: { kind: "choice", value: "expert" },
     },
   },

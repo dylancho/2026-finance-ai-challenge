@@ -67,11 +67,11 @@ function buildPropertyScope(p: Profile): ScopeItem[] {
     if (chosen.size) {
       return { key, label, grant: "exclude" as const, note: "선택하지 않음" };
     }
-    // C13 미응답 시의 일반 기본값
+    // C13 미응답 시의 일반 기본값. 화면에는 "기본값" 대신 왜 그렇게 나뉘는지를 적는다 (2026-09-07).
     const defaultDelegate = ["deposit_use", "tax", "insurance", "estate_rent"];
     return defaultDelegate.includes(key)
-      ? { key, label, grant: "delegate" as const, note: "기본값" }
-      : { key, label, grant: "consent" as const, note: "기본값 — 별도 동의 필요" };
+      ? { key, label, grant: "delegate" as const, note: "일상 관리 사무 — 후견인이 처리" }
+      : { key, label, grant: "consent" as const, note: "중요 재산행위 — 감독인 동의 필요" };
   });
 }
 
@@ -286,9 +286,9 @@ function voluntaryRoadmap(hasDocs: Set<string>): RoadmapStep[] {
       n: 1,
       title: "후견계약 내용 확정",
       detail: "위임할 사무의 범위, 후견인, 보수, 감독 방식을 문서로 정리합니다.",
-      period: "—",
+      period: "즉시",
       docs: ["본 후견설계서"],
-      cost: "—",
+      cost: "비용 없음",
     },
     {
       n: 2,
@@ -335,9 +335,9 @@ function statutoryRoadmap(
       n: 1,
       title: "청구 자격과 사무 범위 정리",
       detail: `본인·배우자·4촌 이내 친족 등이 ${label} 개시를 청구할 수 있습니다. 필요한 사무 범위를 먼저 확정합니다.`,
-      period: "—",
+      period: "즉시",
       docs: ["본 후견설계서"],
-      cost: "—",
+      cost: "비용 없음",
     },
     {
       n: 2,
@@ -357,7 +357,7 @@ function statutoryRoadmap(
       n: 3,
       title: "가정법원에 심판청구",
       detail: "본인 주소지 관할 가정법원에 청구서를 제출합니다.",
-      period: "—",
+      period: "접수 당일",
       docs: ["심판청구서", "청구인 신분증"],
       cost: "인지대·송달료",
     },
@@ -377,7 +377,7 @@ function statutoryRoadmap(
       detail: `${label} 개시 심판이 확정되면 직권으로 후견등기가 이루어지고, 후견인은 재산목록을 법원에 보고합니다.`,
       period: "1~2개월",
       docs: ["심판문", "재산목록 보고서"],
-      cost: "—",
+      cost: "비용 없음",
     },
   ];
 }

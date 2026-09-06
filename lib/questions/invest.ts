@@ -99,9 +99,11 @@ export const investQuestions: Question[] = [
     helper:
       "막상 떨어졌을 때는 이 답을 차분히 고르기 어렵습니다. 그래서 지금 정해 둡니다. 과거 이력이 있으면 옆에 함께 보여드립니다.",
     type: "choice",
+    // 2026-09-07: "아무것도 하지 않는다" 는 설계서 제7조에 실리면 방치처럼 읽혔다. 값은 그대로 두고
+    // 원칙 문장으로 바꾼다 — 하락 직후 매도하지 않는 것이 이 선택지의 뜻이다.
     options: [
-      { value: "do_nothing", label: "아무것도 하지 않는다", hint: "권장" },
-      { value: "reduce", label: "일부를 줄인다" },
+      { value: "do_nothing", label: "팔지 않고 그대로 보유한다", hint: "권장" },
+      { value: "reduce", label: "위험자산 일부를 줄인다" },
       {
         value: "all_safe",
         label: "전량 안전자산으로 바꾼다",
