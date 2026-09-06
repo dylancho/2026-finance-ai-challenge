@@ -28,7 +28,7 @@ export default function EditClauseLink({
     <Link
       className="clause-jump"
       href={`/interview?q=${target.id}`}
-      title={`${target.id} 질문으로 돌아가 이 조항을 고칩니다`}
+      title={`${target.id} 질문으로 돌아가 이 조항을 고쳐요`}
     >
       수정 →
     </Link>

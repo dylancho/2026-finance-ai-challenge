@@ -26,10 +26,10 @@ function coveredBy(key: string, inst: Instrument): boolean {
 }
 
 const STAGE_REASON: Record<string, string> = {
-  draft: "아직 AI 초안 상태입니다. 전문가에게 전달되지 않았습니다.",
-  sent: "전문가에게 전달되었으나 아직 체결되지 않았습니다.",
-  executing: "체결 절차가 진행 중입니다. 아직 효력이 발생하지 않았습니다.",
-  unavailable: "이 제도를 새로 설정하기 어려운 상태입니다.",
+  draft: "아직 AI 초안이에요. 전문가에게 전달하지 않았어요.",
+  sent: "전문가에게 전달했지만 아직 체결하지 않았어요.",
+  executing: "체결 절차가 진행 중이에요. 아직 효력이 생기지 않았어요.",
+  unavailable: "이 제도를 새로 만들기 어려운 상태예요.",
 };
 
 export function canExecute(
@@ -59,6 +59,6 @@ export function canExecute(
   return {
     ok: false,
     instrument: lead,
-    reason: `「${lead.name}」이 ${STAGE_REASON[lead.stage] ?? "집행 가능한 상태가 아닙니다."}`,
+    reason: `「${lead.name}」이 ${STAGE_REASON[lead.stage] ?? "아직 움직일 수 있는 상태가 아니에요."}`,
   };
 }

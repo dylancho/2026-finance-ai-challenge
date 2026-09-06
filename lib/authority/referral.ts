@@ -179,29 +179,29 @@ function docNumber(p: Profile, now: number): string {
 }
 
 const PURPOSE: Record<string, string> = {
-  daily: "일상 지출·공과금의 안정적 관리 체계 수립",
-  future: "미래 판단력 저하에 대비한 재산관리 및 신상보호 체계 수립",
-  caregiver: "가족을 대신한 재산관리 및 신상보호 절차 개시",
-  estate: "상속·증여를 포함한 재산 승계 및 관리 체계 수립",
+  daily: "일상 지출과 공과금을 안정적으로 관리하는 체계 마련",
+  future: "판단력이 떨어진 뒤를 대비한 재산관리와 신상보호 체계 마련",
+  caregiver: "가족을 대신한 재산관리와 신상보호 절차 시작",
+  estate: "상속·증여를 포함한 재산 승계와 관리 체계 마련",
 };
 
 const CAPACITY_LABEL: Record<string, string> = {
-  full: "현재 스스로 금융 의사결정 가능 — 신탁·임의후견 모두 설정 가능한 시점",
+  full: "지금은 스스로 금융 결정을 할 수 있음. 신탁·임의후견 모두 만들 수 있는 시점",
   declining:
-    "판단에 어려움이 보이기 시작한 단계 — 체결 시점의 의사능력이 다투어질 수 있음",
+    "판단에 어려움이 보이기 시작한 단계. 체결 시점의 판단 능력을 두고 다툼이 생길 수 있음",
   diagnosed:
-    "이미 진단을 받은 상태 — 신규 신탁·임의후견 설정이 어려우며 법정후견 경로로 검토",
+    "이미 진단을 받은 상태. 신탁·임의후견을 새로 만들기 어려워 법정후견 경로로 검토",
   incident:
-    "이미 금융 피해·사고가 발생한 상태 — 신규 계약 설정이 어려우며 즉시 보호 조치 필요",
+    "이미 금융 피해나 사고가 있었던 상태. 새 계약이 어려워 즉시 보호 조치가 필요",
 };
 
 const NOTICE_STATUTE =
-  "인용한 조문은 확인 시점(2026-09-03) 기준이며, 개정 여부와 본 사안에의 적용 여부는 전문가의 확인이 필요합니다.";
+  "인용한 조문은 확인 시점(2026-09-03) 기준입니다. 개정 여부와 이 사안에 적용되는지는 전문가의 확인이 필요합니다.";
 
 const NOTICE_COMMON = [
   "본 문서는 의뢰인의 설문 응답을 정리한 초안이며, 그 자체로 법적 효력이 없습니다.",
   "조항의 유효성, 세무 효과, 제도 이용 가능 여부는 금융기관·변호사·법무사의 확인이 필요합니다.",
-  "본 문서에 기재된 재산 금액은 의뢰인이 설문에서 직접 입력한 추정치이며 실사를 거치지 않았습니다.",
+  "본 문서에 적힌 재산 금액은 의뢰인이 설문에서 직접 입력한 추정치이며, 실사를 거치지 않았습니다.",
 ];
 
 export function buildReferral(
@@ -287,7 +287,7 @@ export function buildReferral(
   ];
 
   const overview: ReferralField[] = [
-    { qid: "", label: "의뢰 목적", value: PURPOSE[p.track ?? ""] ?? "재산관리 체계 수립" },
+    { qid: "", label: "의뢰 목적", value: PURPOSE[p.track ?? ""] ?? "재산관리 체계 마련" },
     {
       qid: "",
       label: "설계 대상",
@@ -295,12 +295,12 @@ export function buildReferral(
     },
     {
       qid: "",
-      label: "의사능력",
-      value: CAPACITY_LABEL[p.capacity ?? ""] ?? "미확인",
+      label: "스스로 결정할 수 있는지",
+      value: CAPACITY_LABEL[p.capacity ?? ""] ?? "확인되지 않음",
     },
     {
       qid: "",
-      label: "판정 유형",
+      label: "검토하는 제도",
       value: [
         design.trust?.available ? design.trust.type.name : null,
         design.guardianship?.verdict.code !== "none"
@@ -361,13 +361,13 @@ export function buildReferral(
       qid: "",
       label: "주거래 금융기관",
       value: contact.redirected
-        ? `${contact.primary.name} (거래 비중 ${Math.round(contact.primary.share * 100)}%) — 신탁 창구를 두지 않는 기관이므로 ${contact.recommended.name} 신탁부서를 제안합니다`
+        ? `${contact.primary.name} (거래 비중 ${Math.round(contact.primary.share * 100)}%). 신탁 창구를 두지 않는 기관이라 ${contact.recommended.name} 신탁부서를 제안합니다`
         : `${contact.primary.name} (거래 비중 ${Math.round(contact.primary.share * 100)}%)`,
     });
     overview.push({
       qid: "",
       label: "판단 근거",
-      value: "고정비 자동이체와 입출금이 거친 기관의 비중. 설문 응답이 아닌 금융이력 관찰값입니다.",
+      value: "고정비 자동이체와 입출금이 오간 기관의 비중입니다. 설문 응답이 아니라 금융 이력에서 읽은 값입니다.",
     });
   }
 
@@ -377,7 +377,7 @@ export function buildReferral(
     title: petition ? "후견 청구 참고자료" : "신탁·후견 설계 의뢰서",
     subtitle: petition
       ? "본인이 판단할 수 있을 때 작성한 사전 의사 정리"
-      : "본인 작성 설문에 기초한 사전 의사 정리 및 조항 초안",
+      : "본인이 답한 설문을 바탕으로 정리한 사전 의사와 조항 초안",
     recipients: petition
       ? [
           // 이 문서를 실제로 들고 갈 사람이 맨 앞에 온다.
@@ -396,7 +396,7 @@ export function buildReferral(
     guardian,
     executorNote: !delegated
       ? undefined
-      : `본인이 직접 절차를 밟기 어려운 상태입니다. 후견개시 심판은 ${PETITIONERS}가 청구할 수 있으며(민법 제9조·제12조·제14조의2), 본인 단독으로 한 행위는 나중에 효력이 다투어질 수 있습니다.`,
+      : `본인이 직접 절차를 밟기 어려운 상태입니다. 후견개시 심판을 청구할 수 있는 사람은 ${PETITIONERS}입니다(민법 제9조·제12조·제14조의2). 본인 혼자 한 행위는 나중에 효력이 다투어질 수 있습니다.`,
     overview,
     assetTables,
     roles,
@@ -414,14 +414,14 @@ export function buildReferral(
     contrasts: opts.contrasts ?? [],
     notice: petition
       ? [
-          "본 문서는 후견개시 심판 청구 시 본인의 사전 의사를 참고자료로 전달하기 위한 것이며, 그 자체로 법적 효력이 없습니다.",
+          "본 문서는 후견개시 심판을 청구할 때 본인이 미리 밝힌 뜻을 참고자료로 전달하기 위한 것이며, 그 자체로 법적 효력이 없습니다.",
           "후견인의 권한은 가정법원의 심판으로 정해지며, 본 문서가 그 범위를 구속하지 않습니다.",
           ...NOTICE_COMMON.slice(1),
           NOTICE_STATUTE,
         ]
       : [
           NOTICE_COMMON[0],
-          "효력은 전문가의 검토를 거쳐 신탁계약·후견계약 등 정식 절차가 체결됨으로써 비로소 발생합니다.",
+          "효력은 전문가가 검토한 뒤 신탁계약·후견계약 같은 정식 절차를 체결해야 생깁니다.",
           ...NOTICE_COMMON.slice(1),
           NOTICE_STATUTE,
         ],

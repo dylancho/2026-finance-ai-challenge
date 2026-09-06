@@ -5,9 +5,10 @@ import Disclaimer from "../common/Disclaimer";
 import { personLabel } from "../../lib/format";
 import type { GuardianshipDesign, Profile, ScopeItem } from "../../lib/types";
 
+// "동의유보" 는 한정후견의 법률 용어지만 표 라벨로는 낯설어 "동의 필요" 로 적는다 (2026-09-07).
 const GRANT_META = {
-  delegate: { tone: "ok" as const, label: "위임" },
-  consent: { tone: "warn" as const, label: "동의유보" },
+  delegate: { tone: "ok" as const, label: "맡김" },
+  consent: { tone: "warn" as const, label: "동의 필요" },
   exclude: { tone: "neutral" as const, label: "제외" },
 };
 
@@ -57,7 +58,8 @@ export default function GuardianshipDoc({
     <div className="doc">
       <div>
         <div className="verdict">
-          <div className="k">INSTITUTION VERDICT — 제도 판정</div>
+          {/* 영어 소제목(INSTITUTION VERDICT)은 문체 가이드에 따라 뺐다. */}
+          <div className="k">맞는 제도</div>
           <h3>{design.verdict.name}</h3>
           <ul>
             {design.verdict.rationale.map((r, i) => (
@@ -66,10 +68,10 @@ export default function GuardianshipDoc({
           </ul>
           {design.verdict.ruledOut.length > 0 && (
             <div className="alts">
-              <div className="h">해당하지 않는 제도와 그 이유</div>
+              <div className="h">맞지 않는 제도와 그 이유</div>
               {design.verdict.ruledOut.map((r) => (
                 <div className="a" key={r.name}>
-                  <b>{r.name}</b> — {r.why}
+                  <b>{r.name}</b> · {r.why}
                 </div>
               ))}
             </div>
@@ -77,7 +79,7 @@ export default function GuardianshipDoc({
         </div>
 
         <h4 style={{ margin: "0 0 12px", fontSize: 15 }}>
-          판정 경로
+          이렇게 판단했어요
           <EditClauseLink profile={profile} doc="guardianship" clause="제1조" />
         </h4>
         <div className="tree">
@@ -91,18 +93,18 @@ export default function GuardianshipDoc({
 
         <ScopeTable
           items={design.scopeProperty}
-          title="재산관리 사무 (9항목)"
+          title="재산 관리 (9가지)"
           profile={profile}
           match={(l) => !l.includes("신상보호")}
         />
         <ScopeTable
           items={design.scopePersonal}
-          title="신상보호 사무 (6항목)"
+          title="신상보호 (6가지)"
           profile={profile}
           match={(l) => l.includes("신상보호")}
         />
 
-        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>효력 발생 요건</h4>
+        <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>효력이 생기려면</h4>
         <div className="clause set">
           <ul className="clause-body">
             {design.effect.map((e, i) => (
@@ -114,7 +116,7 @@ export default function GuardianshipDoc({
         {design.roadmap.length > 0 && (
           <>
             <h4 style={{ margin: "28px 0 12px", fontSize: 15 }}>
-              절차 로드맵
+              절차 순서
               <EditClauseLink profile={profile} doc="guardianship" clause="제5조" />
             </h4>
             <div className="card" style={{ padding: "6px 22px" }}>
@@ -125,7 +127,7 @@ export default function GuardianshipDoc({
                     <h5>{s.title}</h5>
                     <p>{s.detail}</p>
                     <div className="roadmap-meta">
-                      <Badge tone="info">소요 {s.period}</Badge>
+                      <Badge tone="info">걸리는 시간 {s.period}</Badge>
                       <Badge tone="neutral">{s.cost}</Badge>
                       {s.docs.map((d) => (
                         <Badge key={d} tone={d.includes("보유") ? "ok" : "warn"}>
@@ -141,8 +143,8 @@ export default function GuardianshipDoc({
         )}
 
         <Disclaimer>
-          후견 제도의 요건·절차·기간은 사건과 관할 법원에 따라 달라집니다. 위 로드맵은 일반적인
-          흐름을 정리한 것으로, 실제 청구 전에 변호사·법무사의 확인이 필요합니다.
+          위 절차는 일반적인 흐름입니다. 요건·절차·기간은 사건과 법원에 따라 다르므로,
+          청구 전에 변호사·법무사의 확인이 필요합니다.
         </Disclaimer>
       </div>
 
@@ -159,7 +161,7 @@ export default function GuardianshipDoc({
                 marginBottom: 12,
               }}
             >
-              검토가 필요한 지점
+              다시 살펴볼 곳
             </h4>
             {design.flags.map((f, i) => (
               <FlagCard key={i} flag={f} />
@@ -168,7 +170,7 @@ export default function GuardianshipDoc({
         )}
 
         <div className="side-card">
-          <h4>당사자</h4>
+          <h4>관련된 사람</h4>
           <div className="kv">
             <div className="kv-row">
               <span className="k">후견인 후보</span>

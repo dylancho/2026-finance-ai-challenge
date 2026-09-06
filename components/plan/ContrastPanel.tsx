@@ -6,7 +6,7 @@ import type { Contrast, Resolution } from "../../lib/types";
 import { docName } from "../../lib/ai/rules";
 
 /**
- * 선언(인터뷰) vs 관찰(이력) 대조.
+ * 내가 정한 것(인터뷰) 과 실제로 해 온 것(이력) 의 비교.
  *
  * gaps 가 "안 채운 칸" 이라면 여기는 "채웠는데 사실과 어긋나는 칸" 이다.
  */
@@ -17,10 +17,11 @@ const TONE: Record<Contrast["agreement"], { tone: "ok" | "warn" | "danger"; labe
   contradiction: { tone: "danger", label: "모순" },
 };
 
+// 2026-09-07 문체 가이드: "선언/관측/명문화" 는 내부 용어라 버튼에도 사람 말을 쓴다.
 const RESOLUTION_LABEL: Record<Resolution, string> = {
-  declared: "선언 유지",
-  observed: "이력대로 수정",
-  adjusted: "절충 — 조항에 명문화",
+  declared: "내가 정한 대로",
+  observed: "실제 해 온 대로",
+  adjusted: "절충해서 조항에 적기",
 };
 
 interface Props {
@@ -40,16 +41,15 @@ export default function ContrastPanel({
     return (
       <div className="clause set">
         <header className="clause-head">
-          <span className="ti">대조할 이력이 없습니다</span>
-          <Badge tone="neutral">미연동</Badge>
+          <span className="ti">비교할 이력이 없어요</span>
+          <Badge tone="neutral">불러오기 전</Badge>
         </header>
         <ul className="clause-body">
           <li>
-            과거 금융 이력을 불러오면, 여기서 답변과 실제 행동이 어긋나는 지점을 짚어
-            드립니다.
+            금융 이력을 불러오면 답과 실제 행동이 어긋나는 곳을 여기서 짚어 드려요.
           </li>
           <li>
-            <Link href="/ledger">이력 연동하러 가기 →</Link>
+            <Link href="/ledger">금융 이력 불러오기 →</Link>
           </li>
         </ul>
       </div>
@@ -61,13 +61,13 @@ export default function ContrastPanel({
   return (
     <div>
       <p className="section-lede" style={{ marginBottom: 18 }}>
-        인터뷰에서 <b>말씀하신 것</b>과 이력에서 <b>관측된 것</b>을 문항 단위로 맞대어
-        봤습니다. 어긋난다고 답이 틀린 것은 아닙니다 — 다만 그 조항이 실제 상황에서
-        어느 쪽으로 작동할지 지금 정해두셔야 합니다.
+        인터뷰에서 <b>정한 것</b>과 이력에서 <b>실제로 해 온 것</b>을 문항별로 나란히
+        놓았어요. 어긋난다고 답이 틀린 건 아니에요. 다만 실제 상황에서 어느 쪽으로
+        움직일지는 지금 정해 두어야 해요.
         {open.length > 0 && (
           <>
             {" "}
-            아직 정하지 않은 항목이 <b>{open.length}개</b> 있습니다.
+            아직 정하지 않은 항목이 <b>{open.length}개</b> 있어요.
           </>
         )}
       </p>
@@ -92,18 +92,18 @@ export default function ContrastPanel({
 
             <div className="ct-cols">
               <div className="ct-col declared">
-                <div className="k">말한 것 · 인터뷰</div>
+                <div className="k">내가 정한 것</div>
                 <div className="v">{c.declared}</div>
               </div>
               <div className="ct-col observed">
-                <div className="k">한 것 · 10년 이력</div>
+                <div className="k">실제로 해 온 것 (10년 이력)</div>
                 <div className="v">{c.observed}</div>
               </div>
             </div>
 
             <p className="ct-reason">
               {interp?.text ?? c.reason}
-              {interp?.source === "llm" && <span className="mono src">AI 판정</span>}
+              {interp?.source === "llm" && <span className="mono src">AI 해설</span>}
             </p>
 
             {c.evidence.length > 0 && (
@@ -125,7 +125,7 @@ export default function ContrastPanel({
                 {c.resolution ? (
                   <>
                     <span className="muted">
-                      {RESOLUTION_LABEL[c.resolution]}(으)로 정하셨습니다.
+                      &lsquo;{RESOLUTION_LABEL[c.resolution]}&rsquo;로 정했어요.
                     </span>
                     <button className="btn ghost sm" onClick={() => onUndo(c)}>
                       다시 정하기
@@ -134,15 +134,15 @@ export default function ContrastPanel({
                 ) : (
                   <>
                     <button className="btn outline sm" onClick={() => onResolve(c, "declared")}>
-                      선언 유지
+                      {RESOLUTION_LABEL.declared}
                     </button>
                     {c.observedValue && (
                       <button className="btn outline sm" onClick={() => onResolve(c, "observed")}>
-                        이력대로 수정
+                        {RESOLUTION_LABEL.observed}
                       </button>
                     )}
                     <button className="btn sm" onClick={() => onResolve(c, "adjusted")}>
-                      절충 — 조항에 명문화
+                      {RESOLUTION_LABEL.adjusted}
                     </button>
                     <Link href={`/interview?q=${c.qid}`} className="btn ghost sm">
                       문항 다시 보기
@@ -154,9 +154,8 @@ export default function ContrastPanel({
 
             {!c.observedValue && c.agreement !== "aligned" && !c.resolution && (
               <p className="ct-hint">
-                관측된 행동에 대응하는 선택지가 이 문항에 없습니다. 그래서 &lsquo;이력대로
-                수정&rsquo;은 제공하지 않습니다. 절충을 고르시면 관측값을 조항 단서로
-                남깁니다.
+                실제 해 온 행동에 맞는 선택지가 이 문항에는 없어요. 그래서 &lsquo;실제 해 온
+                대로&rsquo;는 고를 수 없어요. 절충을 고르면 실제 수치를 조항에 단서로 남겨요.
               </p>
             )}
           </div>

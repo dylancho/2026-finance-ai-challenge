@@ -28,10 +28,10 @@ export default function SignedDocsCard({
 
   const headline =
     onCount === 0
-      ? "아직 체결한 서류가 없어 설계서는 문장으로만 있습니다"
+      ? "아직 체결한 서류가 없어요. 설계서는 글로만 있어요"
       : allOn
-        ? `${onCount}건 모두 체결 — 설계서의 조항이 집행 근거를 갖습니다`
-        : `${onCount}건 체결 — 아직 체결하지 않은 서류에 걸린 항목은 움직이지 않습니다`;
+        ? `${onCount}건 모두 체결했어요. 설계서 조항이 실제로 움직일 수 있어요`
+        : `${onCount}건 체결했어요. 아직 체결하지 않은 서류에 걸린 항목은 움직이지 않아요`;
 
   return (
     <section className="rf-docs" aria-labelledby="rf-docs-t">
@@ -39,9 +39,9 @@ export default function SignedDocsCard({
         <div className="rf-docs-k">실제로 체결한 서류</div>
         <h3 id="rf-docs-t">{headline}</h3>
         <p className="rf-docs-lede">
-          설계서는 초안이고, 돈을 움직이는 힘은 체결된 계약에서 나옵니다. 체결 여부는 이 화면에서
-          정해지지 않습니다. 공증·등기·법원 심판·은행 등록처럼 앱 바깥에서 끝난 일을 여기에 표시해
-          두는 것입니다.
+          설계서는 초안이고, 돈을 움직이는 힘은 체결한 계약에서 나와요. 체결 여부는 이 화면에서
+          정해지지 않아요. 공증·등기·법원 심판·은행 등록처럼 앱 바깥에서 끝난 일을 여기에 표시해
+          두는 거예요.
         </p>
       </header>
 
@@ -62,10 +62,10 @@ export default function SignedDocsCard({
                 </span>
                 <span className="tx">
                   <span className="l">{plain.name}</span>
-                  <span className="s">{on ? `효력 발생 시점 · ${i.effectRule}` : plain.consequence}</span>
+                  <span className="s">{on ? `효력이 생긴 때 · ${i.effectRule}` : plain.consequence}</span>
                 </span>
                 <span className={`sv-tag ${on ? "ok" : "off"}`}>
-                  {on ? "체결함" : "체결 전 · 실행되지 않음"}
+                  {on ? "체결함" : "체결 전 · 아직 안 움직여요"}
                 </span>
               </button>
             </li>
@@ -80,7 +80,7 @@ export default function SignedDocsCard({
                 <div className="s">{i.unavailableReason}</div>
               </div>
               <div className="sv-tags">
-                <span className="sv-tag off">새로 설정하기 어려움</span>
+                <span className="sv-tag off">새로 만들기 어려움</span>
               </div>
             </li>
           );
