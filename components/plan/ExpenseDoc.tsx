@@ -333,7 +333,7 @@ export default function ExpenseDoc({
         {/* 제1조 */}
         <Clause
           n={1}
-          title="돈을 세 층으로 나눠요"
+          title="계좌를 세 개로 나눠 써요"
           lede="자동이체는 생활계좌에서만 나가요. 보전계좌에는 자동이체를 연결하지 않고, 꺼낼 때는 두 사람이 함께 승인해요."
           profile={profile}
         >

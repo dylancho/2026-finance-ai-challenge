@@ -220,10 +220,10 @@ export default function AdviceBlock({
                   </Link>
                 )}
                 {recorded.has(c.id) ? (
-                  <span className="cand-recorded mono">검토 기록에 남겼어요</span>
+                  <span className="cand-recorded mono">저장했어요</span>
                 ) : (
                   <button className="btn outline sm" onClick={() => onRecord(event, c)}>
-                    선택지로 기록
+                    저장
                   </button>
                 )}
               </footer>

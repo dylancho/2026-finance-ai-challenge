@@ -175,7 +175,7 @@ export default function EventsShell() {
     <div className="shell-wide">
       <div className="plan-head">
         {/* 영어 소제목 대신 헤더 메뉴와 같은 이름 */}
-        <div className="eyebrow">상황 변화</div>
+        <div className="eyebrow">상황 대응</div>
         <h1>상황이 바뀌었나요?</h1>
         <p className="section-lede">
           설계서에 적어 둔 원칙은 상황이 바뀌었을 때 쓰라고 있는 거예요. 무슨 일이 있었는지{" "}
@@ -331,12 +331,12 @@ export default function EventsShell() {
       {/* ── 검토 기록 (코드의 판정 원장) ── */}
       <section className="section">
         <div className="section-title">
-          <h2>검토 기록</h2>
+          <h2>저장한 선택지</h2>
           <Badge tone="neutral">{decisions.length}건</Badge>
         </div>
         {decisions.length === 0 ? (
           <p className="muted" style={{ fontSize: 13 }}>
-            아직 남긴 선택지가 없어요. 기록해도 실행되지는 않아요. 나중에 상담이나 가족 회의에서
+            아직 저장한 선택지가 없어요. 저장해도 실행되지는 않아요. 나중에 상담이나 가족 회의에서
             꺼내 볼 근거로 남아요.
           </p>
         ) : (

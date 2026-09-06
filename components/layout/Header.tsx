@@ -40,9 +40,9 @@ interface Feature {
 const FEATURES: readonly Feature[] = [
   { href: "/start", label: "시작하기", desc: "지금 상태를 알리고 인터뷰로 설계를 시작해요", Icon: Play },
   // "이력 연동" 은 기술 용어라 "금융 이력" 으로. 화면 제목도 "…불러와요" 로 맞췄다.
-  { href: "/ledger", label: "금융 이력", desc: "10년치 금융 이력을 불러와 답과 비교해요", Icon: History },
+  { href: "/ledger", label: "거래 기록", desc: "지난 10년 거래 기록을 불러와 답과 비교해요", Icon: History },
   { href: "/plan", label: "내 설계서", desc: "지출·신탁·후견 설계서를 조항별로 봐요", Icon: ScrollText },
-  { href: "/events", label: "상황 변화", desc: "진단·목돈·급락 같은 상황이 생기면 선택지를 늘어놓아요", Icon: Shuffle },
+  { href: "/events", label: "상황 대응", desc: "진단·목돈·급락 같은 일이 생기면 선택지를 늘어놓아요", Icon: Shuffle },
   { href: "/fraud-shield", label: "금융 보호", desc: "이상한 거래를 원칙에 비춰 멈추고 알려요", Icon: ShieldCheck },
 ];
 

@@ -165,7 +165,7 @@ export default function LedgerShell() {
   return (
     <div className="shell-wide lg">
       <div className="plan-head">
-        <div className="eyebrow">금융 이력</div>
+        <div className="eyebrow">거래 기록</div>
         <h1>지금까지 어떻게 돈을 써 왔는지 불러와요</h1>
         <p className="section-lede">
           인터뷰에서 답하는 것은 <b>앞으로 하고 싶은 것</b>이에요. 여기서 불러오는 것은{" "}
@@ -259,7 +259,7 @@ export default function LedgerShell() {
           {insight && (
             <section className="section">
               <div className="section-title">
-                <h2>내 돈 습관 요약</h2>
+                <h2>지출 요약</h2>
               </div>
               <PersonaCard insight={insight} persona={persona} pending={narrating} />
             </section>
