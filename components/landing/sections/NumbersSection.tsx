@@ -24,13 +24,13 @@ export default function NumbersSection({ stats }: { stats: LandingStats }) {
       <div className="shell-wide">
         <Reveal className="ld-sec-head" threshold={0.4}>
           <h2>
-            내 설계서에는
+            당신의 설계서에는
             <br />
-            지금 빈칸이 몇 개일까요
+            지금 몇 개의 빈칸이 있을까요
           </h2>
           <p className="ld-sub">
-            예시 데이터 기준이에요. 답한 만큼 조항이 되고, 답하지 않은 곳은 &lsquo;아직 정하지 않음&rsquo;으로
-            남아요.
+            예시 데이터로 만든 설계서입니다. 답한 만큼 조항이 되고, 답하지 않은 곳은 &lsquo;아직 정하지 않음&rsquo;으로
+            남습니다.
           </p>
         </Reveal>
         <div className="ld-nums">

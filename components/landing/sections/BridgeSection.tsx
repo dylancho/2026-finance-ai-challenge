@@ -12,18 +12,18 @@ export default function BridgeSection() {
       <div className="shell-wide">
         <Reveal className="ld-bridge-inner" threshold={0.4}>
           <h2>
-            지키는 준비가 끝나면,
+            지키는 준비 다음은,
             <br />
-            남기는 준비예요
+            남기는 준비입니다
           </h2>
           <p className="ld-bridge-line">
-            수많은{" "}
+            미뤄 두었던{" "}
             {chips.map((c, i) => (
               <Reveal as="span" className="ld-chip-word" delay={300 + i * 140} key={c}>
                 {c}
               </Reveal>
-            ))}{" "}
-            앞에서, 미루던 결정들
+            ))}
+            , 이제 정할 차례입니다
           </p>
         </Reveal>
       </div>

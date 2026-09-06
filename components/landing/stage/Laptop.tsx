@@ -14,7 +14,7 @@ export function Laptop() {
             <i />
             <i />
           </span>
-          <span className="ld-app-title">NEXT · 실행 기록</span>
+          <span className="ld-app-title">NEXT · 오늘의 실행</span>
           <span className="mono">지출설계서 v3</span>
         </div>
         <div className="ld-screens">
@@ -32,7 +32,7 @@ function LogScreen() {
   return (
     <div className="ld-screen ld-log" data-screen="log">
       <div className="ld-screen-h">
-        오늘 한 일 <small>2026-09-25</small>
+        오늘 실행한 것 <small>2026-09-25</small>
       </div>
       <ul>
         <li className="ld-log-line" data-line="0800">
@@ -47,7 +47,7 @@ function LogScreen() {
             <b data-target="amt">38,500원</b>
             <span data-log-rest> · 납기 </span>
             <b data-target="due">9/25</b>
-            <span data-log-rest> · §2 자동이체로 냈어요</span>
+            <span data-log-rest> · §2 자동이체 완료</span>
           </span>
           <span className="ok" data-log-rest>
             완료
@@ -56,14 +56,14 @@ function LogScreen() {
         <li className="ld-log-line" data-line="1000">
           <span className="mono t">[10:00]</span>
           <span className="body">
-            생활비 1,800,000원 · 생활계좌로 <b>나눠 보냈어요</b> (1/2회차)
+            생활비 1,800,000원 · 생활계좌로 <b>지급 완료</b> (1/2회차)
           </span>
           <span className="ok">완료</span>
         </li>
         <li className="ld-log-line warn" data-line="2347">
           <span className="mono t">[23:47]</span>
           <span className="body">
-            처음 보는 계좌로 <b>4,800,000원</b> 이체 시도 · <b>제4조 보류</b> · 1차 관리자에게 물었어요
+            처음 보는 계좌로 <b>4,800,000원</b> 이체 시도 · <b>제4조 보류</b> · 1차 관리자 확인 요청
           </span>
           <span className="hold">보류</span>
         </li>
@@ -80,7 +80,7 @@ function AccountsScreen() {
       </div>
       <div className="ld-tier ld-tier--3">
         <span className="k">③ 보전계좌</span>
-        <b>원금을 지키는 계좌 · 자동이체는 연결하지 않아요</b>
+        <b>원금을 지키는 계좌 · 자동이체 연결 없음</b>
       </div>
       <div className="ld-tier-arrow" aria-hidden>
         ↓ 한 달에 한 번, 정해 둔 금액만
@@ -90,7 +90,7 @@ function AccountsScreen() {
         <b>매달 생활비가 들어오고 자동이체가 나가는 유일한 계좌</b>
       </div>
       <div className="ld-tier-arrow" aria-hidden>
-        ↓ 생활비를 나눠서 보내요
+        ↓ 생활비를 나눠서 지급
       </div>
       <div className="ld-tier ld-tier--1">
         <span className="k">① 생활계좌</span>
@@ -109,17 +109,17 @@ function LimitsScreen() {
       <div className="ld-limit">
         <span>1회 이체 한도</span>
         <b>1,000,000원</b>
-        <small>넘으면 멈추고 먼저 확인해요</small>
+        <small>넘으면 보류하고 먼저 확인</small>
       </div>
       <div className="ld-limit derived">
         <span>1일 누적 한도</span>
         <b>2,000,000원</b>
-        <small>1회 한도의 2배로 자동 계산해요</small>
+        <small>1회 한도의 2배로 자동 계산</small>
       </div>
       <div className="ld-limit">
         <span>처음 보내는 계좌</span>
-        <b>하루 뒤에 보내요</b>
-        <small>제4조 · 그 사이에 취소할 수 있어요</small>
+        <b>하루 뒤 지급</b>
+        <small>제4조 · 그 사이 취소 가능</small>
       </div>
     </div>
   );

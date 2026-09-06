@@ -38,9 +38,9 @@ const BG = { light: "#f2f4f8", ivory: "#f5f3ee", navy: "#0c1c36", dark: "#0a0e18
 
 // 문구는 docs/writing-style.md(해요체, 짧은 문장, 사람 말)를 따른다. 캡션은 "문제 한 줄 / 해결 한 줄".
 const BEATS = [
-  { id: 1, h: "공과금, 잊어도 돼요", p1: "납부 버튼을 직접 누르지 않아도", p2: "정해 둔 대로 앱이 대신 내요" },
-  { id: 2, h: "생활비는 나눠서, 안전하게", p1: "한 계좌에 다 두는 대신", p2: "계좌 세 개로 나눠 필요한 만큼만 내려와요" },
-  { id: 3, h: "한도는 내가 정한 만큼만", p1: "한 번에 100만원으로 정하면", p2: "하루 200만원이 자동으로 따라와요" },
+  { id: 1, h: "공과금은 잊어도 됩니다", p1: "납부 버튼을 누르지 않아도", p2: "정해 둔 대로 자동으로 냅니다" },
+  { id: 2, h: "생활비는 나눠서, 안전하게", p1: "한 계좌에 다 두지 않고", p2: "세 개 계좌로 나눠 필요한 만큼만 씁니다" },
+  { id: 3, h: "한도는 내가 정한 만큼만", p1: "1회 한도를 100만원으로 정하면", p2: "하루 한도 200만원은 자동으로 따라옵니다" },
 ];
 
 /** 문틈에 꽂혀 있을 때 고지서 너비 (문 장면 viewBox 단위) — 배율은 화면마다 여기서 역산한다. 문짝 폭 200 의 64%(1.9:1 이라 세로가 낮아진 만큼 조금 키웠다) */
@@ -385,19 +385,19 @@ export default function Stage() {
         <div className="ld-veil" aria-hidden />
         <div className="ld-s0-copy ld-s0-copy--1">
           <h1>
-            매달 와요.
+            매달 옵니다.
             <br />
-            그리고, 잊는 날이 와요
+            그리고, 잊는 날이 옵니다
           </h1>
           <p className="ld-foot">
-            치매 진단 6년 전부터 지급 연체가 늘기 시작해요 (Nicholas 외, JAMA Internal Medicine, 2020)
+            치매 진단 6년 전부터 공과금 연체가 늘어납니다 (Nicholas 외, JAMA Internal Medicine, 2020)
           </p>
         </div>
         <div className="ld-s0-copy ld-s0-copy--2">
           <h2>
-            내가 잊어도,
+            당신이 잊어도,
             <br />
-            원칙은 기억해요
+            원칙은 기억합니다
           </h2>
         </div>
       </section>
@@ -443,13 +443,13 @@ export default function Stage() {
           ))}
           <div className="ld-beat" data-beat={4}>
             <h2>
-              이상한 순간,
+              수상한 거래는,
               <br />
-              앱이 먼저 멈춰요
+              먼저 멈춥니다
             </h2>
             <p className="ld-cap">
-              <span>금액 기준 7가지, 상황 기준 3가지로 거래를 살펴요</span>
-              <span>어긋나면 멈추고, 12시간 뒤엔 감독자에게 넘겨요</span>
+              <span>금액 기준 7가지와 상황 기준 3가지로 거래를 살핍니다</span>
+              <span>어긋나면 보류하고, 12시간 안에 답이 없으면 다음 사람에게 알립니다</span>
             </p>
             <StartLink className="ld-cta" focus="safe">
               금융 보호 설계하기 →
@@ -463,7 +463,7 @@ export default function Stage() {
         <h2 className="ld-tr-copy">
           그리고 어떤 날은,
           <br />
-          시장이 무너져요
+          시장이 무너집니다
         </h2>
         <div className="ld-tr-chart">
           <Candles />

@@ -42,10 +42,10 @@ export default function AssetsSection() {
       <div className="shell-wide">
         <Reveal className="ld-sec-head dark">
           <div className="ld-chip">03 자산</div>
-          <h2>원칙은 건강할 때 정해 둬요</h2>
+          <h2>투자 원칙은 건강할 때 정해 둡니다</h2>
           <p className="ld-cap">
-            <span>겁이 나서 팔아 버리는 대신</span>
-            <span>내가 정한 원칙이 선택지를 먼저 정리해요</span>
+            <span>급락에 놀라 팔아 버리기 전에</span>
+            <span>미리 정한 원칙이 선택지를 먼저 정리합니다</span>
           </p>
         </Reveal>
 
@@ -56,7 +56,7 @@ export default function AssetsSection() {
               <b>
                 지난 급락 때,
                 <br />
-                7일 만에 42%를 파셨어요
+                7일 만에 42%를 파셨습니다
               </b>
               <div className="ld-mini-dd" aria-hidden>
                 <i style={{ height: "62%" }} />
@@ -67,8 +67,8 @@ export default function AssetsSection() {
               </div>
             </div>
             <p className="ld-cap">
-              <span>정한 것과 다르게 해 온 이력이 있으면</span>
-              <span>어느 쪽이 앞으로의 나인지 먼저 물어요</span>
+              <span>정해 둔 원칙과 실제 행동이 다르면</span>
+              <span>어느 쪽을 따를지 먼저 묻습니다</span>
             </p>
           </Reveal>
 
@@ -80,11 +80,11 @@ export default function AssetsSection() {
                 <span>파생상품 금지</span>
                 <span>레버리지 금지</span>
               </div>
-              <div className="ld-declare-note">건강할 때 적어 둔 한 줄이 제7조 투자 원칙이 돼요.</div>
+              <div className="ld-declare-note">건강할 때 적어 둔 한 줄이 제7조 투자 원칙이 됩니다.</div>
             </div>
             <p className="ld-cap">
               <span>판단이 또렷할 때 적어 두면</span>
-              <span>흔들리는 날 그 문장이 대신 판단해요</span>
+              <span>흔들리는 날에는 그 문장이 기준이 됩니다</span>
             </p>
           </Reveal>
 
@@ -101,7 +101,7 @@ export default function AssetsSection() {
               </div>
               <ul className="ld-options">
                 <li className="first">
-                  아무것도 하지 않기 <small>되돌릴 수 있어요</small>
+                  그대로 두기 <small>언제든 되돌릴 수 있음</small>
                 </li>
                 <li>위험자산 일부 팔기</li>
                 <li>생활비 줄이기</li>
@@ -109,8 +109,8 @@ export default function AssetsSection() {
               </ul>
             </div>
             <p className="ld-cap">
-              <span>앱은 선택지를 정리할 뿐이에요</span>
-              <span>결정은 끝까지 사람이 해요</span>
+              <span>앱은 선택지를 정리할 뿐,</span>
+              <span>결정은 끝까지 사람이 합니다</span>
             </p>
           </Reveal>
         </div>
