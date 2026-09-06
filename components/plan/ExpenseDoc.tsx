@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { HeartPulse, Landmark, Wallet } from "lucide-react";
 import { FlagCard } from "./ClauseCard";
 import EditClauseLink from "./EditClauseLink";
@@ -251,8 +251,56 @@ export default function ExpenseDoc({
     document.getElementById(id)?.scrollIntoView({ block: "start", behavior: "smooth" });
   }, []);
 
+  // 2026-09-07: 스크롤로 어느 카드에 와 있는지 목차에 표시한다 (hover 와 같은 강조).
+  // 헤더 아래 96px 선을 기준으로, 그 선을 지난 카드 중 가장 아래 것이 "지금 보는 카드" 다.
+  // 교차 관찰자는 가장자리에서 두 카드가 동시에 걸릴 때 튀어서, 스크롤마다 직접 계산한다.
+  const [activeId, setActiveId] = useState<string>("exp-cashflow");
+  useEffect(() => {
+    const root = document.querySelector(".xd-col");
+    if (!root) return;
+    const cards = Array.from(root.querySelectorAll<HTMLElement>("section[id^='exp-']"));
+    if (cards.length === 0) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const line = 96 + 24;
+      let current = cards[0].id;
+      for (const c of cards) {
+        if (c.getBoundingClientRect().top <= line) current = c.id;
+      }
+      // 바닥까지 내려갔는데 마지막 카드가 기준선에 못 미치면 마지막 카드를 잡는다.
+      const doc = document.documentElement;
+      if (window.innerHeight + window.scrollY >= doc.scrollHeight - 2) current = cards[cards.length - 1].id;
+      setActiveId((prev) => (prev === current ? prev : current));
+    };
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, [design]);
+
+  const railLink = (id: string, no: string | null, label: string) => (
+    <a key={id} href={`#${id}`} className={activeId === id ? "is-active" : undefined} aria-current={activeId === id ? "true" : undefined}>
+      {no && <span className="no">{no}</span>}
+      {label}
+    </a>
+  );
+
   return (
     <div className="xd">
+      {/* 넓은 화면에서만 보이는 조항 이동 목록. 왼쪽에 고정되고, 데이터는 두지 않는다. */}
+      <nav className="xd-rail" aria-label="조항 이동">
+        {railLink("exp-cashflow", null, "월 현금흐름")}
+        {RAIL.filter((r) => r.n !== 7 || design.invest).map((r) => railLink(`exp-${r.n}`, `제${r.n}조`, r.label))}
+      </nav>
+
       <div className="xd-col">
         <CashflowHero cf={cf} payout={payout} />
 
@@ -548,16 +596,6 @@ export default function ExpenseDoc({
         </Disclaimer>
       </div>
 
-      {/* 넓은 화면에서만 보이는 조항 이동 목록. 데이터는 두지 않는다. */}
-      <nav className="xd-rail" aria-label="조항 이동">
-        <a href="#exp-cashflow">월 현금흐름</a>
-        {RAIL.filter((r) => r.n !== 7 || design.invest).map((r) => (
-          <a key={r.n} href={`#exp-${r.n}`}>
-            <span className="no">제{r.n}조</span>
-            {r.label}
-          </a>
-        ))}
-      </nav>
     </div>
   );
 }
