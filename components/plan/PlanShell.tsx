@@ -238,8 +238,7 @@ export default function PlanShell() {
                 </header>
                 <ul className="clause-body">
                   <li>
-                    모든 필수 질문에 답하셨습니다. 시뮬레이션에서 흐름이 끝까지 이어지는지
-                    확인해 보세요.
+                    모든 필수 질문에 답하셨습니다. 의뢰서에서 체결 절차를 확인하세요.
                   </li>
                 </ul>
               </div>
@@ -247,7 +246,7 @@ export default function PlanShell() {
               <>
                 <p className="section-lede" style={{ marginBottom: 18 }}>
                   아래 항목이 비어 있으면 미래의 특정 시점에 결정을 내릴 근거가 없습니다.
-                  시뮬레이션은 바로 그 지점에서 멈춥니다.
+                  설계서는 바로 그 지점에서 멈춥니다.
                 </p>
                 {gaps.map((g) =>
                   g.chapter ? (
@@ -302,9 +301,6 @@ export default function PlanShell() {
           </p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <Link href="/simulation" className="btn outline">
-            먼저 시뮬레이션 보기
-          </Link>
           <Link href="/events" className="btn outline">
             상황이 바뀌었나요?
           </Link>

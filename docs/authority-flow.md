@@ -2,6 +2,11 @@
 
 담당 김지훈 · 브랜치 `feat/authority-axis` · 2026-09-03
 
+> **2026-09-07 추가** — 아래 글에서 `/simulation`(미리보기)이 맡던 체결 상태 표시는 이제 `/referral`
+> 3단계(전달)의 「실제로 체결한 서류」 카드(`components/referral/SignedDocsCard.tsx`)에 있다.
+> 저장소는 그대로 `lib/authority` (`next.authority.v1`) 라 1단계 카드와 같은 상태를 읽고 쓴다.
+> 미리보기 라우트와 코드는 남아 있지만 어디에서도 링크하지 않는다.
+
 ---
 
 ## 왜 필요했나

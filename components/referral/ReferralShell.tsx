@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import InstrumentCard from "./InstrumentCard";
 import ReferralDoc from "./ReferralDoc";
+import SignedDocsCard from "./SignedDocsCard";
 import { buildDesign } from "../../lib/design";
 import {
   applyDemoLedger,
@@ -119,6 +120,9 @@ export default function ReferralShell() {
 
   const changeStage = (kind: InstrumentKind, stage: AuthorityStage) =>
     setAuth(saveAuthorityState(setStage(auth, kind, stage)));
+  // 3단계 체결 서류 카드의 체크. 1단계 카드와 같은 저장소라 어느 쪽에서 바꿔도 함께 움직인다.
+  const toggleEffective = (kind: InstrumentKind, effective: boolean) =>
+    changeStage(kind, effective ? "effective" : "draft");
 
   const guardian = referral.guardian;
 
@@ -239,14 +243,6 @@ export default function ReferralShell() {
                 입력하신 내용은 어디로도 전송되지 않았습니다. 체결 상태는 이 브라우저에만
                 저장됩니다.
               </p>
-              <div className="rf-nav">
-                <button className="btn outline" onClick={() => setStep(1)}>
-                  체결 상태 확인
-                </button>
-                <Link href="/simulation" className="btn">
-                  시뮬레이션에서 확인하기
-                </Link>
-              </div>
             </div>
           ) : (
             <>
@@ -303,7 +299,27 @@ export default function ReferralShell() {
                 알려주는 입력입니다.
               </p>
 
-              <div className="rf-nav">
+            </>
+          )}
+
+          {/* 2026-09-07 미리보기에 있던 "실제로 체결한 서류" 카드. 전달 전이든 후든 마지막
+              단계에서 본다 — 전달했다고 계약이 되는 것이 아니라는 문장 바로 아래가 제자리다. */}
+          {instruments.length > 0 && (
+            <SignedDocsCard instruments={instruments} onToggle={toggleEffective} />
+          )}
+
+          <div className="rf-nav">
+            {sent ? (
+              <>
+                <button className="btn outline" onClick={() => setStep(1)}>
+                  체결 대상 문서 보기
+                </button>
+                <Link href="/plan" className="btn">
+                  내 설계서 보기
+                </Link>
+              </>
+            ) : (
+              <>
                 <button className="btn outline" onClick={() => setStep(2)}>
                   이전
                 </button>
@@ -314,9 +330,9 @@ export default function ReferralShell() {
                 >
                   전문가에게 전달
                 </button>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </section>
       )}
     </div>

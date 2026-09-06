@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LedgerChart from "./LedgerChart";
 import PersonaCard from "./PersonaCard";
+import BiomarkerCard from "./BiomarkerCard";
 import Badge from "../common/Badge";
 import { chapterCompleted, flowMeta, isUnified } from "../../lib/questions";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
@@ -15,6 +16,7 @@ import {
   emptyLedgerState,
   generateLedger,
   narrate,
+  readBiomarker,
   rulePersona,
   readLedgerState,
   saveLedgerState,
@@ -85,6 +87,10 @@ export default function LedgerShell() {
         : [],
     [profile, insight, ledger, state],
   );
+
+  // 평소 패턴과 비교한 점수. 2026-09-07 미리보기에서 옮겨 왔다 — 보호자 알림 경로를 여는 신호가
+  // 이력에서 나온다는 것을 이력 화면에서 바로 보여 준다.
+  const reading = useMemo(() => (ledger ? readBiomarker(ledger) : null), [ledger]);
 
   /* ── 판정층 ── */
   useEffect(() => {
@@ -259,6 +265,9 @@ export default function LedgerShell() {
               <PersonaCard insight={insight} persona={persona} pending={narrating} />
             </section>
           )}
+
+          {/* ── ④ 평소 패턴과 비교한 점수 ── */}
+          <BiomarkerCard reading={reading} />
 
           <section className="cta-band">
             <div>

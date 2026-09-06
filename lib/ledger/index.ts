@@ -30,6 +30,7 @@ export {
   bandLabel,
   bandOf,
   BANDS,
+  biomarkerMeaning,
   biomarkerSummary,
   evaluateTrigger,
   PROOF_FRESH_DAYS,
