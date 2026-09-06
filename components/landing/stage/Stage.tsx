@@ -387,12 +387,8 @@ export default function Stage() {
         <div className="ld-vignette" aria-hidden />
         <div className="ld-veil" aria-hidden />
         <h1 className="ld-s0-intro">
-          <span className="l">공과금부터 상속까지</span>
-          <span className="r">
-            미리 정해 두면
-            <br />
-            그대로 움직입니다
-          </span>
+          <span className="l">미래의 나를 위해</span>
+          <span className="r">지금의 내가</span>
         </h1>
       </section>
 

@@ -3701,13 +3701,13 @@ body.ld-dark .nav-panel, body.ld-dark .nav-sheet { color: var(--ink); }
 .ld-veil { position: absolute; inset: 0; background: #f2f4f8; opacity: 0; }
 /* 첫 화면 소개(=페이지 h1). 문틀 왼쪽(viewBox 570)~사람 오른쪽(1026) 이 가운데를 쓰므로 글은 그 바깥 여백에 앉는다. */
 .ld-s0-intro { position: absolute; inset: 0; margin: 0; pointer-events: none; }
-.ld-s0-intro span { position: absolute; top: 40%; width: min(340px, 26vw); font-size: clamp(18px, 1.7vw, 26px); font-weight: 600; letter-spacing: -0.035em; line-height: 1.45; word-break: keep-all; }
+.ld-s0-intro span { position: absolute; top: 56%; width: min(400px, 30vw); font-size: clamp(24px, 2.8vw, 42px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.35; word-break: keep-all; }
 .ld-s0-intro .l { left: max(28px, 5.5vw); }
 .ld-s0-intro .r { right: max(28px, 5.5vw); text-align: right; }
 @media (max-width: 900px) {
-  /* 좁은 화면에서는 문이 가로를 다 채워 여백이 없다 — 문 위 벽에 두 줄을 모아 놓는다 */
-  .ld-s0-intro { display: grid; gap: 2px; align-content: start; padding: 76px 24px 0; text-align: center; }
-  .ld-s0-intro span { position: static; width: auto; font-size: 15px; text-align: center; }
+  /* 좁은 화면에서는 문이 가로를 다 채워 좌우 여백이 없다 — 사람 발 아래 바닥에 두 줄을 모아 놓는다 */
+  .ld-s0-intro { display: grid; gap: 2px; align-content: end; padding: 0 24px 9%; text-align: center; }
+  .ld-s0-intro span { position: static; width: auto; font-size: clamp(20px, 5.6vw, 28px); text-align: center; }
 }
 /* 앵커가 스테이지를 덮고 grid 로 고지서를 화면 중앙에 놓는다 — offset 좌표가 곧 시각적 중심이 되도록 CSS translate 를 쓰지 않는다.
  * 노트북(z auto) 위에 온다. */
