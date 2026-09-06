@@ -4137,12 +4137,6 @@ body.ld-dark .nav-panel, body.ld-dark .nav-sheet { color: var(--ink); }
   background:
     radial-gradient(60% 50% at 28% 12%, rgba(255, 255, 255, 0.55), transparent 70%),
     radial-gradient(120% 95% at 50% 50%, transparent 55%, rgba(12, 28, 54, 0.08) 100%); }
-/* 오프닝 영상 — 스크롤이 재생 헤드다(Stage.tsx seekVideo). 배경색은 첫 프레임이 오기 전 빈 화면용 */
-.ld-s0-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #f2f4f8; }
-.ld-stage[data-mode="static"] .ld-s0-video { display: none; }
-/* 소개 글 뒤의 밝기 막. 글이 걷히면 같이 걷혀 장면이 온전히 드러난다 */
-.ld-s0-wash { position: absolute; inset: 0; background: #f2f4f8; opacity: 0.62; pointer-events: none; }
-.ld-stage[data-mode="static"] .ld-s0-wash { display: none; }
 /* 고지서가 앞으로 나올 때 문을 뒤로 물리는 서리 유리 베일 — 스테이지 배경과 같은 색 */
 .ld-veil { position: absolute; inset: 0; background: #f2f4f8; opacity: 0; }
 /* 첫 화면 소개(=페이지 h1). 문틀 왼쪽(viewBox 570)~사람 오른쪽(1026) 이 가운데를 쓰므로 글은 그 바깥 여백에 앉는다. */
