@@ -105,6 +105,12 @@ export default function PlanShell() {
 
   useEffect(() => {
     if (!design) return;
+    // ?tab=expense 로 들어오면(다른 화면의 "지출설계서 제6조 보기 →" 등) 첫 탭을 그것으로 연다.
+    // 없는 문서를 가리키면 무시하고 기본 규칙(신탁 → 후견 → 지출)으로 돌아간다.
+    const wanted = new URLSearchParams(window.location.search).get("tab");
+    if (wanted === "trust" && design.trust) return setTab("trust");
+    if (wanted === "guardianship" && design.guardianship) return setTab("guardianship");
+    if (wanted === "expense" || wanted === "gaps" || wanted === "contrast") return setTab(wanted);
     setTab(design.trust ? "trust" : design.guardianship ? "guardianship" : "expense");
   }, [design]);
 
