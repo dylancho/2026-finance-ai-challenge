@@ -14,7 +14,7 @@ export default function BridgeSection() {
           <h2>
             지키는 준비가 끝나면,
             <br />
-            남기는 준비입니다
+            남기는 준비예요
           </h2>
           <p className="ld-bridge-line">
             수많은{" "}

@@ -42,21 +42,21 @@ export default function AssetsSection() {
       <div className="shell-wide">
         <Reveal className="ld-sec-head dark">
           <div className="ld-chip">03 자산</div>
-          <h2>원칙은 건강할 때 정해둡니다</h2>
+          <h2>원칙은 건강할 때 정해 둬요</h2>
           <p className="ld-cap">
-            <span>공포가 팔게 두는 대신</span>
-            <span>당신이 정한 원칙이 판단 재료를 정렬합니다</span>
+            <span>겁이 나서 팔아 버리는 대신</span>
+            <span>내가 정한 원칙이 선택지를 먼저 정리해요</span>
           </p>
         </Reveal>
 
         <div className="ld-cards3">
           <Reveal className="ld-dcard" delay={0}>
             <div className="ld-dcard-body">
-              <span className="ld-dcard-k">관측 · 거래 이력</span>
+              <span className="ld-dcard-k">실제로 해 온 것 · 거래 이력</span>
               <b>
                 지난 급락 때,
                 <br />
-                7일 만에 42%를 파셨습니다
+                7일 만에 42%를 파셨어요
               </b>
               <div className="ld-mini-dd" aria-hidden>
                 <i style={{ height: "62%" }} />
@@ -67,31 +67,31 @@ export default function AssetsSection() {
               </div>
             </div>
             <p className="ld-cap">
-              <span>선언과 어긋난 이력이 있으면</span>
-              <span>어느 쪽이 앞으로의 나인지 먼저 묻습니다</span>
+              <span>정한 것과 다르게 해 온 이력이 있으면</span>
+              <span>어느 쪽이 앞으로의 나인지 먼저 물어요</span>
             </p>
           </Reveal>
 
           <Reveal className="ld-dcard" delay={140}>
             <div className="ld-dcard-body">
-              <span className="ld-dcard-k">선언 · I01 · I02</span>
+              <span className="ld-dcard-k">내가 정한 것 · 투자 원칙</span>
               <b>위험자산 상한 20%</b>
               <div className="ld-tags">
                 <span>파생상품 금지</span>
                 <span>레버리지 금지</span>
               </div>
-              <div className="ld-declare-note">건강할 때 적어둔 한 줄이 제7조 투자 원칙이 됩니다.</div>
+              <div className="ld-declare-note">건강할 때 적어 둔 한 줄이 제7조 투자 원칙이 돼요.</div>
             </div>
             <p className="ld-cap">
-              <span>지금 판단이 또렷할 때 적어두면</span>
-              <span>흔들리는 날 그 문장이 대신 판단합니다</span>
+              <span>판단이 또렷할 때 적어 두면</span>
+              <span>흔들리는 날 그 문장이 대신 판단해요</span>
             </p>
           </Reveal>
 
           <Reveal className="ld-dcard" delay={280}>
             <div className="ld-dcard-body">
-              <span className="ld-dcard-k">재배치 · 선언 범위 안으로</span>
-              <div className="ld-pf" role="img" aria-label="포트폴리오가 위험자산 20% 안으로 재정렬">
+              <span className="ld-dcard-k">투자 비중 조정 · 정한 범위 안으로</span>
+              <div className="ld-pf" role="img" aria-label="투자 자산이 위험자산 20% 안으로 조정된 모습">
                 <i className="risk" />
                 <i className="safe" />
               </div>
@@ -101,23 +101,23 @@ export default function AssetsSection() {
               </div>
               <ul className="ld-options">
                 <li className="first">
-                  아무것도 하지 않음 <small>되돌릴 수 있음</small>
+                  아무것도 하지 않기 <small>되돌릴 수 있어요</small>
                 </li>
-                <li>위험자산 일부 매도</li>
-                <li>생활비 감액</li>
-                <li>현금화 순서 조정</li>
+                <li>위험자산 일부 팔기</li>
+                <li>생활비 줄이기</li>
+                <li>현금화 순서 바꾸기</li>
               </ul>
             </div>
             <p className="ld-cap">
-              <span>선택지는 정렬만 합니다</span>
-              <span>결정은 끝까지 사람이 합니다</span>
+              <span>앱은 선택지를 정리할 뿐이에요</span>
+              <span>결정은 끝까지 사람이 해요</span>
             </p>
           </Reveal>
         </div>
 
         <Reveal className="ld-sec-cta" delay={200}>
           <StartLink className="btn light lg" focus="invest">
-            자산 관리 설계 시작
+            자산 관리 설계하기
           </StartLink>
         </Reveal>
       </div>
