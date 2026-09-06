@@ -23,6 +23,7 @@ import { T, TOTAL, isDark } from "./phases";
  *
  * S0 는 짧은 영화 비트다 (2026-09-06 연출 변경: "문에 꽂힌 고지서" → "사람이 꺼내 클로즈업").
  *  A. 와이드 숏 — 실제 비례의 현관문 앞에 선 사람이 문틈에 꽂힌 고지서로 팔을 뻗고 있다.
+ *     문과 사람이 가운데를 차지하므로 소개 글(h1)은 좌우 여백에 나눠 앉고, 스크롤을 시작하면 위로 옅어지며 사라진다.
  *  B. 손이 고지서를 뽑는다(0→s0Bill) — DOM 고지서가 문틈 선을 따라 빠져나오고, 문틈 선 왼쪽을 잘라 둔
  *     clip-path 가 함께 풀린다. 꽂혀 있는 동안은 회전 0 — 기울이면 잘린 모서리(고지서 로컬 좌표)가 세로
  *     문틈 선과 어긋나 종이가 문에 붙인 것처럼 보인다. 손은 고지서 래퍼 안에 있어 종이와 같이 움직이고,
@@ -70,6 +71,7 @@ export default function Stage() {
       const doorBack = one(".ld-door--back");
       const vignette = one(".ld-vignette");
       const veil = one(".ld-veil");
+      const intro = all(".ld-s0-intro span");
       const billWrap = one(".ld-bill-wrap");
       const bill = one(".ld-bill");
       const billFold = one(".ld-bill-fold");
@@ -188,6 +190,10 @@ export default function Stage() {
       tl.eventCallback("onUpdate", () => {
         if (tl.time() <= T.s0Bill + HAND_OFF) updateArm();
       });
+
+      /* ── S0-0. 첫 화면 소개 — 스크롤을 시작하면 위로 옅어지며 사라진다 ──
+       * CSS 기본 상태가 보이는 상태다: 첫 페인트(하이드레이션 전)와 reduced-motion 에서 그대로 읽힌다. */
+      tl.to(intro, { autoAlpha: 0, y: -44, duration: 4, ease: "power1.in", stagger: 0.4 }, 0);
 
       /* ── S0-1 (비트 B). 손이 문틈에서 고지서를 뽑는다 ── */
       tl.fromTo(
@@ -380,6 +386,14 @@ export default function Stage() {
         </div>
         <div className="ld-vignette" aria-hidden />
         <div className="ld-veil" aria-hidden />
+        <h1 className="ld-s0-intro">
+          <span className="l">공과금부터 상속까지</span>
+          <span className="r">
+            미리 정해 두면
+            <br />
+            그대로 움직입니다
+          </span>
+        </h1>
       </section>
 
       {/* 고지서 — 문틈에서 손에 뽑혀 중앙으로, 조각이 노트북 위로 날아간다. 손은 종이와 같이 움직이도록 래퍼 안에 */}
