@@ -1,35 +1,12 @@
 import Link from "next/link";
-import { StatusBadge } from "../common/Badge";
-import type { Clause, Flag } from "../../lib/types";
+import type { Flag } from "../../lib/types";
 
-export function ClauseCard({ clause }: { clause: Clause }) {
-  return (
-    <article className={`clause ${clause.status}`}>
-      <header className="clause-head">
-        <span className="no mono">{clause.no}</span>
-        <span className="ti">{clause.title}</span>
-        <StatusBadge status={clause.status} />
-      </header>
-      <ul className="clause-body">
-        {clause.body.map((line, i) => (
-          <li key={i}>{line}</li>
-        ))}
-      </ul>
-      {clause.note && <p className="clause-note">{clause.note}</p>}
-      {clause.sources.length > 0 && (
-        <p className="clause-edit">
-          <Link href={`/interview?q=${clause.sources[0]}`}>
-            {clause.status === "missing"
-              ? "이 조항 채우러 가기 →"
-              : clause.status === "partial"
-                ? "이 조항 마저 채우기 →"
-                : "이 조항 수정하기 →"}
-          </Link>
-        </p>
-      )}
-    </article>
-  );
-}
+/*
+ * 설계서 위쪽의 "다시 살펴볼 곳" 카드.
+ *
+ * 2026-09-07: 조항 한 장을 그리던 ClauseCard 는 뺐다. 신탁설계서가 지출설계서와 같은
+ * 카드(components/plan/DocKit.tsx 의 DocCard)로 조항을 그리게 되면서 쓰는 곳이 없어졌다.
+ */
 
 export function FlagCard({ flag }: { flag: Flag }) {
   const icon = flag.level === "critical" ? "!" : flag.level === "warn" ? "△" : "i";
