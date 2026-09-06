@@ -65,6 +65,18 @@ const SCENARIO_PHASE: Record<string, 1 | 2 | 3> = {
   spouse_death: 3,
 };
 
+/* ── 구간 연차 ─────────────────────────────────────── */
+
+/**
+ * 30년 축에서 각 Phase 가 차지하는 연차 (0 시작, 양끝 포함).
+ * span() 문자열과 미리보기의 가로 축 표시가 같은 숫자를 쓰도록 한 곳에 둔다.
+ */
+export const PHASE_YEARS: Record<1 | 2 | 3, [number, number]> = {
+  1: [0, 9],
+  2: [10, 14],
+  3: [15, 29],
+};
+
 /* ── 조립 ──────────────────────────────────────────── */
 
 export interface TimelineInput {
@@ -174,7 +186,7 @@ export function buildTimeline({
     {
       phase: 1,
       title: "적재와 복제",
-      span: span(0, 9),
+      span: span(...PHASE_YEARS[1]),
       caption: ledger
         ? "금융 행동을 기록해 '가장 건강할 때의 판단 기준'을 만든다."
         : "이력을 연동하면 이 구간이 채워집니다.",
@@ -185,7 +197,7 @@ export function buildTimeline({
     {
       phase: 2,
       title: "감지와 전환",
-      span: span(10, 14),
+      span: span(...PHASE_YEARS[2]),
       caption: alerted
         ? "평소 패턴과 달라진 지점이 관측됐습니다. 서류가 확인되면 전환이 시작됩니다."
         : "베이스라인에서 벗어나는 신호를 감시하는 구간입니다.",
@@ -196,7 +208,7 @@ export function buildTimeline({
     {
       phase: 3,
       title: "대행",
-      span: span(15, 29),
+      span: span(...PHASE_YEARS[3]),
       caption: "복제된 원칙에 따라 일상 케어와 자산 집행이 이어진다.",
       state: fired ? "future" : "locked",
       actions: p3Actions,

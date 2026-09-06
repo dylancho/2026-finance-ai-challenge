@@ -4,7 +4,7 @@ import { buildGuardianshipDesign } from "./guardianship";
 import { buildExpenseDesign } from "./expense";
 
 export { findGaps, chapterGaps, chapterGapId } from "./gaps";
-export { runScenario, scenariosFor, SCENARIOS } from "./scenario";
+export { runScenario, scenariosFor, SCENARIOS, TRIGGER_LABEL } from "./scenario";
 
 export function buildDesign(p: Profile): DesignSet {
   return {
