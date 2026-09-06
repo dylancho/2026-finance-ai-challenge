@@ -1,78 +1,73 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import Badge from '../components/common/Badge';
+import MonthlyRuleReview from '../components/fraud/MonthlyRuleReview';
 import { TRACK_META } from '../lib/questions';
 import type { Track } from '../lib/types';
 
 const TRACK_ORDER: Track[] = ['daily', 'future', 'caregiver', 'estate'];
 
 export default function Home() {
+  const [monthlyReviewOpen, setMonthlyReviewOpen] = useState(true);
+
   return (
     <>
       <Header />
-      <main className="shell-wide">
-        <section className="hero">
+      <main className="shell-wide landing-v2">
+        <section className="hero landing-hero">
           <div>
-            <div className="eyebrow">AI Future Financial Decision Service</div>
+            <div className="eyebrow">NEXT SAFE · YOUR FINANCIAL SAFETY NET</div>
             <h1>
-              내가 결정할 수 없을 때를 위해,
+              평소의 나를 배워,
               <br />
-              지금의 내가 결정합니다.
+              <em className="landing-accent">위험한 순간</em>을 막습니다.
             </h1>
             <p className="hero-sub">
-              NEXT는 목적을 먼저 묻습니다. 공과금 관리가 필요한 분에게 치매와 후견 이야기를
-              꺼내지 않습니다. 대화가 끝나면 신탁·후견·지출 설계서가 조항 단위로 남습니다.
+              NEXT는 거래 한도가 아니라 나의 금융 맥락을 봅니다. 평소와 다른 거래가 겹치는 순간,
+              AI가 먼저 멈추고 보호자에게 확인을 요청합니다.
             </p>
 
             <div className="hero-actions">
-              <Link href="/start" className="btn">
-                무엇을 준비할지 고르기
-              </Link>
-              <Link href="/plan?demo=B" className="btn outline">
-                완성된 설계서 예시 보기
-              </Link>
+              <Link href="/fraud-shield" className="btn landing-primary">내 금융 보호하기</Link>
 
-              {/* FDS 이상 거래 차단 엔진 실시간 시뮬레이션 버튼 */}
-              <Link href="/fraud-shield" className="btn fds-btn">금융 보호 서비스 보기</Link>
-              <Link href="/monthly-review" className="btn outline">이번 달 보호 룰 설정</Link>
+              <button type="button" className="landing-text-link" onClick={() => setMonthlyReviewOpen(true)}>AI 월간 시나리오 점검 →</button>
             </div>
 
-            <p className="hero-note">
-              실제 금융상품 가입이나 자산 이동은 발생하지 않는 데모 서비스입니다.
-            </p>
+            <p className="hero-note">현재는 레벨 1로 준비하고, 치매 진단 또는 장기요양 등급이 확인되면 레벨 2 보호가 작동합니다.</p>
           </div>
 
           <aside className="hero-panel" aria-label="설계서 미리보기">
-            <div className="label">TRUST DESIGN — 신탁설계서 (발췌)</div>
+            <div className="label">NEXT SAFE · LIVE PROTECTION</div>
             <h3>
-              미래의 나에게 남기는
+              나의 평소와 다른 순간을
               <br />
-              금융 사용 설명서
+              먼저 알아차립니다.
             </h3>
             <div className="hero-clause">
               <span>제4조</span>
               <em>
-                전문의 2인의 소견이 일치하고 그 소견서가 수탁자에게 제출된 때 지급을 개시한다.
+                새벽 2:15 · 신규 수취계좌 · 비밀번호 2회 오류
               </em>
             </div>
             <div className="hero-clause">
               <span>제5조</span>
               <em>
-                매월 300만원을 지급하고, 요양시설 입소가 확인되면 480만원으로 증액한다.
+                행동 패턴 89% 이탈 · 위험도 99%
               </em>
             </div>
             <div className="hero-clause">
               <span>제8조</span>
               <em>
-                부동산의 매매·담보 제공, 대출 및 제3자를 위한 보증을 금지한다.
+                거래를 일시 정지하고 보호자에게 알립니다.
               </em>
             </div>
             <div className="hero-clause">
               <span>제9조</span>
-              <em>변호사를 신탁감독인으로 두고 반기마다 지급 내역을 확인한다.</em>
+              <em>보호자 확인 전까지 출금과 이체를 제한합니다.</em>
             </div>
           </aside>
         </section>
@@ -200,6 +195,8 @@ export default function Home() {
           </Link>
         </section>
       </main>
+
+      {monthlyReviewOpen && <div className="monthly-popup-backdrop" role="dialog" aria-modal="true" aria-label="AI 월간 시나리오 점검"><section className="monthly-popup"><button type="button" className="monthly-popup-close" onClick={() => setMonthlyReviewOpen(false)} aria-label="닫기">×</button><MonthlyRuleReview name="나" onComplete={() => setMonthlyReviewOpen(false)} /></section></div>}
 
       <Footer />
     </>

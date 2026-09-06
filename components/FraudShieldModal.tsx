@@ -29,6 +29,17 @@ export function mockFraudReport(): FraudReportUI {
   };
 }
 
+export function FraudAnalysisDetails({ report, expanded = false, onToggle }: { report: FraudReportUI; expanded?: boolean; onToggle?: () => void }) {
+  const signals = expanded ? report.signals : report.signals.slice(0, 3);
+  return <section className="inline-fraud-analysis" aria-label="위험 분석 상세 정보">
+    <div className={`inline-fraud-analysis-transaction ${report.status === "ALLOW" ? "allowed" : "blocked"}`}><span>{report.status === "ALLOW" ? "정상 인정 거래" : "차단된 거래"}</span><b>{report.transaction.requestTime} · {report.transaction.targetAccount} · {report.transaction.amount.toLocaleString("ko-KR")}원</b></div>
+    <p className="inline-fraud-analysis-decision">{report.decision}</p>
+    <p className="inline-fraud-analysis-count">{expanded ? `전체 근거 ${report.signals.length}개` : "주요 근거 3개"}</p>
+    <div className="fds-signals">{signals.map((signal) => <article className={`fds-signal ${signal.level}`} key={signal.key}><div className="fds-signal-top"><h4>{signal.label}</h4><span>{signal.score ? `+${signal.score}` : "정상"}</span></div><p>{signal.detail}</p><dl><div><dt>이번 거래</dt><dd>{signal.observed}</dd></div><div><dt>평소 기준</dt><dd>{signal.baseline}</dd></div></dl></article>)}</div>
+    {report.signals.length > 3 && onToggle && <button className="inline-fraud-analysis-toggle" onClick={onToggle}>{expanded ? "주요 근거만 보기" : `나머지 근거 ${report.signals.length - 3}개 자세히 보기`} <span aria-hidden>{expanded ? "↑" : "↓"}</span></button>}
+  </section>;
+}
+
 export default function FraudShieldModal({ report, onClose }: Props) {
   const [showDetails, setShowDetails] = useState(false);
   const [resendCount, setResendCount] = useState(0);
