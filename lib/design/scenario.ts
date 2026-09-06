@@ -118,18 +118,24 @@ function gap(
 
 /* ── 시나리오별 노드 ─────────────────────────────── */
 
+/**
+ * B05 지급개시 사유의 표시 라벨. 미리보기(/simulation)도 같은 문장을 쓰므로 밖으로 뺐다.
+ * 값·판정 로직은 그대로다.
+ */
+export const TRIGGER_LABEL: Record<string, string> = {
+  doctor1: "전문의 진단서 1장 제출",
+  doctor2: "전문의 2인 소견 일치 확인",
+  court: "가정법원 후견개시 심판 확정",
+  designee: "지정 확인자의 서면 판단",
+  self: "본인의 사전 요청",
+};
+
 function dementiaNodes(ctx: Ctx): ScenarioNode[] {
   const { p } = ctx;
   const nodes: ScenarioNode[] = [];
 
   const trig = choiceOf(p, "B05");
-  const TRIG_LABEL: Record<string, string> = {
-    doctor1: "전문의 진단서 1장 제출",
-    doctor2: "전문의 2인 소견 일치 확인",
-    court: "가정법원 후견개시 심판 확정",
-    designee: "지정 확인자의 서면 판단",
-    self: "본인의 사전 요청",
-  };
+  const TRIG_LABEL = TRIGGER_LABEL;
 
   if (!isAnswered(p, "B05") && p.track === "future") {
     nodes.push(

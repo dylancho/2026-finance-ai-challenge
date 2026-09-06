@@ -11,7 +11,7 @@ export default function SimulationPage() {
         <Suspense
           fallback={
             <div className="shell-wide" style={{ padding: "80px 0" }}>
-              <p className="muted">시뮬레이션을 준비하는 중입니다…</p>
+              <p className="muted">미리보기를 준비하는 중입니다…</p>
             </div>
           }
         >

@@ -40,6 +40,7 @@ export {
 
 export {
   buildTimeline,
+  PHASE_YEARS,
   TIER_ACTIONS,
   TIER_CAPTION,
   TIER_LABEL,
