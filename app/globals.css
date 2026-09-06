@@ -2307,7 +2307,8 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 .ld-alert {
   position: absolute;
   left: -4%;
-  bottom: 22%;
+  top: 44%;
+  overflow: hidden;
   width: min(300px, 46%);
   padding: 14px 16px;
   border-radius: 14px;
@@ -2352,11 +2353,17 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 .ld-cta { display: inline-block; margin-top: 22px; font-weight: 600; font-size: 14px; color: var(--blue); }
 .ld-scene--ch[data-tone="dark"] .ld-cta { color: #9ec1f5; }
 
-/* TR 알림 → 낙폭 */
-.ld-scene--tr { display: grid; place-items: center; }
+/* TR 알림 카드 → 캔들차트 */
 .ld-drawdown { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 62%; }
-.ld-tr-stamp { position: absolute; right: 12%; top: 26%; font-size: clamp(40px, 7vw, 96px); color: #ff6b61; letter-spacing: -0.04em; transform-origin: center; }
-.ld-tr-copy { position: relative; color: #fff; text-align: center; font-size: clamp(28px, 4vw, 52px); letter-spacing: -0.045em; line-height: 1.2; word-break: keep-all; margin-top: -18vh; }
+.ld-tr-copy { position: absolute; left: 50%; top: 13vh; transform: translateX(-50%); width: min(880px, 92vw); color: #fff; text-align: center; font-size: clamp(28px, 4vw, 52px); letter-spacing: -0.045em; line-height: 1.2; word-break: keep-all; }
+.ld-tr-chart { position: absolute; left: 50%; top: 56%; translate: -50% -50%; width: min(920px, 78vw); height: min(400px, 44vh); }
+.ld-candles { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ld-candle.up line { stroke: #7f93b8; }
+.ld-candle.up rect { fill: #8ea3c9; }
+.ld-candle.down line { stroke: #ff8a80; }
+.ld-candle.down rect { fill: #ff6b61; }
+.ld-candle[data-crash] rect { filter: drop-shadow(0 0 18px rgba(255, 107, 97, 0.6)); }
+.ld-tr-stamp { position: absolute; right: 2%; top: -6%; font-size: clamp(36px, 6vw, 84px); color: #ff6b61; letter-spacing: -0.04em; transform-origin: center; line-height: 1; }
 
 /* Stage 정적 모드 (reduced-motion) — 완성 장면을 세로로 쌓는다 */
 .ld-stage[data-mode="static"] { height: auto; min-height: 0; background: var(--bg); color: var(--ink); }
@@ -2376,8 +2383,8 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 .ld-stage[data-mode="static"] .ld-beats { min-height: 0; }
 .ld-stage[data-mode="static"] .ld-beat { position: static; margin-bottom: 40px; width: auto; }
 .ld-stage[data-mode="static"] .ld-ind span { position: static; margin-right: 18px; }
-.ld-stage[data-mode="static"] .ld-scene--tr { min-height: 70vh; background: #0a0e18; }
-.ld-stage[data-mode="static"] .ld-tr-copy { margin-top: 0; }
+.ld-stage[data-mode="static"] .ld-scene--tr { min-height: 70vh; background: #0a0e18; padding-top: 30vh; }
+.ld-stage[data-mode="static"] .ld-tr-copy { top: 8vh; }
 
 /* ══ CH3 자산관리 (다크, 모듈 D) ══ */
 .ld-assets { position: relative; padding: clamp(96px, 14vh, 160px) 0; background: #0a0e18; color: #dbe5f3; overflow: hidden; }
@@ -2507,7 +2514,8 @@ body.ld-dark .nav .nav-signout { color: #fff; }
   .ld-cards3 .ld-dcard .ld-dcard-body { border-radius: 16px; min-height: 0; }
   .ld-doc { transform: none; }
   .ld-doc-float { position: static; width: auto; margin-top: 14px; }
-  .ld-tr-stamp { right: 8%; top: 20%; }
+  .ld-tr-chart { width: 92vw; height: 36vh; top: 54%; }
+  .ld-tr-stamp { right: 0; top: -10%; }
 }
 @media (max-width: 640px) {
   .ld-stage { min-height: 560px; }

@@ -5,9 +5,9 @@ import { gsap, useGSAP } from "../gsap";
 import StartLink from "../StartLink";
 import Bill from "./Bill";
 import { Laptop, AlertCard } from "./Laptop";
-import Drawdown from "./Drawdown";
+import Candles, { CRASH_INDEX } from "./Candles";
 import { DoorBack, DOOR } from "./DoorScene";
-import { centerDelta, layoutCenter, sliceToScreen } from "./layout";
+import { centerDelta, layoutCenter, layoutOffset, sliceToScreen } from "./layout";
 import { T, TOTAL, isDark } from "./phases";
 
 /**
@@ -81,9 +81,12 @@ export default function Stage() {
       const ind02 = one(".ld-ind--02");
       const beats = [1, 2, 3, 4].map((n) => one(`[data-beat="${n}"]`));
       const alert = one("[data-alert]");
+      const alertKids = all(".ld-alert > *");
       const trScene = one(".ld-scene--tr");
-      const ddLine = one("[data-dd-line]");
-      const ddFill = one("[data-dd-fill]");
+      const candles = all("[data-candle]");
+      const crash = one("[data-crash]");
+      const crashBody = one("[data-crash-body]");
+      const peakLine = one("[data-peak-line]");
       const stamp = one(".ld-tr-stamp");
       const trCopy = one(".ld-tr-copy");
 
@@ -242,25 +245,59 @@ export default function Stage() {
       beat(3, T.ch2 + 2, false);
       tl.from(alert, { autoAlpha: 0, y: 34, scale: 0.92, duration: 4 }, T.ch2 + 6);
 
-      /* ── TR. 알림 → 낙폭 ── */
-      tl.to([laptop, chScene], { autoAlpha: 0, duration: 6 }, T.tr);
+      /* ── TR. 알림 카드 → 폭락 캔들 ──
+       * 카드가 튕겨나와 잠깐 커졌다가, 글자가 사라지고 폭이 좁아지며 빨갛게 물들어
+       * 캔들 하나가 된다. 그 자리에 진짜 폭락 캔들이 있어서 안착하는 순간 바꿔친다. */
+      const crashBox = () => {
+        const r = crashBody.getBoundingClientRect();
+        const e = el.getBoundingClientRect();
+        return { cx: r.left - e.left + r.width / 2, cy: r.top - e.top + r.height / 2, w: r.width, h: r.height };
+      };
+      const MORPH_AT = T.tr + 4;
+      const MORPH = 7;
+      const LAND = MORPH_AT + MORPH;
+
+      tl.to([laptop, chScene], { autoAlpha: 0, duration: 5 }, T.tr);
       tl.to(el, { backgroundColor: BG.dark, duration: 8 }, T.tr);
+      // 1) 튕겨나와 주목
+      tl.to(
+        alert,
+        { x: () => centerDelta(alert, el).x, y: () => centerDelta(alert, el).y - el.clientHeight * 0.04, scale: 1.25, duration: 4, ease: "power2.out" },
+        T.tr,
+      );
+      tl.from(trScene, { autoAlpha: 0, duration: 3 }, T.tr + 2);
+      // 2) 카드가 캔들로: 글자 페이드 → 크기·위치·색이 캔들과 같아진다
+      // 글자는 카드가 실제로 줄어들기 시작할 때 지운다 — 빈 카드가 오래 떠 있지 않게
+      tl.to(alertKids, { autoAlpha: 0, duration: 2 }, MORPH_AT + MORPH * 0.4);
       tl.to(
         alert,
         {
-          x: () => centerDelta(alert, el).x,
-          y: () => centerDelta(alert, el).y,
-          scale: 2.3,
-          duration: 8,
+          x: () => crashBox().cx - (layoutOffset(alert, el).left + crashBox().w / 2),
+          y: () => crashBox().cy - (layoutOffset(alert, el).top + crashBox().h / 2),
+          width: () => crashBox().w,
+          height: () => crashBox().h,
+          scale: 1,
+          borderRadius: 2,
+          padding: 0,
+          backgroundColor: "#ff6b61",
+          borderColor: "#ff6b61",
+          boxShadow: "0 0 42px rgba(255,107,97,0.55)",
+          duration: MORPH,
+          ease: "power2.in", // 머물다가 캔들로 빨려들 듯
         },
-        T.tr,
+        MORPH_AT,
       );
-      tl.from(trScene, { autoAlpha: 0, duration: 4 }, T.tr + 5);
-      tl.fromTo(ddLine, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 10 }, T.tr + 6);
-      tl.from(ddFill, { autoAlpha: 0, duration: 6 }, T.tr + 10);
-      tl.to(alert, { autoAlpha: 0, scale: 2.6, duration: 3 }, T.tr + 8);
-      tl.from(stamp, { autoAlpha: 0, scale: 1.7, duration: 3 }, T.tr + 14);
-      tl.from(trCopy, { autoAlpha: 0, y: 24, duration: 4 }, T.tr + 16);
+      // 폭락 전 캔들들이 왼쪽부터 자라며 차트 맥락을 만든다
+      const before = candles.slice(0, CRASH_INDEX);
+      const after = candles.slice(CRASH_INDEX + 1);
+      tl.from(before, { scaleY: 0, transformOrigin: "50% 100%", duration: 2.5, stagger: (MORPH - 2.5) / before.length }, MORPH_AT);
+      // 3) 안착: 카드 ↔ 진짜 캔들 교체, 반등 캔들, 고점선, 스탬프, 카피
+      tl.from(crash, { autoAlpha: 0, duration: 0.4 }, LAND);
+      tl.to(alert, { autoAlpha: 0, duration: 0.4 }, LAND + 0.2);
+      tl.from(after, { scaleY: 0, transformOrigin: "50% 100%", duration: 2, stagger: 0.5 }, LAND + 0.4);
+      tl.from(peakLine, { autoAlpha: 0, duration: 2 }, LAND);
+      tl.from(stamp, { autoAlpha: 0, scale: 1.7, duration: 3, ease: "back.out(2)" }, LAND + 1);
+      tl.from(trCopy, { autoAlpha: 0, y: 24, duration: 4 }, LAND + 3);
       tl.to({}, { duration: TOTAL - T.trHold }, T.trHold);
 
       return () => document.body.classList.remove("ld-dark");
@@ -351,15 +388,17 @@ export default function Stage() {
         </div>
       </section>
 
-      {/* TR */}
+      {/* TR — 알림 카드가 이 차트의 폭락 캔들이 된다 */}
       <section className="ld-scene ld-scene--tr">
-        <Drawdown id="ldDdStage" />
-        <div className="ld-tr-stamp mono">-25%</div>
         <h2 className="ld-tr-copy">
           그리고 어떤 날은,
           <br />
           시장이 무너집니다
         </h2>
+        <div className="ld-tr-chart">
+          <Candles />
+          <div className="ld-tr-stamp mono">-25%</div>
+        </div>
       </section>
     </div>
   );
