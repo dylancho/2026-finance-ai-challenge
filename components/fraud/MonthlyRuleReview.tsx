@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isTouring, TOUR_PERSONA } from "../../lib/demo/tour";
 import {
   readRule,
   RULE_CHOICES,
@@ -11,12 +12,15 @@ import {
   type RuleReview,
 } from "../../lib/fraud/rule";
 
-export default function MonthlyRuleReview({ name }: { name: string }) {
+export default function MonthlyRuleReview({ name: given }: { name: string }) {
   const [review, setReview] = useState<RuleReview | null>(null);
   const [ready, setReady] = useState(false);
+  // 둘러보기 중에는 "나님" 대신 예시 인물의 이름을 쓴다 (금융 보호 화면과 같은 사람).
+  const [name, setName] = useState(given);
 
   useEffect(() => {
     setReview(readRule());
+    if (isTouring()) setName(TOUR_PERSONA.replace(/\(.*$/, ""));
     setReady(true);
   }, []);
 

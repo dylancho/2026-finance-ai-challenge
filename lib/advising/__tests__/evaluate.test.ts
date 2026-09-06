@@ -120,7 +120,7 @@ describe("재진입과 대조", () => {
   it("급락 이벤트는 선언(I03)과 관측(낙폭 반응)을 나란히 둔다", () => {
     const p = base({ answers: { I03: { kind: "choice", value: "do_nothing" } } });
     const adv = adviseEvent(p, insightFor(ledger, p), ev("market_crash"));
-    expect(adv.contrast?.declared).toContain("아무것도 하지 않는다");
+    expect(adv.contrast?.declared).toContain("팔지 않고 그대로 보유한다"); // 2026-09-07 라벨 변경 (값 do_nothing 은 그대로)
     expect(adv.contrast?.observed).toMatch(/하락 \d회/);
     expect(adv.contrast?.evidence.length).toBeGreaterThan(0);
     expect(adv.reentry).toEqual([]);

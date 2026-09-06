@@ -61,9 +61,10 @@ export function projectRunway(
   return { years, series, careStartYear };
 }
 
+// lib/questions/invest.ts I03 의 라벨과 같은 문장을 쓴다. 설계서 제7조·의뢰서 부록에 그대로 실린다.
 const CRASH_POLICY_LABEL: Record<string, string> = {
-  do_nothing: "아무것도 하지 않는다",
-  reduce: "일부를 줄인다",
+  do_nothing: "팔지 않고 그대로 보유한다",
+  reduce: "위험자산 일부를 줄인다",
   all_safe: "전량 안전자산으로 바꾼다",
   consult: "지정한 사람과 상의한 뒤 정한다",
 };
@@ -108,10 +109,15 @@ export function buildInvestPrinciples(p: Profile): InvestPrinciples | null {
     forbiddenLabels: forbidden.map((k) => ASSET_CLASS_LABEL[k] ?? k),
     riskCapPct: cap !== undefined ? RISK_CAP_PCT[cap] : undefined,
     crashPolicyCode: crash,
-    crashPolicy: crash ? CRASH_POLICY_LABEL[crash] : undefined,
+    // "지정한 사람" 은 I05 의 그 사람이다. 이름이 있으면 문장에 넣어 누구와 상의하는지 보이게 한다.
+    crashPolicy: crash
+      ? crash === "consult" && handoverPerson
+        ? `${personLabel(handoverPerson)}의 의견을 듣고 정한다`
+        : CRASH_POLICY_LABEL[crash]
+      : undefined,
     handover: handover
       ? handover === "designee" && handoverPerson
-        ? `${HANDOVER_LABEL[handover]} (${personLabel(handoverPerson)})`
+        ? `${personLabel(handoverPerson)}에게 맡긴다`
         : HANDOVER_LABEL[handover]
       : undefined,
     stance: stance ? STANCE_LABEL[stance] : undefined,

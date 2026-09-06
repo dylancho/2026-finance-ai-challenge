@@ -128,10 +128,17 @@ export interface Referral {
 /* ── 응답 서술 ─────────────────────────────────────── */
 
 /** 설문 응답을 사람이 읽는 한 줄로 옮긴다. 미응답은 null. */
+/**
+ * 금액 칸에 사람 수를 적는 문항. D01(상속인)은 withAmount 로 인원을 받으므로, 여기 있는 문항은
+ * "배우자 1원" 이 아니라 "배우자 1명" 으로 적고 재산 표에도 올리지 않는다 (2026-09-07).
+ */
+const COUNT_QIDS = new Set(["D01"]);
+
 export function describeAnswer(q: Question, a?: AnswerValue): string | null {
   if (!a) return null;
   const labelOf = (v: string) =>
     q.options?.find((o) => o.value === v)?.label ?? v;
+  const unit = (n: number) => (COUNT_QIDS.has(q.id) ? `${n}명` : won(n));
 
   switch (a.kind) {
     case "choice":
@@ -141,7 +148,7 @@ export function describeAnswer(q: Question, a?: AnswerValue): string | null {
       return a.values
         .map((v) => {
           const amt = a.amounts?.[v];
-          return amt ? `${labelOf(v)} ${won(amt)}` : labelOf(v);
+          return amt ? `${labelOf(v)} ${unit(amt)}` : labelOf(v);
         })
         .join(" / ");
     }
@@ -237,6 +244,7 @@ export function buildReferral(
   for (const q of qs) {
     const a = p.answers[q.id];
     if (!a || a.kind !== "multi" || !a.amounts) continue;
+    if (COUNT_QIDS.has(q.id)) continue; // 인원 수는 재산이 아니다 — 아래 "사람과 배분" 에 싣는다
     const rows = a.values.map((v) => ({
       label: q.options?.find((o) => o.value === v)?.label ?? v,
       amount: a.amounts?.[v],
@@ -254,7 +262,7 @@ export function buildReferral(
   const roles: ReferralField[] = [];
   for (const q of qs) {
     const a = p.answers[q.id];
-    if (!a || (a.kind !== "person" && a.kind !== "allocation")) continue;
+    if (!a || (a.kind !== "person" && a.kind !== "allocation" && !COUNT_QIDS.has(q.id))) continue;
     const value = describeAnswer(q, a);
     if (value) roles.push({ qid: q.id, label: q.prompt, value });
   }
