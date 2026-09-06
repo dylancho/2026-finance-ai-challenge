@@ -52,13 +52,27 @@ export const EVENT_META: Record<
     exposureHelp: "보전계좌, 승인 절차, 지급 약정 어디에도 묶여 있지 않아 사기나 충동적인 처분에 노출되는 금액",
   },
   market_crash: {
-    caption: "갖고 있던 위험자산이 하루 만에 25% 떨어졌습니다. 미리 정해 둔 원칙과 예전에 실제로 했던 행동을 나란히 놓고 봅니다.",
+    caption: "갖고 있던 위험자산이 하루 만에 크게 떨어졌습니다. 미리 정해 둔 원칙과 예전에 실제로 했던 행동을 나란히 놓고 봅니다.",
     exposureLabel: "추가 하락에 노출되는 위험자산",
     exposureHelp: "이 후보를 택한 뒤에도 시장에 남아 있는 위험자산 평가액(하락 반영)",
   },
 };
 
-const DROP = 0.25;
+/* 2026-09-06: 이벤트는 이제 자유 입력에서 해석되므로 숫자는 event.params 로 들어온다.
+ * 문장에 숫자가 없을 때만 아래 기본값을 쓴다 (칩 3종도 이 값이다). */
+export const DEFAULT_WINDFALL_AMOUNT = 300_000_000;
+export const DEFAULT_DROP_PCT = 25;
+
+/** event.params 에서 숫자를 꺼낸다. 문자열로 들어와도 숫자로, 못 읽으면 기본값. */
+export function windfallAmountOf(event: LifeEvent): number {
+  const n = Number(event.params.amount);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_WINDFALL_AMOUNT;
+}
+
+export function dropPctOf(event: LifeEvent): number {
+  const n = Number(event.params.dropPct);
+  return Number.isFinite(n) && n > 0 && n <= 100 ? n : DEFAULT_DROP_PCT;
+}
 
 interface Ctx {
   p: Profile;
@@ -320,7 +334,7 @@ function crashCandidates(c: Ctx, dropPct: number): Candidate[] {
     title: "아무것도 하지 않음 (그대로 보유)",
     basis: [
       shareBasis,
-      `위험자산 ${won(risky)} 중 평가손 ${won(loss)}, 팔지 않으면 손실은 확정되지 않습니다`,
+      `${dropPct}% 하락 반영: 위험자산 ${won(risky)} 중 평가손 ${won(loss)}, 팔지 않으면 손실은 확정되지 않습니다`,
       "제7조 ③에서 권한 선택지",
     ],
     impact: { runwayYears: runway(c, after), riskExposure: riskyAfter },
@@ -436,10 +450,10 @@ export function evaluateEvent(
       cands = diagnosisCandidates(c);
       break;
     case "windfall":
-      cands = windfallCandidates(c, Number(event.params.amount ?? 300_000_000));
+      cands = windfallCandidates(c, windfallAmountOf(event));
       break;
     case "market_crash":
-      cands = crashCandidates(c, Number(event.params.dropPct ?? 25));
+      cands = crashCandidates(c, dropPctOf(event));
       break;
   }
   return applyForbidden(cands, c.forbidden);

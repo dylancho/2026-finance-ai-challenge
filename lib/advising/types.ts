@@ -72,6 +72,59 @@ export interface AdviceNarration {
   contrastNote?: { text: string; source: "rule" | "llm" };
 }
 
+/* ── 자유 입력 해석 (2026-09-06) ─────────────────────────
+ * 이벤트 3종 버튼 대신 사용자가 상황을 말로 적는다. /api/ai/event 가 이 모양으로
+ * 해석하고, 키가 없거나 실패하면 lib/advising/interpret 의 룰 해석기가 같은 모양을 낸다.
+ * 어느 쪽이든 숫자(amount, dropPct)는 사용자 문장에서 뽑은 값이지 모델이 지어낸 값이 아니다.
+ */
+
+export type InterpretSource = "llm" | "rule";
+
+export type EventInterpretation =
+  /** 세 이벤트 중 하나로 대응됐다. params 는 문장에서 뽑은 숫자. */
+  | {
+      kind: EventKind;
+      params: { amount?: number; dropPct?: number };
+      /** 이벤트 카드 제목 한 줄 (예: "목돈 2억 5,000만원이 들어왔습니다") */
+      label: string;
+      reply: string;
+      source: InterpretSource;
+    }
+  /** 필요한 숫자가 빠졌거나 모호하다. reply 는 되묻는 질문 하나. */
+  | {
+      kind: "clarify";
+      reply: string;
+      /** 되묻는 중인 이벤트 종류. 다음 답을 룰 폴백으로 이어 붙일 때 쓴다. */
+      pendingKind?: EventKind;
+      source: InterpretSource;
+    }
+  /** 실제 상황이지만 모델링된 3종 밖. 숫자 없이 정성 검토 항목만. */
+  | {
+      kind: "other";
+      reply: string;
+      considerations: string[];
+      /** 명확히 닿는 설계 영역이 있으면 /interview?chapter= 링크로 */
+      chapter?: Chapter;
+      source: InterpretSource;
+    };
+
+/** 대화 한 줄. API 에 앞선 턴을 그대로 넘겨 되묻기 → 답 → 확정이 이어지게 한다. */
+export interface EventChatMessage {
+  role: "user" | "assistant";
+  text: string;
+}
+
+/** 해석에 필요한 설계서 요약. 숫자는 참고용이며 모델은 이 숫자로 계산하지 않는다. */
+export interface EventContext {
+  capacity: string | null;
+  chaptersCompleted: string[];
+  totalAssets?: number;
+  monthlyLiving?: number;
+  riskCapPct?: number;
+  forbidden?: string[];
+  hasLedgerInsight: boolean;
+}
+
 /** 판정 원장 한 줄 — 실행이 아니라 "검토 후보로 기록" 이다. */
 export interface DecisionRecord {
   id: string;
