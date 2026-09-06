@@ -73,11 +73,13 @@ describe("데모 K — 41문항 + 추가 문항이 모두 채워진 통합 프�
       fixed: 940_000,
       net: 340_000,
     });
-    // 제6조: 30년 뒤에도 남지만(years null) 기울기는 보인다 — 7억 8,000만에서 3억 아래로
+    // 제6조: 보유 자산은 예금을 한 번만 세어 신탁 제2조와 같은 6억 9,000만.
+    // 30년 뒤에도 남지만(years null) 기울기는 보인다 — 6억 9,000만에서 2억 안팎으로
     const s = expense.sustainability;
+    expect(s.assets).toBe(690_000_000);
     expect(s.years).toBeNull();
-    expect(s.series[s.series.length - 1].balance).toBeLessThan(300_000_000);
-    expect(s.series[s.series.length - 1].balance).toBeGreaterThan(250_000_000);
+    expect(s.series[s.series.length - 1].balance).toBeLessThan(250_000_000);
+    expect(s.series[s.series.length - 1].balance).toBeGreaterThan(180_000_000);
   });
 
   it("가족이 화면마다 같다 — 1차 배우자 이정숙, 2차·예비·발동 확인·운용 이양 모두 자녀 김도현", () => {

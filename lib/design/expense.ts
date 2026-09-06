@@ -402,9 +402,13 @@ export function buildExpenseDesign(p: Profile): ExpenseDesign {
     ...amountsOf(p, "C08"),
     ...amountsOf(p, "D02"),
   };
-  // A10 은 단일 amount 라 자산 맵에 합쳐지지 않는다. 따로 더한다.
+  // A10(지금 바로 쓸 수 있는 예금·현금)은 단일 amount 라 자산 맵에 합쳐지지 않는다.
+  // 2026-09-07: 상속 챕터의 D02 예금과 같은 돈이라 둘을 더하면 예금이 두 번 잡혔다
+  // (신탁 제2조 6.9억 vs 제6조 7.8억). 예금은 둘 중 큰 값 하나로만 센다.
+  const mappedDeposit = assetMap.deposit ?? 0;
+  const liquid = amountOf(p, "A10") ?? 0;
   const assets =
-    Object.values(assetMap).reduce((a, b) => a + b, 0) + (amountOf(p, "A10") ?? 0);
+    Object.values(assetMap).reduce((a, b) => a + b, 0) - mappedDeposit + Math.max(mappedDeposit, liquid);
   const monthlyNet = Math.max(0, cashflow.net);
 
   // 데모: 요양 증액(B08)이 있으면 5년 뒤 요양 진입을 가정한다.
