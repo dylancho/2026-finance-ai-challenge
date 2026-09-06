@@ -236,30 +236,53 @@ export default function Stage() {
       );
 
       /* ── S0-4. 조각이 날아가 실행 기록 줄에 안착한다 ──
-       * 이륙은 노트북이 다 올라오기 전(s0Flip=17, 상승 완료 20)이라 고지서와 노트북이 완전히 겹치는 순간이 없다.
-       * 도착점은 노트북의 레이아웃 위치 + S0 오프셋으로 계산해 상승 중에도 흔들리지 않는다 — 첫 착지(22)는 상승이 끝난 뒤다. */
+       * 이륙(17)은 노트북이 다 올라오기 전이고, 착지(22~) 무렵 노트북은 이미 커지는 중이다(s0Full=21).
+       * 그래서 도착점을 이륙할 때 못 박지 않고 매 프레임 노트북의 현재 transform 으로 되짚는다 —
+       * 조각이 움직이는 노트북을 따라가 정확히 그 줄 위에 앉는다.
+       * GSAP 의 함수형 값은 트윈이 시작할 때 한 번만 불리므로, 좌표는 트윈이 아니라 진행률(p.v)로 만든다. */
       const FLIGHT = 5;
       const GAP = 1.6;
+      const ARC = 40; // 포물선 최고점 (px)
+      const UP = 0.35; // 떠오르는 구간이 비행에서 차지하는 몫
+      const TRAIL = 0.8; // 착지 뒤 사라지는 동안에도 노트북을 따라가는 시간
+      const eOut = gsap.parseEase("power2.out");
+      const eIn = gsap.parseEase("power2.in");
+
+      /** i 번째 조각이 "지금 이 순간의" 노트북 위 목적지까지 가려면 얼마나 움직여야 하는지 */
+      const dest = (i: number) => {
+        const lc = layoutCenter(laptopWrap, el);
+        const tc = layoutCenter(targets[i], el);
+        const fc = layoutCenter(frags[i], el);
+        const ls = Number(gsap.getProperty(laptopWrap, "scale"));
+        return {
+          x: lc.x + (tc.x - lc.x) * ls + Number(gsap.getProperty(laptopWrap, "x")) - fc.x,
+          y: lc.y + (tc.y - lc.y) * ls + Number(gsap.getProperty(laptopWrap, "y")) - fc.y,
+          scale: (targets[i].offsetWidth * ls) / frags[i].offsetWidth,
+        };
+      };
+
       tl.to(logWait, { autoAlpha: 0, duration: 1 }, T.s0Flip);
       frags.forEach((f, i) => {
         const at = T.s0Flip + i * GAP;
-        // 도착점: 노트북이 S0 위치(x,y 오프셋 + 0.8 배)에 있을 때 target 이 실제로 보이는 자리
-        const d = () => {
-          const lc = layoutCenter(laptopWrap, el);
-          const tc = layoutCenter(targets[i], el);
-          const fc = layoutCenter(f, el);
-          return {
-            x: lc.x + (tc.x - lc.x) * S0_SCALE + s0X() - fc.x,
-            y: lc.y + (tc.y - lc.y) * S0_SCALE + s0Y() - fc.y,
-            scale: (targets[i].offsetWidth * S0_SCALE) / f.offsetWidth,
-          };
-        };
-        // 종이 조각처럼 떨어져 나온다: 배경(고지서와 같은 누런 종이색)·그림자를 얻고, 살짝 떠오른 뒤 포물선으로 떨어진다
+        const rot = i % 2 ? 6 : -6;
+        const p = { v: 0 };
+        // 종이 조각처럼 떨어져 나온다: 배경(고지서와 같은 누런 종이색)·그림자를 얻는다
         tl.to(f, { backgroundColor: "#f7f1d9", boxShadow: "0 18px 34px -10px rgba(12,28,54,.38)", duration: 1 }, at);
-        tl.to(f, { x: () => d().x, duration: FLIGHT }, at);
-        tl.to(f, { y: () => d().y - 40, duration: FLIGHT * 0.35, ease: "power2.out" }, at);
-        tl.to(f, { y: () => d().y, duration: FLIGHT * 0.65, ease: "power2.in" }, at + FLIGHT * 0.35);
-        tl.to(f, { scale: () => d().scale, rotation: i % 2 ? 6 : -6, duration: FLIGHT }, at);
+        // 비행: 살짝 떠오른 뒤 포물선으로 떨어진다. 좌표는 매 프레임 지금의 목적지에서 되짚는다.
+        tl.to(
+          p,
+          {
+            v: 1,
+            duration: FLIGHT + TRAIL,
+            onUpdate: () => {
+              const d = dest(i);
+              const v = Math.min(1, (p.v * (FLIGHT + TRAIL)) / FLIGHT);
+              const y = v <= UP ? (d.y - ARC) * eOut(v / UP) : d.y - ARC + ARC * eIn((v - UP) / (1 - UP));
+              gsap.set(f, { x: d.x * v, y, scale: 1 + (d.scale - 1) * v, rotation: rot * v });
+            },
+          },
+          at,
+        );
         // 안착: 조각이 사라지며 그 자리에 글자가 튀어 오르고, 줄이 한 번 번쩍인다
         const land = at + FLIGHT;
         tl.to(f, { autoAlpha: 0, duration: 0.6 }, land);
@@ -278,13 +301,17 @@ export default function Stage() {
       const lastLand = T.s0Flip + (frags.length - 1) * GAP + FLIGHT;
       tl.from(logRest, { autoAlpha: 0, x: -6, duration: 1.5, stagger: 0.2 }, lastLand + 0.4);
 
-      /* ── S0-5. 노트북 풀스크린 ── */
+      /* ── S0-5. 노트북이 커지며 풀스크린으로 ──
+       * 고지서가 사라지자마자(21) 시작해 조각이 날아가는 내내 함께 커진다. 12 단위로 천천히 — 마지막 조각이
+       * 앉는 25.2 를 지나 33 에 다 커진다. 조각은 dest() 로 이 움직임을 따라간다. */
       tl.to(
         laptopWrap,
-        { x: () => centerDelta(laptopWrap, el).x, y: fullY, scale: fullScale, duration: 8 },
+        { x: () => centerDelta(laptopWrap, el).x, y: fullY, scale: fullScale, duration: 12 },
         T.s0Full,
       );
-      tl.to([doorBack, vignette, veil, billWrap], { autoAlpha: 0, duration: 6 }, T.s0Full);
+      tl.to([doorBack, vignette, veil], { autoAlpha: 0, duration: 6 }, T.s0Full);
+      // 고지서 래퍼는 조각이 다 앉은 뒤에 치운다 — s0Full 과 같이 지우면 아직 날고 있는 조각까지 사라진다
+      tl.set(billWrap, { autoAlpha: 0 }, lastLand + 1);
       tl.to(el, { backgroundColor: BG.ivory, duration: 8 }, T.s0Full + 2);
 
       /* ── CH1. 일상관리 ── */
