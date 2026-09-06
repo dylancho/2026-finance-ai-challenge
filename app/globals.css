@@ -3600,14 +3600,11 @@ input[type="range"] {
 .protection-guide { padding: 38px; border: 0; border-radius: 28px; background: #f2f4f6; }.protection-guide-head { display: flex; align-items: end; justify-content: space-between; gap: 28px; }.protection-guide-head h2 { margin-top: 4px; font-size: clamp(25px, 3vw, 34px); letter-spacing: -.05em; }.protection-guide-head > p { max-width: 36em; color: #6b7684; font-size: 13px; line-height: 1.75; }.protection-progress { display: flex; align-items: center; gap: 9px; margin: 28px 0 14px; }.protection-progress span { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; background: #dfe3e8; color: #8b95a1; font: 700 10px var(--mono); }.protection-progress span.done { background: #dbeafe; color: #3182f6; }.protection-progress span:last-child.done { background: #dff4e7; color: #21a365; }.protection-progress i { color: #9aa8b7; font-style: normal; }.protection-stage-row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; align-items: center; }.protection-stage { min-height: 205px; padding: 31px 32px; border: 0; border-radius: 22px; background: #fff; box-shadow: 0 9px 24px rgba(28, 47, 68, .05); animation: protection-stage-in .48s cubic-bezier(.22,.75,.25,1) both; }.protection-stage.active { border: 1px solid #c7e6d7; background: #eef8f1; box-shadow: 0 9px 24px rgba(24, 148, 78, .1); }.protection-stage > span { display: block; color: #3182f6; font: 700 11px var(--mono); }.protection-stage.active > span { color: #217551; }.protection-stage.active h3 { color: #174c37; }.protection-stage.active p { color: #3f6e5b; }.protection-stage h3 { margin: 8px 0 9px; color: #191f28; font-size: 23px; letter-spacing: -.045em; }.protection-stage p { max-width: 58em; color: #6b7684; font-size: 13.5px; line-height: 1.8; }.protection-stage .btn { margin-top: 20px; border-radius: 12px; background: #3182f6; box-shadow: none; }.protection-stage .btn:hover:not(:disabled) { background: #1b64da; }.protection-stage .btn i { margin-left: 5px; font-style: normal; }.protection-stage-next { display: block; margin-top: 20px; color: #217551; font-size: 12px; }.protection-stage-arrow { display: grid; place-items: center; width: 76px; height: 76px; border: 0; border-radius: 50%; color: #fff; background: #3182f6; box-shadow: 0 12px 25px rgba(49,130,246,.28); font-size: 32px; font-weight: 700; transition: transform .2s, background .2s; }.protection-stage-arrow:hover { background: #1b64da; transform: translateY(4px); }.protection-stage-back { background: #7890ad; box-shadow: 0 12px 25px rgba(68, 91, 118, .2); }.protection-stage-back:hover { background: #526b87; transform: translateX(-4px); }.protection-guide b { color: #191f28; }.protection-guide p { margin-top: 3px; }#level-two-content { scroll-margin-top: 90px; }@keyframes protection-stage-in { from { opacity: 0; transform: translateY(-30px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .protection-document-stage { min-height: 370px; }.care-document-update { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 17px; padding: 15px; border-radius: 14px; background: #f2f4f6; }.care-document-update > div { min-width: 0; }.care-document-update label:not(.care-document-upload) { display: block; margin-bottom: 6px; color: #4e5968; font-size: 11px; font-weight: 700; }.care-document-update select { width: 100%; height: 43px; padding: 0 11px; border: 1px solid #d9e0e8; border-radius: 9px; color: #333d4b; background: #fff; font: 12px inherit; }.care-document-upload { display: flex; align-items: center; gap: 8px; height: 43px; padding: 0 10px; border: 1px dashed #aebdce; border-radius: 9px; background: #fff; cursor: pointer; }.care-document-upload span { color: #3182f6; font-size: 11px; font-weight: 700; }.care-document-upload small { overflow: hidden; color: #6b7684; font-size: 10.5px; white-space: nowrap; text-overflow: ellipsis; }.care-document-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }.protection-stage .care-document-note { margin-top: 8px; color: #8b95a1; font-size: 10.5px; line-height: 1.55; }
 .protection-stage-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 20px; }.protection-stage-actions .btn { margin-top: 0; color: #526b87; border-color: #b7c5d4; background: #fff; }.protection-stage-actions .btn:hover:not(:disabled) { color: #263f5b; border-color: #7890ad; background: #f4f7fa; }.protection-stage-actions .protection-stage-next { margin-top: 0; }
-.level-two-scope { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }.level-two-scope article { padding: 14px; border: 1px solid #c8e5d5; border-radius: 11px; background: rgba(255,255,255,.62); }.level-two-scope span, .level-two-scope b, .level-two-scope p { display: block; }.level-two-scope span { color: #217551; font-size: 11px; font-weight: 800; }.level-two-scope b { margin: 4px 0 5px; color: #174c37; font-size: 13px; }.level-two-scope p { color: #3f6e5b; font-size: 11.5px; font-weight: 600; line-height: 1.65; }
-.fraud-learning { display: flex; align-items: center; padding: 16px 20px; border: 1px solid var(--line); border-radius: 11px; }.fraud-learning > div { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }.fraud-learning span { color: var(--muted); font-size: 12px; }.fraud-learning b { padding: 4px 9px; border-radius: 99px; background: var(--blue-soft); color: var(--blue); font-size: 11.5px; }.monthly-principle-section { margin-top: 18px; padding: 25px 27px; border: 1px solid #c8dcf4; border-radius: 16px; background: linear-gradient(125deg, #f5f9ff, #edf5ff); box-shadow: 0 10px 28px rgba(39, 102, 199, .08); }.monthly-principle-notice { display: grid; grid-template-columns: 40px 1fr auto; gap: 13px; align-items: center; }.monthly-principle-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #3182f6; color: #fff; font-weight: 800; }.monthly-principle-notice h3 { margin: 3px 0; color: #17273b; font-size: 20px; }.monthly-principle-notice > div > p:last-child { color: #526174; font-size: 12.5px; font-weight: 500; }.monthly-principle-notice time { padding: 5px 9px; border-radius: 99px; background: #dceaff; color: #1558bd; font: 700 11px var(--mono); }.monthly-principle-rule { margin-top: 19px; padding: 17px 18px; border-radius: 11px; background: #fff; }.monthly-principle-rule span, .monthly-principle-rule b, .monthly-principle-rule p { display: block; }.monthly-principle-rule span { color: #2369d9; font-size: 11px; font-weight: 800; }.monthly-principle-rule b { margin: 4px 0 3px; color: #1b2a3e; font-size: 14px; }.monthly-principle-rule p { color: #526174; font-size: 12px; font-weight: 600; }
-.portfolio-report { margin-top: 24px; padding: 28px 30px; border: 1px solid #c7dcef; border-radius: 12px; background: #f5f9fe; }.portfolio-report-head { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; }.portfolio-report-head h2 { margin: 3px 0 7px; font-size: 24px; }.portfolio-report-head p:not(.eyebrow) { max-width: 54em; color: var(--muted); font-size: 13px; line-height: 1.75; }.portfolio-report-status { flex: 0 0 auto; padding: 7px 10px; border-radius: 99px; background: var(--ok-soft); color: var(--ok); font-size: 11.5px; font-weight: 700; white-space: nowrap; }.portfolio-report-status i { display: inline-block; width: 7px; height: 7px; margin: 0 5px 1px 0; border-radius: 50%; background: var(--ok); }.portfolio-approval-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 21px; }.portfolio-approval-grid article { padding: 18px; border: 1px solid #d8e5f2; border-radius: 9px; background: var(--paper); }.portfolio-approval-grid span { color: var(--blue); font: 700 11px var(--mono); }.portfolio-approval-grid h3 { margin: 5px 0 10px; color: var(--navy); font-size: 16px; }.portfolio-approval-grid p { color: var(--muted); font-size: 12px; line-height: 1.7; }.portfolio-approval-grid p + p { margin-top: 7px; padding-top: 7px; border-top: 1px solid #edf2f7; }.portfolio-approval-grid b { color: var(--navy); }.portfolio-report-note { margin-top: 15px; color: var(--muted); font-size: 11.5px; line-height: 1.65; }
-.portfolio-report-summary { margin-top: 18px; padding: 17px 18px; border: 1px solid #d8e5f2; border-radius: 10px; background: #fff; }.portfolio-report-summary b { color: var(--navy); font-size: 14px; }.portfolio-report-summary p { margin-top: 4px; color: var(--muted); font-size: 12.5px; line-height: 1.7; }.portfolio-report-summary .btn { margin-top: 12px; padding: 8px 11px; font-size: 11.5px; }
+.monthly-principle-section { margin-top: 18px; padding: 25px 27px; border: 1px solid #c8dcf4; border-radius: 16px; background: linear-gradient(125deg, #f5f9ff, #edf5ff); box-shadow: 0 10px 28px rgba(39, 102, 199, .08); }.monthly-principle-notice { display: grid; grid-template-columns: 40px 1fr auto; gap: 13px; align-items: center; }.monthly-principle-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #3182f6; color: #fff; font-weight: 800; }.monthly-principle-notice h3 { margin: 3px 0; color: #17273b; font-size: 20px; }.monthly-principle-notice > div > p:last-child { color: #526174; font-size: 12.5px; font-weight: 500; }.monthly-principle-notice time { padding: 5px 9px; border-radius: 99px; background: #dceaff; color: #1558bd; font: 700 11px var(--mono); }.monthly-principle-rule { margin-top: 19px; padding: 17px 18px; border-radius: 11px; background: #fff; }.monthly-principle-rule span, .monthly-principle-rule b, .monthly-principle-rule p { display: block; }.monthly-principle-rule span { color: #2369d9; font-size: 11px; font-weight: 800; }.monthly-principle-rule b { margin: 4px 0 3px; color: #1b2a3e; font-size: 14px; }.monthly-principle-rule p { color: #526174; font-size: 12px; font-weight: 600; }
 .monthly-page { min-height: calc(100vh - 140px); padding-top: 62px; padding-bottom: 80px; }.monthly-page-intro { margin-bottom: 26px; }.monthly-page-intro h1 { margin: 4px 0; font-size: 30px; }.monthly-page-intro p:last-child { color: var(--muted); font-size: 14px; }
 .monthly-review { margin-top: 42px; padding: 28px 30px; border-radius: 12px; background: #f2f7fd; border: 1px solid #d8e6f6; }.monthly-review-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }.monthly-review-head h2 { font-size: 23px; margin: 3px 0 6px; }.monthly-review-head p:last-child { color: var(--muted); max-width: 48em; font-size: 13px; line-height: 1.75; }.monthly-review-head > span { flex: 0 0 auto; padding: 4px 9px; border-radius: 99px; background: #dbeafa; color: var(--blue); font: 600 11px var(--mono); }.monthly-scenario { margin-top: 20px; padding: 17px 18px; border-radius: 9px; background: var(--paper); border-left: 3px solid var(--blue); }.monthly-scenario > span { color: var(--blue); font-size: 11px; font-weight: 700; }.monthly-scenario h3 { margin: 5px 0; font-size: 16px; }.monthly-scenario p { color: var(--muted); font-size: 12.5px; line-height: 1.75; }.monthly-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 12px; }.monthly-choices button { padding: 14px; border: 1px solid #cbdced; border-radius: 8px; background: var(--paper); text-align: left; transition: border .2s, box-shadow .2s, transform .2s; }.monthly-choices button:hover { border-color: var(--blue); box-shadow: 0 5px 13px rgba(39, 102, 199, .1); transform: translateY(-1px); }.monthly-choices b, .monthly-choices span { display: block; }.monthly-choices b { color: var(--navy); font-size: 13px; }.monthly-choices span { color: var(--muted); font-size: 11.5px; line-height: 1.55; margin-top: 3px; }.monthly-updated { display: flex; justify-content: space-between; gap: 25px; align-items: center; margin-top: 19px; padding: 17px 18px; background: var(--paper); border-radius: 9px; border: 1px solid #c7e6d7; }.monthly-updated span, .monthly-updated b, .monthly-updated p { display: block; }.monthly-updated span { color: var(--ok); font-size: 11px; font-weight: 700; }.monthly-updated b { color: var(--navy); margin: 3px 0; font-size: 14px; }.monthly-updated p { color: var(--muted); font-size: 12px; }.monthly-updated i { display: grid; place-items: center; flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); font-style: normal; font-weight: 700; }
-.fraud-record { margin-top: 50px; }.fraud-record-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }.fraud-record-head h2, .fraud-process h2 { margin-top: 3px; font-size: 24px; }.fraud-record-head > span { color: var(--muted); font: 12px var(--mono); }.fraud-record-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }.fraud-record-card { padding: 28px 30px; border: 1px solid var(--line); border-left: 5px solid; border-radius: 12px; box-shadow: var(--shadow); }.fraud-record-card.blocked { border-left-color: var(--danger); }.fraud-record-card.allowed { border-left-color: var(--ok); }.fraud-record-status { display: flex; justify-content: space-between; align-items: center; }.fraud-record-status span { padding: 3px 8px; border-radius: 99px; font-weight: 700; font-size: 12px; }.blocked .fraud-record-status span { color: var(--danger); background: var(--danger-soft); }.allowed .fraud-record-status span { color: var(--ok); background: var(--ok-soft); }.fraud-record-status b { color: var(--navy); font: 600 12px var(--mono); }.fraud-record-card h3 { margin: 13px 0 4px; font-size: 21px; }.fraud-record-card > p { color: var(--muted); font-size: 13px; }.fraud-record-actions { display: flex; gap: 8px; margin-top: 20px; }.fraud-record-actions .btn { padding: 9px 13px; font-size: 12px; }
-.fraud-analysis-list { margin-top: 38px; }.fraud-analysis-list-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 14px; }.fraud-analysis-list-head h3 { margin-top: 3px; color: #111827; font-size: 24px; }.fraud-analysis-list-head > p { color: #526174; font-size: 13px; font-weight: 700; }.inline-fraud-analysis { margin-top: 16px; padding: 28px; border: 1px solid #ccd7e4; border-radius: 16px; background: #fff; box-shadow: 0 5px 18px rgba(21, 41, 65, .05); }.inline-fraud-analysis-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }.inline-fraud-analysis-head .eyebrow { color: #2369d9; }.inline-fraud-analysis-head h4 { margin-top: 4px; color: #111827; font-size: 21px; font-weight: 800; }.inline-fraud-analysis-head > b { padding: 6px 10px; border-radius: 99px; background: #dceaff; color: #1558bd; font-size: 12px; font-weight: 800; white-space: nowrap; }.inline-fraud-analysis-transaction { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 14px; padding: 10px 12px; border-radius: 9px; font-size: 12px; }.inline-fraud-analysis-transaction span { padding: 3px 7px; border-radius: 99px; font-size: 11px; font-weight: 800; }.inline-fraud-analysis-transaction b { color: #26364b; font-weight: 800; }.inline-fraud-analysis-transaction.blocked { background: #fff2f1; }.inline-fraud-analysis-transaction.blocked span { color: #a72d27; background: #ffe0de; }.inline-fraud-analysis-transaction.allowed { background: #eff9f3; }.inline-fraud-analysis-transaction.allowed span { color: #247454; background: #d7f1e1; }.inline-fraud-analysis-decision { margin: 12px 0; color: #344256; font-size: 14px; font-weight: 700; line-height: 1.75; }.inline-fraud-analysis-count { margin-bottom: 12px; color: #1558bd; font-size: 12px; font-weight: 800; }.inline-fraud-analysis .fds-signals { grid-template-columns: repeat(3, 1fr); gap: 12px; }.inline-fraud-analysis .fds-signal { padding: 16px; border-color: #d6e0ea; background: #f8fafc; }.inline-fraud-analysis .fds-signal h4 { color: #152238; font-size: 14px; font-weight: 800; }.inline-fraud-analysis .fds-signal > p { margin: 6px 0 10px; color: #435166; font-size: 13px; font-weight: 700; }.inline-fraud-analysis .fds-signal dl { gap: 9px; }.inline-fraud-analysis .fds-signal dt { color: #64748b; font-size: 11px; font-weight: 700; }.inline-fraud-analysis .fds-signal dd { color: #1e2c40; font-size: 12px; font-weight: 800; }.inline-fraud-analysis .fds-signal-top span { font-weight: 800; }.inline-fraud-analysis-toggle { display: block; margin: 18px auto 0; padding: 10px 14px; border: 0; border-radius: 10px; color: #1558bd; background: #dceaff; font-size: 13px; font-weight: 800; }.inline-fraud-analysis-toggle:hover { background: #c9dfff; }.inline-fraud-analysis-toggle span { margin-left: 4px; }
+.fraud-process h2 { margin-top: 3px; font-size: 24px; }
+.inline-fraud-analysis { margin-top: 16px; padding: 28px; border: 1px solid #ccd7e4; border-radius: 16px; background: #fff; box-shadow: 0 5px 18px rgba(21, 41, 65, .05); }.inline-fraud-analysis-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }.inline-fraud-analysis-head .eyebrow { color: #2369d9; }.inline-fraud-analysis-head h4 { margin-top: 4px; color: #111827; font-size: 21px; font-weight: 800; }.inline-fraud-analysis-head > b { padding: 6px 10px; border-radius: 99px; background: #dceaff; color: #1558bd; font-size: 12px; font-weight: 800; white-space: nowrap; }.inline-fraud-analysis-transaction { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 14px; padding: 10px 12px; border-radius: 9px; font-size: 12px; }.inline-fraud-analysis-transaction span { padding: 3px 7px; border-radius: 99px; font-size: 11px; font-weight: 800; }.inline-fraud-analysis-transaction b { color: #26364b; font-weight: 800; }.inline-fraud-analysis-transaction.blocked { background: #fff2f1; }.inline-fraud-analysis-transaction.blocked span { color: #a72d27; background: #ffe0de; }.inline-fraud-analysis-transaction.allowed { background: #eff9f3; }.inline-fraud-analysis-transaction.allowed span { color: #247454; background: #d7f1e1; }.inline-fraud-analysis-decision { margin: 12px 0; color: #344256; font-size: 14px; font-weight: 700; line-height: 1.75; }.inline-fraud-analysis-count { margin-bottom: 12px; color: #1558bd; font-size: 12px; font-weight: 800; }.inline-fraud-analysis .fds-signals { grid-template-columns: repeat(3, 1fr); gap: 12px; }.inline-fraud-analysis .fds-signal { padding: 16px; border-color: #d6e0ea; background: #f8fafc; }.inline-fraud-analysis .fds-signal h4 { color: #152238; font-size: 14px; font-weight: 800; }.inline-fraud-analysis .fds-signal > p { margin: 6px 0 10px; color: #435166; font-size: 13px; font-weight: 700; }.inline-fraud-analysis .fds-signal dl { gap: 9px; }.inline-fraud-analysis .fds-signal dt { color: #64748b; font-size: 11px; font-weight: 700; }.inline-fraud-analysis .fds-signal dd { color: #1e2c40; font-size: 12px; font-weight: 800; }.inline-fraud-analysis .fds-signal-top span { font-weight: 800; }.inline-fraud-analysis-toggle { display: block; margin: 18px auto 0; padding: 10px 14px; border: 0; border-radius: 10px; color: #1558bd; background: #dceaff; font-size: 13px; font-weight: 800; }.inline-fraud-analysis-toggle:hover { background: #c9dfff; }.inline-fraud-analysis-toggle span { margin-left: 4px; }
 .fraud-process { margin-top: 52px; padding: 30px; border-radius: 12px; background: var(--navy); }.fraud-process .eyebrow { color: #8db5ee; }.fraud-process h2 { color: #fff; margin-bottom: 20px; }.fraud-process ol { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; list-style: none; margin: 0; padding: 0; counter-reset: process; }.fraud-process li { position: relative; padding: 34px 14px 0; color: #c5d5e8; font-size: 12px; line-height: 1.6; counter-increment: process; }.fraud-process li::before { content: "0" counter(process); position: absolute; top: 0; left: 14px; color: #95b9eb; font: 600 11px var(--mono); }.fraud-process li:not(:last-child)::after { content: "→"; position: absolute; right: -9px; top: 30px; color: #7295c3; }
 
 .monthly-updated .btn { margin-top: 11px; padding: 8px 11px; font-size: 11.5px; }
@@ -3617,6 +3614,445 @@ input[type="range"] {
 .inline-fraud-analysis-transaction.review span { color: #9a6200; background: #ffe9b8; }
 /* 레벨 2 단계에서 월간 시나리오 점검으로 가는 링크. 헤더에서 빠진 /monthly-review 진입로. */
 .protection-stage-actions a.btn { text-decoration: none; }
+
+/* ── 서류를 알린 뒤의 보호 화면 (2026-09-07) ─────────────────────
+ * 지출설계서(.xd-*)의 시각 언어를 그대로 옮긴다. 카드 한 장에 메시지 하나, 큰 숫자 하나와
+ * 그 숫자를 설명하는 한 문장이 먼저 오고, 표 대신 목록 행으로 세부를 보여준다.
+ * .xd-* 규칙은 지출설계서 것이라 손대지 않고, 필요한 모양만 여기에 새 이름으로 둔다.
+ * 서류를 올리는 01·02 카드(.protection-stage, .care-document-*)는 위 규칙 그대로다. */
+
+.pr-col {
+  display: grid;
+  gap: 16px;
+  max-width: 920px;
+  margin: 34px auto 0;
+}
+
+.pr-group {
+  display: grid;
+  gap: 16px;
+}
+
+.pr-card {
+  background: var(--paper);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 26px 28px;
+  scroll-margin-top: 96px;
+}
+
+/* 03 카드는 안내 상자(.protection-guide) 안에 서므로 단계가 바뀔 때의 등장 동작을 이어받는다.
+   폭은 아래 카드 열과 같게 맞춘다. 넓은 화면에서 카드 왼쪽 끝이 어긋나 보이지 않아야 한다. */
+.pr-stage {
+  max-width: 920px;
+  margin: 22px auto 0;
+  animation: protection-stage-in 0.48s cubic-bezier(0.22, 0.75, 0.25, 1) both;
+}
+
+.pr-head {
+  padding: 6px 4px 0;
+}
+
+.pr-no {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.pr-card h2,
+.pr-head h2,
+.pr-card h3 {
+  font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
+  font-size: 24px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.015em;
+  margin: 8px 0 0;
+  word-break: keep-all;
+}
+
+.pr-head h2 {
+  font-size: 26px;
+}
+
+.pr-card h2 em,
+.pr-head h2 em,
+.pr-card h3 em {
+  font-style: normal;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.pr-card .pr-lede,
+.pr-head .pr-lede {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ink);
+  margin-top: 10px;
+  max-width: 44em;
+  word-break: keep-all;
+}
+
+.pr-head .pr-lede {
+  color: var(--muted);
+}
+
+.pr-card .pr-note {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin-top: 8px;
+  word-break: keep-all;
+}
+
+/* 상태 알약. 색 하나로 막았는지 통과했는지만 말한다. */
+.pr-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.pr-tag.on {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.pr-tag.on::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.pr-tag.blocked {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.pr-tag.review {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.pr-tag.allowed {
+  background: var(--line-soft);
+  color: var(--muted);
+}
+
+/* 목록 행: 왼쪽 라벨(+회색 둘째 줄), 오른쪽 값. 카드 안쪽 실선만 hairline. */
+.pr-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+
+.pr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.pr-row:first-child {
+  border-top: 0;
+}
+
+.pr-row-main {
+  min-width: 0;
+}
+
+.pr-row .l {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.pr-row .s {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-top: 2px;
+  word-break: keep-all;
+}
+
+.pr-val {
+  flex: none;
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  max-width: 55%;
+  word-break: keep-all;
+}
+
+.pr-val.muted {
+  color: var(--faint);
+  font-weight: 500;
+}
+
+/* 어디까지 왔고 다음에 무엇을 기다리는지. 끝난 칸·지금 칸·기다리는 칸을 색으로 나눈다. */
+.pr-steps {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+  display: grid;
+}
+
+.pr-steps li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.pr-steps .dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--line-soft);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+
+.pr-steps li.done .dot {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.pr-steps li.now .dot {
+  background: var(--blue);
+  color: #fff;
+}
+
+.pr-steps li.wait .dot {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.pr-steps li.gap {
+  min-height: 40px;
+  align-items: center;
+}
+
+.pr-steps .dot.line {
+  width: 2px;
+  height: 100%;
+  min-height: 40px;
+  border-radius: 0;
+  background: var(--line);
+  justify-self: center;
+}
+
+.pr-steps .l {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 28px;
+  word-break: keep-all;
+}
+
+.pr-steps .s {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.pr-steps li.now .l {
+  color: var(--blue);
+}
+
+/* 보호가 닿는 세 곳. 층 타일과 같은 옅은 바탕 하나씩. */
+.pr-scope {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.pr-scope > div {
+  border-radius: 16px;
+  padding: 16px 18px;
+  background: var(--line-soft);
+}
+
+.pr-scope .k {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pr-scope .v {
+  display: block;
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  word-break: keep-all;
+}
+
+.pr-scope p {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.pr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pr-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 13px;
+}
+
+/* 카드 아래 조용한 글자 링크. 버튼 두 개가 나란히 서는 것보다 가볍다. */
+.pr-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.pr-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.pr-link:hover {
+  text-decoration: underline;
+}
+
+.pr-more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+  background: none;
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.pr-more::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  margin-right: 4px;
+  transition: transform 0.15s ease;
+}
+
+.pr-more[aria-expanded="true"]::after {
+  transform: rotate(-135deg);
+}
+
+/* 판단 근거는 거래 카드 안에서 이어진다. 공용 블록(.inline-fraud-analysis)의 테두리·그림자를
+   벗겨 카드 안쪽 단락처럼 보이게 하고, 거래 한 줄은 위 목록과 겹치므로 감춘다. */
+.pr-evidence {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.pr-evidence .inline-fraud-analysis {
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.pr-evidence .inline-fraud-analysis-transaction {
+  display: none;
+}
+
+.pr-evidence .inline-fraud-analysis-decision {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.75;
+  color: var(--ink);
+  word-break: keep-all;
+}
+
+.pr-evidence .inline-fraud-analysis-count {
+  margin: 6px 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pr-evidence .fds-signal {
+  border-radius: 14px;
+  border-color: var(--line);
+  background: var(--bg);
+}
+
+.pr-evidence .inline-fraud-analysis-toggle {
+  margin-top: 14px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .pr-scope { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .pr-col { margin-top: 24px; }
+  .pr-card { padding: 22px 20px; border-radius: 16px; }
+  .pr-card h2, .pr-head h2, .pr-card h3 { font-size: 21px; }
+  .pr-row { flex-wrap: wrap; gap: 4px 12px; }
+  .pr-val { max-width: 100%; text-align: left; margin-left: 0; }
+  .pr-evidence .fds-signals { grid-template-columns: 1fr; }
+}
 
 /* ── 인터뷰: 금융 보호 영역 완료 후 판정 미리보기 ─ */
 .fds-step { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
