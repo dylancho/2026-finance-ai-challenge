@@ -19,6 +19,10 @@ import type { ProofKind } from "../../lib/types";
  *
  * 데이터는 main 의 것이다: 거래는 SCENARIOS/TOUR_SCENARIOS 를 scoreTransaction 이 인터뷰의
  * 보호 원칙(policyFromProfile)으로 채점하고, 둘러보기 중에는 김영수와 설문의 보호자(A07)를 쓴다.
+ *
+ * 2026-09-07 문구: 구조와 정보는 이지수의 것 그대로 두고 말만 바꿨다 (docs/writing-style.md).
+ * 해요체, 영어 소제목 제거, 레벨 1/2 → "1단계 · 보호 준비" / "2단계 · 보호자와 함께 승인",
+ * 포트폴리오 → 투자 자산, 리밸런싱 → 투자 비중 조정, 공동 승인 모드 리포트 → 함께 승인하는 방식.
  */
 
 /** 둘러보기가 아닐 때 4초마다 바뀌는 예시 이름 (fsd 원본의 순서 그대로). */
@@ -104,8 +108,8 @@ function TodayTransactions({
   return (
     <section className="fraud-record" aria-label="거래별 보호 판단">
       <div className="fraud-record-head">
-        <div><p className="eyebrow">TODAY&apos;S PROTECTION</p><h2>오늘의 거래</h2></div>
-        <span>{records.length}건 분석 완료</span>
+        <div><p className="eyebrow">오늘 살펴본 거래</p><h2>오늘의 거래</h2></div>
+        <span>{records.length}건 살펴봤어요</span>
       </div>
       <div className="fraud-record-grid">
         {records.map(({ tx, score }) => {
@@ -114,17 +118,17 @@ function TodayTransactions({
           return (
             <article className={`fraud-record-card ${isBlocked ? "blocked" : "allowed"}`} key={tx.transactionId}>
               <div className="fraud-record-status">
-                <span>{isBlocked ? "차단됨" : isReview ? "추가 확인 필요" : "정상 인정"}</span>
+                <span>{isBlocked ? "막았어요" : isReview ? "확인이 더 필요해요" : "평소대로예요"}</span>
                 <b>위험도 {score.risk_score}%</b>
               </div>
               <h3>
                 {isBlocked
                   ? score.policyNote
-                    ? "금액은 한도 안이지만, 선언한 원칙에 걸렸습니다."
-                    : "평소와 다른 신호가 동시에 감지됐습니다."
+                    ? "금액은 한도 안이지만, 내가 정한 원칙에 걸렸어요."
+                    : "평소와 다른 신호가 여러 개 함께 보였어요."
                   : isReview
-                    ? "일부 신호가 평소와 다릅니다."
-                    : "평소 패턴 안의 거래입니다."}
+                    ? "일부 신호가 평소와 달라요."
+                    : "평소 하던 대로의 거래예요."}
               </h3>
               <p>{tx.requestTime} · {tx.targetAccount} · {tx.amount.toLocaleString("ko-KR")}원</p>
               {/* 룰 점수만으로는 통과했을 거래를 원칙(S01·S02)이 막았을 때 그 이유를 카드에 바로 적는다. */}
@@ -135,8 +139,8 @@ function TodayTransactions({
       </div>
       <section className="fraud-analysis-list" aria-labelledby="fraud-analysis-title">
         <div className="fraud-analysis-list-head">
-          <div><p className="eyebrow">WHY THIS DECISION</p><h3 id="fraud-analysis-title">위험 분석 상세 정보</h3></div>
-          <p>각 거래를 평소 금융 패턴과 비교한 결과입니다.</p>
+          <div><p className="eyebrow">왜 이렇게 판단했나</p><h3 id="fraud-analysis-title">판단 근거</h3></div>
+          <p>거래마다 평소 돈 쓰는 방식과 비교한 결과예요.</p>
         </div>
         {records.map(({ tx, report }) => (
           <FraudAnalysisDetails
@@ -207,10 +211,10 @@ export default function FraudShieldDashboard() {
       ? `${name}님의 보호자`
       : "김하나 (자녀)";
   const guardianAside = guardianPerson
-    ? `${[guardianPerson.relation, `${guardianPerson.name}님`].filter(Boolean).join(" · ")}과 공동 승인 연결`
+    ? `${[guardianPerson.relation, `${guardianPerson.name}님`].filter(Boolean).join(" · ")}과 함께 승인해요`
     : touring
-      ? `${name}님의 보호자와 공동 승인 연결`
-      : "자녀 · 김하나님과 공동 승인 연결";
+      ? `${name}님의 보호자와 함께 승인해요`
+      : "자녀 · 김하나님과 함께 승인해요";
 
   // 룰 점수는 클라이언트에서 바로 나온다. 서버는 같은 점수 위에 Claude 해설을 얹는다.
   // 거래가 화면에 나타난 뒤에 한 번만 요청하고, 서버가 죽거나 키가 없어도 룰 문장으로 완주한다.
@@ -263,21 +267,22 @@ export default function FraudShieldDashboard() {
     <div className="fraud-page shell-wide">
       <section className="fraud-intro">
         <div>
-          <p className="eyebrow">NEXT SAFE · FINANCIAL PROTECTION</p>
+          <p className="eyebrow">금융 보호</p>
           <h1>{name}님의 금융 보호</h1>
-          <p>{careStatusUpdated ? "치매·장기요양 상태 업데이트가 확인되어 보호 서비스가 작동 중입니다." : "현재 보호 상태와 서비스가 작동하는 조건을 단계별로 안내합니다."}</p>
+          <p>{careStatusUpdated ? "치매·장기요양 상태를 확인했어요. 보호가 작동하고 있어요." : "지금 보호 상태와 보호가 시작되는 조건을 순서대로 안내해요."}</p>
         </div>
         <aside>
-          <span>현재 보호 상태</span>
-          <b>{careStatusUpdated ? "레벨 2 · 보호 활성화" : "레벨 1 · 보호 준비"}</b>
-          <p>{careStatusUpdated ? guardianAside : "등급 업데이트를 기다리는 중"}</p>
+          <span>지금 보호 상태</span>
+          {/* 레벨 1/2 라는 이름은 두되 무엇인지 말로 적는다 */}
+          <b>{careStatusUpdated ? "2단계 · 보호자와 함께 승인" : "1단계 · 보호 준비"}</b>
+          <p>{careStatusUpdated ? guardianAside : "진단서나 등급 확인을 기다리고 있어요"}</p>
         </aside>
       </section>
 
       <section className="protection-guide" aria-labelledby="protection-guide-title">
         <div className="protection-guide-head">
-          <div><p className="eyebrow">HOW IT WORKS</p><h2 id="protection-guide-title">한 페이지에서 보호를 시작하세요</h2></div>
-          <p>현재 상태를 확인하고, 필요한 경우 돌봄 상태를 업데이트하면 같은 화면에서 레벨 2 보호 서비스가 시작됩니다.</p>
+          <div><p className="eyebrow">보호가 시작되는 순서</p><h2 id="protection-guide-title">이 화면에서 보호를 시작해요</h2></div>
+          <p>지금 상태를 확인하고, 필요하면 돌봄 상태를 알려 주세요. 같은 화면에서 2단계 보호가 시작돼요.</p>
         </div>
         <div className="protection-progress" aria-label={`보호 단계 ${guideStep + 1} / 3`}>
           <span className={guideStep >= 0 ? "done" : ""}>01</span><i>→</i>
@@ -287,28 +292,28 @@ export default function FraudShieldDashboard() {
 
         {guideStep === 0 && (
           <article className="protection-stage" key="level-one">
-            <span>01 · LEVEL 1 · 보호 준비</span>
-            <h3>내 금융 원칙을 미리 학습하는 단계</h3>
-            <p>거래 계좌, 이용 시간, 자산 운용 원칙과 보호자 정보를 정리합니다. 이 단계에서는 AI가 제안을 준비하지만 거래를 제한하거나 포트폴리오를 변경하지 않습니다.</p>
+            <span>01 · 1단계 · 보호 준비</span>
+            <h3>앱이 내 금융 원칙을 미리 익히는 단계</h3>
+            <p>거래 계좌, 이용 시간, 투자 원칙, 보호자 정보를 정리해요. 이 단계에서 앱은 제안만 준비해요. 거래를 막거나 투자 자산을 바꾸지 않아요.</p>
             <button className="btn" onClick={() => setGuideStep(1)}>다음 단계로 <i aria-hidden>↓</i></button>
           </article>
         )}
 
         {guideStep === 1 && (
           <article className="protection-stage protection-document-stage" key="care-update">
-            <span>02 · 상태 업데이트</span>
-            <h3>치매·장기요양 등급 문서를 업데이트하세요</h3>
-            <p>업데이트된 돌봄 상태를 기준으로 보호자 공동 승인 모드가 시작됩니다. 이 단계부터 위험 상황에 맞는 승인 절차를 준비합니다.</p>
+            <span>02 · 돌봄 상태 알리기</span>
+            <h3>치매나 장기요양 등급 서류를 알려 주세요</h3>
+            <p>알려 주신 돌봄 상태를 기준으로 보호자와 함께 승인하는 방식이 시작돼요. 이 단계부터 위험한 상황에 맞는 승인 절차를 준비해요.</p>
             <div className="care-document-update">
               <div>
                 <label htmlFor="care-status">확인된 상태</label>
                 <select id="care-status" value={careStatus} onChange={(e) => setCareStatus(e.target.value)}>
-                  <option value="" disabled>상태를 선택하세요</option>
+                  <option value="" disabled>상태를 골라 주세요</option>
                   {CARE_STATUSES.map((s) => <option key={s.label} value={s.label}>{s.label}</option>)}
                 </select>
               </div>
               <div>
-                <label htmlFor="care-document">증빙 문서</label>
+                <label htmlFor="care-document">서류</label>
                 <label className="care-document-upload" htmlFor="care-document">
                   <span>파일 선택</span>
                   <small>{careFileName || "진단서 또는 장기요양 인정서"}</small>
@@ -316,29 +321,29 @@ export default function FraudShieldDashboard() {
                 </label>
               </div>
             </div>
-            <p className="care-document-note">업로드한 문서는 이 데모에서 실제로 저장·전송되지 않으며, 보호 서비스 전환 흐름을 확인하기 위한 입력입니다.</p>
+            <p className="care-document-note">올린 서류는 이 예시 화면에서 저장하거나 보내지 않아요. 보호가 시작되는 흐름을 보기 위한 입력이에요.</p>
             {/* 상태를 고르기 전에는 남길 증빙 종류가 없으므로 완료를 막는다. */}
-            <button className="btn" disabled={!careStatus} onClick={completeCareUpdate}>문서 업데이트 완료 · 보호 시작 <i aria-hidden>↓</i></button>
+            <button className="btn" disabled={!careStatus} onClick={completeCareUpdate}>서류 확인 완료 · 보호 시작 <i aria-hidden>↓</i></button>
           </article>
         )}
 
         {guideStep === 2 && (
           <article className={`protection-stage ${careStatusUpdated ? "active" : ""}`} key="level-two">
-            <span>03 · LEVEL 2 · 보호자 공동 승인</span>
-            <h3>{careStatusUpdated ? "보호 서비스가 작동 중입니다" : "문서 업데이트 후 보호 서비스가 시작됩니다"}</h3>
-            <p>{careStatusUpdated ? "AI가 이상거래와 포트폴리오 위험 신호를 감지하고, 본인·보호자·전문가에게 상황에 맞는 최종 승인을 요청합니다." : "레벨 2에서 제공하는 공동 승인 리포트와 이상거래 보호를 확인할 수 있습니다. 먼저 2단계에서 치매·장기요양 등급 문서를 업데이트해 주세요."}</p>
+            <span>03 · 2단계 · 보호자와 함께 승인</span>
+            <h3>{careStatusUpdated ? "보호가 작동하고 있어요" : "서류를 알려 주시면 보호가 시작돼요"}</h3>
+            <p>{careStatusUpdated ? "앱이 평소와 다른 거래와 투자 자산의 위험 신호를 살펴요. 본인, 보호자, 전문가에게 상황에 맞는 최종 승인을 요청해요." : "2단계에서는 함께 승인하는 방식과 평소와 다른 거래 보호를 볼 수 있어요. 먼저 02에서 치매나 장기요양 등급 서류를 알려 주세요."}</p>
             {careStatusUpdated && (
               <div className="level-two-scope">
-                <article><span>일상 대리</span><b>정기 지출은 원칙대로 관리</b><p>예외 거래만 보호자와 공동 승인합니다.</p></article>
-                <article><span>포트폴리오 구성</span><b>AI가 초안을 제안</b><p>매수·매도는 보호자가 승인한 뒤 진행합니다.</p></article>
-                <article><span>상속 연계</span><b>자산 이전 원칙을 기록</b><p>실제 이전은 전문가 확인과 승인을 거칩니다.</p></article>
+                <article><span>일상 지출</span><b>정기 지출은 원칙대로</b><p>예외 거래만 보호자와 함께 승인해요.</p></article>
+                <article><span>투자 자산</span><b>앱이 초안을 제안</b><p>사고파는 것은 보호자가 승인한 뒤 진행해요.</p></article>
+                <article><span>상속 준비</span><b>자산 이전 원칙을 기록</b><p>실제 이전은 전문가 확인과 승인을 거쳐요.</p></article>
               </div>
             )}
             <div className="protection-stage-actions">
-              <button className="btn outline" onClick={() => setGuideStep(1)}>← 문서 업데이트 단계</button>
+              <button className="btn outline" onClick={() => setGuideStep(1)}>← 서류 단계로</button>
               {/* 헤더에서 빠진 월간 시나리오 점검 진입로. 공동 승인 원칙은 여기서 매달 고친다. */}
-              <a className="btn outline" href="/monthly-review">AI 월간 시나리오 점검 →</a>
-              {careStatusUpdated && <b className="protection-stage-next">바로 아래에서 오늘의 거래를 확인하세요</b>}
+              <a className="btn outline" href="/monthly-review">매달 하는 상황 점검 →</a>
+              {careStatusUpdated && <b className="protection-stage-next">바로 아래에서 오늘의 거래를 확인해 주세요</b>}
             </div>
           </article>
         )}
@@ -353,34 +358,34 @@ export default function FraudShieldDashboard() {
           />
 
           <section className="fraud-learning" id="level-two-content">
-            <div><span>AI 학습 항목</span><b>거래 계좌</b><b>이용 시간</b><b>인증 행동</b><b>포트폴리오 원칙</b><b>돌봄 상태</b></div>
+            <div><span>앱이 익힌 것</span><b>거래 계좌</b><b>이용 시간</b><b>비밀번호 입력 습관</b><b>투자 원칙</b><b>돌봄 상태</b></div>
           </section>
 
           <section className="portfolio-report" aria-labelledby="portfolio-report-title">
             <div className="portfolio-report-head">
               <div>
-                <p className="eyebrow">LEVEL 2 · GUARDIAN CO-APPROVAL</p>
-                <h2 id="portfolio-report-title">보호자 공동 승인 모드 리포트</h2>
-                <p>AI는 제안과 위험 감지만 수행하며, 포트폴리오 변경은 상황에 맞는 사람이 최종 승인해야 실행됩니다.</p>
+                <p className="eyebrow">2단계 · 보호자와 함께 승인</p>
+                <h2 id="portfolio-report-title">함께 승인하는 방식</h2>
+                <p>앱은 제안하고 위험 신호를 살피기만 해요. 투자 자산을 바꾸는 일은 상황에 맞는 사람이 최종 승인해야 진행돼요.</p>
               </div>
-              <span className="portfolio-report-status"><i /> 현재 보호 서비스 작동 중</span>
+              <span className="portfolio-report-status"><i /> 지금 보호가 작동 중</span>
             </div>
             <div className="portfolio-report-summary">
-              <b>AI 제안 · 보호자 승인 · 필요 시 전문가 확인</b>
-              <p>일상 지출, 포트폴리오 조정, 상속 관련 자산 이전 모두 사전에 정한 공동 승인 원칙에 따라 진행됩니다.</p>
+              <b>앱이 제안 · 보호자가 승인 · 필요하면 전문가 확인</b>
+              <p>일상 지출, 투자 비중 조정, 상속 관련 자산 이전 모두 미리 정한 승인 원칙대로 진행해요.</p>
               <button className="btn outline sm" onClick={() => setPortfolioExpanded((expanded) => !expanded)} aria-expanded={portfolioExpanded}>
-                {portfolioExpanded ? "간략히 보기" : "자세히 보기"}
+                {portfolioExpanded ? "간단히 보기" : "자세히 보기"}
               </button>
             </div>
             {portfolioExpanded && (
               <div className="portfolio-approval-grid">
-                <article><span>01 · 평시 / 건강기</span><h3>본인의 정기 승인</h3><p><b>AI</b> 인터뷰 데이터와 시장 상황을 학습해 리밸런싱 안을 제안합니다.</p><p><b>최종 승인</b> 본인이 6개월 또는 1년에 한 번 리포트를 검토한 뒤 적용합니다.</p></article>
-                <article><span>02 · 시장 급변기</span><h3>PB 또는 AI 컨설턴트 검증</h3><p><b>AI</b> 금융위기·전쟁·금리 급변 같은 블랙스완 위험 신호를 탐지합니다.</p><p><b>최종 승인</b> 전문 자산관리사 또는 금융 전문가의 2차 검증과 본인 동의 후 수정안을 적용합니다.</p></article>
-                <article><span>03 · 인지 저하 초기</span><h3>보호자의 리밸런싱 승인</h3><p><b>AI</b> NEXT Plan 원칙에 따라 안전 자산 전환 리포트를 자동으로 만듭니다.</p><p><b>최종 승인</b> 사전에 지정한 보호자(자녀·배우자)가 주문 전 최종 승인합니다.</p></article>
-                <article><span>04 · 중증기 / 특수 상황</span><h3>신탁사·법적 후견인 서면 승인</h3><p><b>AI</b> 병원비·요양비에 따른 대규모 현금화 필요액을 계산합니다.</p><p><b>최종 승인</b> 신탁사 또는 법적 후견인이 증빙 서류를 확인한 뒤 승인합니다.</p></article>
+                <article><span>01 · 건강할 때</span><h3>본인이 정기적으로 승인</h3><p><b>AI</b> 인터뷰 답과 시장 상황을 익혀 투자 비중 조정안을 제안해요.</p><p><b>최종 승인</b> 본인이 6개월이나 1년에 한 번 보고서를 보고 적용해요.</p></article>
+                <article><span>02 · 시장이 크게 흔들릴 때</span><h3>전문가가 한 번 더 확인</h3><p><b>AI</b> 금융위기, 전쟁, 금리 급변 같은 큰 위험 신호를 찾아요.</p><p><b>최종 승인</b> 자산관리 전문가가 한 번 더 확인하고, 본인이 동의한 뒤 수정안을 적용해요.</p></article>
+                <article><span>03 · 판단이 흐려지기 시작할 때</span><h3>보호자가 투자 비중 조정을 승인</h3><p><b>AI</b> 설계서 원칙대로 안전한 자산으로 옮기는 보고서를 자동으로 만들어요.</p><p><b>최종 승인</b> 미리 정한 보호자(자녀·배우자)가 주문 전에 최종 승인해요.</p></article>
+                <article><span>04 · 중증이거나 특별한 상황</span><h3>신탁회사나 법적 후견인이 서면으로 승인</h3><p><b>AI</b> 병원비와 요양비에 필요한 현금이 얼마인지 계산해요.</p><p><b>최종 승인</b> 신탁회사나 법적 후견인이 서류를 확인한 뒤 승인해요.</p></article>
               </div>
             )}
-            {portfolioExpanded && <p className="portfolio-report-note">리밸런싱·매수·매도는 이 서비스에서 자동 집행되지 않으며, 필요한 승인 절차를 거친 초안으로만 제시됩니다.</p>}
+            {portfolioExpanded && <p className="portfolio-report-note">투자 비중 조정과 사고파는 일은 이 서비스가 자동으로 실행하지 않아요. 필요한 승인을 거친 초안으로만 보여 드려요.</p>}
           </section>
         </>
       )}

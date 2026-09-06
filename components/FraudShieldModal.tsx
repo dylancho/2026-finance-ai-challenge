@@ -32,9 +32,9 @@ export interface FraudReportUI {
 interface Props { report: FraudReportUI | null; onClose?: () => void }
 
 const STATUS: Record<FraudStatus, { label: string; className: string }> = {
-  BLOCKED: { label: "이체 일시 차단", className: "blocked" },
-  REVIEW: { label: "추가 확인 필요", className: "review" },
-  ALLOW: { label: "거래 승인", className: "allow" },
+  BLOCKED: { label: "이체를 잠시 멈췄어요", className: "blocked" },
+  REVIEW: { label: "확인이 더 필요해요", className: "review" },
+  ALLOW: { label: "평소대로 진행해요", className: "allow" },
 };
 
 /** 서버 없이도 같은 화면을 그리기 위한 룰 기반 리포트. API 가 실패하면 이걸로 대체한다. */
@@ -57,9 +57,9 @@ export function ruleReport(tx: FraudTransaction, guardian = "김하나", policy?
 
 /** 인라인 분석 상단의 거래 한 줄 라벨. 모달의 STATUS 와 달리 거래 자체를 가리킨다. */
 const TRANSACTION_LABEL: Record<FraudStatus, { label: string; className: string }> = {
-  BLOCKED: { label: "차단된 거래", className: "blocked" },
-  REVIEW: { label: "추가 확인이 필요한 거래", className: "review" },
-  ALLOW: { label: "정상 인정 거래", className: "allowed" },
+  BLOCKED: { label: "막은 거래", className: "blocked" },
+  REVIEW: { label: "확인이 더 필요한 거래", className: "review" },
+  ALLOW: { label: "평소대로 진행한 거래", className: "allowed" },
 };
 
 /**
@@ -67,6 +67,7 @@ const TRANSACTION_LABEL: Record<FraudStatus, { label: string; className: string 
  * 금융 보호 화면은 "오늘의 거래" 카드 아래에 거래마다 이 블록을 나열한다.
  * 기본은 주요 근거 3개만 보이고, 토글로 나머지를 연다 — 판단 이유를 찾으러 클릭할 필요가 없어야 한다.
  * REVIEW(추가 확인)는 그녀의 원본에 없던 상태라 라벨과 색을 따로 둔다.
+ * 2026-09-07 문구: 해요체, 영어 소제목 제거 (docs/writing-style.md). 구조는 그대로.
  */
 export function FraudAnalysisDetails({
   report,
@@ -81,17 +82,17 @@ export function FraudAnalysisDetails({
   const label = TRANSACTION_LABEL[report.status];
   const rest = report.signals.length - 3;
   return (
-    <section className="inline-fraud-analysis" aria-label="위험 분석 상세 정보">
+    <section className="inline-fraud-analysis" aria-label="판단 근거">
       <div className={`inline-fraud-analysis-transaction ${label.className}`}>
         <span>{label.label}</span>
         <b>{report.transaction.requestTime} · {report.transaction.targetAccount} · {report.transaction.amount.toLocaleString("ko-KR")}원</b>
       </div>
       <p className="inline-fraud-analysis-decision">{report.decision}</p>
-      <p className="inline-fraud-analysis-count">{expanded ? `전체 근거 ${report.signals.length}개` : "주요 근거 3개"}</p>
+      <p className="inline-fraud-analysis-count">{expanded ? `근거 ${report.signals.length}개 전부` : "주요 근거 3개"}</p>
       <div className="fds-signals">
         {signals.map((signal) => (
           <article className={`fds-signal ${signal.level}`} key={signal.key}>
-            <div className="fds-signal-top"><h4>{signal.label}</h4><span>{signal.score ? `+${signal.score}` : "정상"}</span></div>
+            <div className="fds-signal-top"><h4>{signal.label}</h4><span>{signal.score ? `+${signal.score}` : "평소대로"}</span></div>
             <p>{signal.detail}</p>
             <dl>
               <div><dt>이번 거래</dt><dd>{signal.observed}</dd></div>
@@ -102,7 +103,7 @@ export function FraudAnalysisDetails({
       </div>
       {rest > 0 && onToggle && (
         <button className="inline-fraud-analysis-toggle" onClick={onToggle} aria-expanded={expanded}>
-          {expanded ? "주요 근거만 보기" : `나머지 근거 ${rest}개 자세히 보기`} <span aria-hidden>{expanded ? "↑" : "↓"}</span>
+          {expanded ? "주요 근거만 보기" : `나머지 근거 ${rest}개 보기`} <span aria-hidden>{expanded ? "↑" : "↓"}</span>
         </button>
       )}
     </section>
@@ -125,8 +126,8 @@ export default function FraudShieldModal({ report, onClose }: Props) {
     return createPortal(
       <div className="backdrop" role="dialog" aria-modal="true">
         <section className="fds-modal fds-error">
-          <p className="eyebrow">SMART FRAUD SHIELD</p>
-          <h2>분석을 완료하지 못했습니다.</h2>
+          <p className="eyebrow">금융 보호</p>
+          <h2>분석을 마치지 못했어요.</h2>
           <p>{report.error}</p>
           <button className="btn" onClick={onClose}>닫기</button>
         </section>
@@ -140,12 +141,12 @@ export default function FraudShieldModal({ report, onClose }: Props) {
   const aiNarrated = report.narrator && report.narrator !== "rule";
 
   return createPortal(
-    <div className="backdrop" role="dialog" aria-modal="true" aria-label="스마트 이상거래 분석 결과">
+    <div className="backdrop" role="dialog" aria-modal="true" aria-label="평소와 다른 거래 분석 결과">
       <section className="fds-modal">
         <header className="fds-head">
           <div>
-            <p className="eyebrow">SMART FRAUD SHIELD · 실시간 맥락 분석{aiNarrated ? " · AI 해설" : ""}</p>
-            <h2>단일 한도가 아닌, 거래 맥락을 확인했습니다.</h2>
+            <p className="eyebrow">금융 보호 · 거래 상황 분석{aiNarrated ? " · AI 해설" : ""}</p>
+            <h2>금액 한도만이 아니라 거래 상황을 함께 봤어요.</h2>
           </div>
           <button className="fds-close" onClick={onClose} aria-label="닫기">×</button>
         </header>
@@ -159,10 +160,10 @@ export default function FraudShieldModal({ report, onClose }: Props) {
         </div>
 
         <section className="fds-transaction" aria-label="거래 정보">
-          <div><span>요청 금액</span><b>{report.transaction.amount.toLocaleString("ko-KR")}원</b></div>
-          <div><span>수취 계좌</span><b>{report.transaction.targetAccount}</b></div>
+          <div><span>보내려는 금액</span><b>{report.transaction.amount.toLocaleString("ko-KR")}원</b></div>
+          <div><span>받는 계좌</span><b>{report.transaction.targetAccount}</b></div>
           <div><span>요청 시각</span><b>{report.transaction.requestTime}</b></div>
-          <div><span>거래 ID</span><b>{report.transaction.transactionId}</b></div>
+          <div><span>거래 번호</span><b>{report.transaction.transactionId}</b></div>
         </section>
 
         {pending && (
@@ -170,37 +171,37 @@ export default function FraudShieldModal({ report, onClose }: Props) {
             <div>
               <span className="fds-pending-dot" />
               <div>
-                <p>보호자 승인 대기</p>
-                <b>{guardian}님에게 비상 승인 요청을 보냈습니다.</b>
+                <p>보호자 확인을 기다리는 중</p>
+                <b>{guardian}님에게 확인 요청을 보냈어요.</b>
                 <small>
                   {report.guardian_message
                     ? `보낸 내용: ${report.guardian_message}`
                     : resendCount
-                      ? `요청을 ${resendCount}회 다시 보냈습니다.`
-                      : "보호자 확인 전까지 이체와 출금은 제한됩니다."}
+                      ? `요청을 ${resendCount}번 다시 보냈어요.`
+                      : "보호자가 확인할 때까지 이체와 출금을 멈춰요."}
                 </small>
               </div>
             </div>
             <div className="fds-approval-actions">
               <button className="btn outline sm" onClick={() => setResendCount((c) => c + 1)}>
-                보호자 승인 요청 다시 보내기{resendCount ? ` (${resendCount})` : ""}
+                보호자에게 다시 요청하기{resendCount ? ` (${resendCount})` : ""}
               </button>
               <button className="btn sm" onClick={() => setChecked(true)}>거래 상태 확인</button>
             </div>
-            {checked && <p className="fds-check-result">현재 상태: 거래 동결 유지 · 보호자 승인 대기 중</p>}
+            {checked && <p className="fds-check-result">지금 상태: 거래를 계속 멈춰 두고 있어요 · 보호자 확인을 기다리는 중</p>}
           </section>
         )}
 
         <section className="fds-analysis">
           <button className="fds-detail-toggle" onClick={() => setShowDetails((v) => !v)} aria-expanded={showDetails}>
-            <span><p className="eyebrow">WHY THIS DECISION</p><h3>위험 분석 상세 정보</h3></span>
+            <span><p className="eyebrow">왜 이렇게 판단했나</p><h3>판단 근거</h3></span>
             <b>{showDetails ? "접기 −" : "펼치기 +"}</b>
           </button>
           {showDetails && (
             <div className="fds-signals">
               {report.signals.map((signal) => (
                 <article className={`fds-signal ${signal.level}`} key={signal.key}>
-                  <div className="fds-signal-top"><h4>{signal.label}</h4><span>{signal.score ? `+${signal.score}` : "정상"}</span></div>
+                  <div className="fds-signal-top"><h4>{signal.label}</h4><span>{signal.score ? `+${signal.score}` : "평소대로"}</span></div>
                   <p>{signal.detail}</p>
                   <dl>
                     <div><dt>이번 거래</dt><dd>{signal.observed}</dd></div>
@@ -214,9 +215,9 @@ export default function FraudShieldModal({ report, onClose }: Props) {
 
         <footer className="fds-footer">
           <p>
-            <b>자동 조치</b> · {pending ? "거래 일시 정지 → 보호자 알림 → 보호자가 허용하면 이체 재개" : "정상 처리 · 학습 기준선에 반영"}
+            <b>앱이 한 일</b> · {pending ? "거래를 잠시 멈추고 보호자에게 알렸어요. 보호자가 허용하면 이체를 다시 진행해요" : "평소대로 처리하고, 평소 기준에 반영했어요"}
           </p>
-          <button className="btn" onClick={onClose}>분석 결과 확인</button>
+          <button className="btn" onClick={onClose}>확인했어요</button>
         </footer>
       </section>
     </div>,

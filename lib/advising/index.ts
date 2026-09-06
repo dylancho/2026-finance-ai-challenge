@@ -22,6 +22,7 @@ export {
   EVENTS,
   evaluateEvent,
   windfallAmountOf,
+  runoutLabel,
   yearsLabel,
 } from "./evaluate";
 export {

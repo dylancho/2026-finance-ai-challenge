@@ -1,5 +1,5 @@
 import type { Advice, AdviceNarration } from "./types";
-import { EVENT_META, yearsLabel } from "./evaluate";
+import { EVENT_META, runoutLabel } from "./evaluate";
 import { won } from "../format";
 
 /**
@@ -27,27 +27,28 @@ export function ruleAdviceNarration(advice: Advice): AdviceNarration {
   const hasOpen = years.some((y) => y === null);
   const lo = finite.length ? Math.min(...finite) : null;
   const hi = finite.length ? Math.max(...finite) : null;
+  // "사이" 는 받침이 없어 "예요", "N년·N원" 은 받침이 있어 "이에요". 조사를 문장 조각 안에 둔다.
   const runwayText = !finite.length
-    ? "모두 30년 이상"
+    ? `선택지 ${candidates.length}가지 모두 30년 뒤에도 자산이 남아요.`
     : !hasOpen && lo === hi
-      ? `모두 약 ${lo}년`
-      : `${lo}년에서 ${hasOpen ? "30년 이상" : `${hi}년`} 사이`;
+      ? `선택지 ${candidates.length}가지 모두 약 ${lo}년 뒤에 자산이 바닥나요.`
+      : `선택지 ${candidates.length}가지에서 자산이 바닥나는 때는 ${lo}년에서 ${hasOpen ? "30년 이상" : `${hi}년`} 사이예요.`;
   const exposureText =
-    minEx === maxEx ? `모두 ${won(minEx)}` : `${won(minEx)}에서 ${won(maxEx)} 사이`;
+    minEx === maxEx ? `모두 ${won(minEx)}이에요.` : `${won(minEx)}에서 ${won(maxEx)} 사이예요.`;
   const summary =
-    `후보 ${candidates.length}개의 소진 시점은 ${runwayText}이고, ` +
-    `${meta.exposureLabel}은 ${exposureText}입니다. ` +
-    (doNothing ? `'${doNothing.title}'도 같은 잣대로 나란히 두었습니다. ` : "") +
-    "어느 쪽도 권하지 않습니다. 되돌릴 수 있는지부터 보시는 것도 한 방법입니다.";
+    `${runwayText} ` +
+    `${meta.exposureLabel}은 ${exposureText} ` +
+    (doNothing ? `'${doNothing.title}'도 같은 잣대로 나란히 두었어요. ` : "") +
+    "어느 쪽도 권하지 않아요. 되돌릴 수 있는지부터 보는 것도 한 방법이에요.";
 
   const tradeoffs: AdviceNarration["tradeoffs"] = {};
   for (const c of candidates) {
     tradeoffs[c.id] = {
       text:
-        `소진 시점 ${yearsLabel(c.impact.runwayYears ?? null)}, ${meta.exposureLabel} ${won(c.impact.riskExposure ?? 0)}. ` +
+        `${runoutLabel(c.impact.runwayYears ?? null)}. ${meta.exposureLabel}은 ${won(c.impact.riskExposure ?? 0)}이에요. ` +
         (c.reversible
-          ? "되돌릴 수 있는 조치입니다."
-          : "되돌리기 어렵습니다. 정하기 전에 지정한 사람과 한 번 확인하는 편이 안전합니다."),
+          ? "되돌릴 수 있는 조치예요."
+          : "되돌리기 어려워요. 정하기 전에 지정한 사람과 한 번 확인하는 편이 안전해요."),
       source: "rule",
     };
   }
@@ -55,8 +56,8 @@ export function ruleAdviceNarration(advice: Advice): AdviceNarration {
   const contrastNote = advice.contrast
     ? {
         text:
-          `정해 둔 것은 '${advice.contrast.declared}', 이력은 '${advice.contrast.observed}'입니다. ` +
-          "둘이 어긋난다면 급할 때의 선택은 원칙보다 그때 기분을 따라갈 수 있습니다.",
+          `정해 둔 것은 '${advice.contrast.declared}'예요. 실제로 해 온 것은 위에 적은 대로예요. ` +
+          "둘이 어긋나면 급할 때의 선택은 원칙보다 그때 기분을 따라갈 수 있어요.",
         source: "rule" as const,
       }
     : undefined;

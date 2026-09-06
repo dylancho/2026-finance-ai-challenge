@@ -18,27 +18,27 @@ export interface RuleReview {
 export const RULE_OPTIONS: Record<RuleChoice, { title: string; description: string; rule: string }> = {
   guardian: {
     title: "보호자 승인 후 진행",
-    description: "보호자가 거래 맥락을 확인한 뒤에만 진행합니다.",
-    rule: "신규 개인 계좌로 300만원 이상 송금은 보호자 승인 후 진행",
+    description: "보호자가 무슨 거래인지 확인한 뒤에만 진행해요.",
+    rule: "처음 보는 개인 계좌로 300만원 이상 보낼 때는 보호자가 승인한 뒤 진행",
   },
   block: {
     title: "금액과 관계없이 우선 차단",
-    description: "신규 개인 계좌 송금은 모두 멈추고 확인을 요청합니다.",
-    rule: "신규 개인 계좌 송금은 금액과 관계없이 우선 차단",
+    description: "처음 보는 개인 계좌로 보내는 돈은 모두 멈추고 확인을 요청해요.",
+    rule: "처음 보는 개인 계좌로 보낼 때는 금액과 관계없이 먼저 막고 확인",
   },
   reauth: {
     title: "본인 재인증 후 진행",
-    description: "본인의 추가 인증이 성공하면 거래를 다시 허용합니다.",
-    rule: "신규 개인 계좌 송금은 본인 재인증 성공 후 진행",
+    description: "본인이 한 번 더 인증에 성공하면 거래를 다시 허용해요.",
+    rule: "처음 보는 개인 계좌로 보낼 때는 본인이 한 번 더 인증한 뒤 진행",
   },
 };
 
 export const RULE_CHOICES = Object.keys(RULE_OPTIONS) as RuleChoice[];
 
 export const RULE_SCENARIO = {
-  title: "오랫동안 연락이 없던 지인이 1,200만원을 급히 빌려 달라고 요청했습니다.",
+  title: "오랫동안 연락이 없던 지인이 1,200만원을 급히 빌려 달라고 했어요.",
   body: (name: string) =>
-    `수취 계좌는 평소 거래 이력이 없는 신규 개인 계좌입니다. 나중에 ${name}님이 이 거래를 직접 판단하기 어려운 상태라면, NEXT는 어떻게 처리해야 할까요?`,
+    `받는 계좌는 한 번도 보낸 적 없는 개인 계좌예요. 나중에 ${name}님이 이 거래를 직접 판단하기 어려운 상태라면, NEXT는 어떻게 해야 할까요?`,
 };
 
 export function currentMonth(): string {
