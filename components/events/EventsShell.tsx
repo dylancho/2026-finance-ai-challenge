@@ -344,7 +344,7 @@ export default function EventsShell() {
                 <div className="c">{d.basis[0]}</div>
               </div>
               {d.clause && (
-                <Link href="/plan" className="btn outline sm">
+                <Link href={clauseHref(d.clause)} className="btn outline sm">
                   {DOC_PATH[d.clause.doc]} {d.clause.ref}
                 </Link>
               )}
