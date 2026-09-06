@@ -42,7 +42,7 @@ export const futureQuestions: Question[] = [
     max: 15_000_000,
     step: 100_000,
     presets: [500_000, 1_000_000, 2_000_000, 3_000_000],
-    mapsTo: [{ doc: "expense", clause: "제6조", label: "지속가능성 추정" }],
+    mapsTo: [{ doc: "expense", clause: "제6조", label: "자산이 얼마나 버티는지" }],
   },
 
   /* ── B-2 신탁 대상과 목적 ──────────────────────── */
@@ -96,7 +96,7 @@ export const futureQuestions: Question[] = [
       { value: "designee", label: "내가 지정한 사람의 판단 + 금융기관 확인" },
       { value: "self", label: "내가 미리 요청했을 때만" },
     ],
-    mapsTo: [{ doc: "trust", clause: "제4조", label: "지급개시 트리거" }],
+    mapsTo: [{ doc: "trust", clause: "제4조", label: "지급 시작 조건" }],
   },
   {
     id: "B06",
@@ -144,7 +144,7 @@ export const futureQuestions: Question[] = [
       { value: "hospital", label: "정기 통원 치료비" },
       { value: "support", label: "가족 정기 지원" },
     ],
-    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 매트릭스" }],
+    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 목록" }],
   },
 
   /* ── B-5 자산 운용과 권한 ──────────────────────── */

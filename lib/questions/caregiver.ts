@@ -38,7 +38,7 @@ export const caregiverQuestions: Question[] = [
       { value: "hospital", label: "입원 중이거나 요양시설에 계세요" },
       { value: "none", label: "특별한 변화는 아직 없어요" },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "제1조", label: "의사능력 판단 근거" }],
+    mapsTo: [{ doc: "guardianship", clause: "제1조", label: "결정 능력 판단 근거" }],
   },
   {
     id: "C03",
@@ -58,7 +58,7 @@ export const caregiverQuestions: Question[] = [
       },
       { value: "unknown", label: "잘 모르겠어요" },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "제1조", label: "제도 판정" }],
+    mapsTo: [{ doc: "guardianship", clause: "제1조", label: "맞는 제도" }],
   },
   {
     id: "C04",
@@ -113,7 +113,7 @@ export const caregiverQuestions: Question[] = [
         warn: "가족끼리 다툼이 있으면 법원이 가족 대신 전문가 후견인을 정하는 경우가 있어요.",
       },
     ],
-    mapsTo: [{ doc: "guardianship", clause: "제5조", label: "절차 리스크" }],
+    mapsTo: [{ doc: "guardianship", clause: "제5조", label: "절차상 주의점" }],
   },
   {
     id: "C07",
@@ -178,7 +178,7 @@ export const caregiverQuestions: Question[] = [
       { value: "hospital", label: "병원 정기 치료비" },
       { value: "rent", label: "월세·대출 이자" },
     ],
-    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 매트릭스" }],
+    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 목록" }],
   },
   {
     id: "C10",

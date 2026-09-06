@@ -44,7 +44,7 @@ export const coreQuestions: Question[] = [
     max: 1_000_000_000,
     step: 10_000_000,
     presets: [50_000_000, 100_000_000, 300_000_000, 500_000_000],
-    mapsTo: [{ doc: "expense", clause: "제6조", label: "자산 소진 추정" }],
+    mapsTo: [{ doc: "expense", clause: "제6조", label: "자산이 바닥나는 시점" }],
   },
   {
     id: "A01",
@@ -68,7 +68,7 @@ export const coreQuestions: Question[] = [
       { value: "hospital", label: "병원 정기 치료비" },
       { value: "support", label: "가족에게 정기적으로 보내는 돈" },
     ],
-    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 매트릭스" }],
+    mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 목록" }],
   },
   {
     id: "A02",
@@ -164,7 +164,7 @@ export const coreQuestions: Question[] = [
       { value: "deposit_break", label: "정기예금 중도해지" },
       { value: "burst", label: "월 지급액의 3배가 넘는 인출·이체" },
     ],
-    mapsTo: [{ doc: "expense", clause: "제4조", label: "이상거래 룰셋" }],
+    mapsTo: [{ doc: "expense", clause: "제4조", label: "보호 규칙" }],
   },
   {
     id: "A07",

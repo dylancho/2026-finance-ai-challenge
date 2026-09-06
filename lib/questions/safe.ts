@@ -70,7 +70,7 @@ export const S03: Question = {
     { value: "biometric", label: "평소와 다른 터치 속도와 리듬" },
     { value: "device", label: "처음 쓰는 기기에서 접속" },
   ],
-  mapsTo: [{ doc: "expense", clause: "제4조", label: "맥락 감시 신호" }],
+  mapsTo: [{ doc: "expense", clause: "제4조", label: "함께 보는 상황 신호" }],
 };
 
 export const S04: Question = {

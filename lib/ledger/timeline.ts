@@ -159,7 +159,7 @@ export function buildTimeline({
       label: "병원비 · 요양비 · 공과금 자동 배분 결제",
       tier: 1,
       approver: "AI",
-      clause: { doc: "expense", clause: "제2조", label: "자동이체 매트릭스" },
+      clause: { doc: "expense", clause: "제2조", label: "자동이체 목록" },
     },
     {
       label: "주마다 소액 생활비만 지급 (갈취·보이스피싱을 구조적으로 막기)",

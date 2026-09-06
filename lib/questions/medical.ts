@@ -41,7 +41,7 @@ export const B08: Question = {
   max: 5_000_000,
   step: 100_000,
   presets: [1_000_000, 1_500_000, 2_000_000],
-  mapsTo: [{ doc: "trust", clause: "제5조", label: "증액 트리거" }],
+  mapsTo: [{ doc: "trust", clause: "제5조", label: "증액 조건" }],
 };
 
 export const B09: Question = {
