@@ -20,8 +20,8 @@ import { T, TOTAL, isDark } from "./phases";
  * 그래서 reduced-motion(static) 에서는 타임라인 없이 완성 화면이 세로로 쌓여 보인다.
  * 위치 계산은 전부 함수형 값 — 리사이즈 시 ScrollTrigger 가 다시 계산한다.
  *
- * S0 의 고지서는 처음부터 문 투입구에 "꽂힌" DOM 고지서다. 스크롤이 곧 꺼내는 손이다.
- * 투입구 구멍 선 아래를 clip-path 로 잘라 두었다가 빠져나오면서 풀어 준다.
+ * S0 의 고지서는 처음부터 현관문 문틈에 "꽂힌" DOM 고지서다(한국식). 스크롤이 곧 꺼내는 손이다.
+ * 문틈 선 왼쪽을 clip-path 로 잘라 두었다가 옆으로 빠져나오면서 풀어 준다.
  * 고지서는 노트북 위 겹에 있어야 조각이 화면 위로 날아간다 — 그래서 S0 장면 밖, 스테이지 직속이다.
  */
 
@@ -33,10 +33,10 @@ const BEATS = [
   { id: 3, h: "한도는 당신이 정한 만큼만", p1: "한 번에 100만원을 정하면", p2: "하루 200만원이 자동으로 따라옵니다" },
 ];
 
-/** 투입구에 꽂혀 있을 때 고지서 배율 */
-const SLOT_SCALE = 0.46;
-/** 꽂혀 있을 때 틈 위로 보이는 비율 (고지서 높이 기준) */
-const PEEK = 0.36;
+/** 문틈에 꽂혀 있을 때 고지서 배율 */
+const SLOT_SCALE = 0.5;
+/** 꽂혀 있을 때 문틈 밖으로 보이는 비율 (고지서 너비 기준) */
+const PEEK = 0.6;
 
 export default function Stage() {
   const root = useRef<HTMLDivElement>(null);
@@ -91,17 +91,15 @@ export default function Stage() {
       const trCopy = one(".ld-tr-copy");
 
       /* ── 좌표 함수 (리사이즈마다 다시 계산) ── */
-      // 투입구 구멍의 화면 좌표
-      const slit = () =>
-        sliceToScreen(DOOR.vw, DOOR.vh, el.clientWidth, el.clientHeight, DOOR.slotCenterX, DOOR.slit.top);
-      // 꽂혀 있을 때: 중심이 구멍 아래쪽에 있어 위 PEEK 만큼만 보인다
-      const slotX = () => slit().x - layoutCenter(billWrap, el).x;
-      const slotY = () =>
-        slit().y + billWrap.offsetHeight * SLOT_SCALE * (0.5 - PEEK) - layoutCenter(billWrap, el).y;
-      // 완전히 빠져나온 자리: 구멍 바로 위
-      const outY = () => slit().y - billWrap.offsetHeight * SLOT_SCALE * 0.58 - layoutCenter(billWrap, el).y;
-      // 꽂혀 있을 때 구멍 선 아래로 잘리는 높이 (고지서 로컬 px)
-      const clipIn = () => `inset(0px 0px ${Math.round(billWrap.offsetHeight * (1 - PEEK))}px 0px)`;
+      // 문틈의 화면 좌표
+      const gap = () => sliceToScreen(DOOR.vw, DOOR.vh, el.clientWidth, el.clientHeight, DOOR.gap.x, DOOR.gap.y);
+      // 꽂혀 있을 때: 왼쪽 (1-PEEK) 은 문틈 안, 오른쪽 PEEK 만 밖으로 보인다
+      const slotX = () => gap().x + billWrap.offsetWidth * SLOT_SCALE * (PEEK - 0.5) - layoutCenter(billWrap, el).x;
+      const slotY = () => gap().y - layoutCenter(billWrap, el).y;
+      // 완전히 빠져나온 자리: 문틈 바로 오른쪽
+      const outX = () => gap().x + billWrap.offsetWidth * SLOT_SCALE * 0.5 + 10 - layoutCenter(billWrap, el).x;
+      // 꽂혀 있을 때 문틈 선 왼쪽으로 잘리는 너비 (고지서 로컬 px)
+      const clipIn = () => `inset(0px 0px 0px ${Math.round(billWrap.offsetWidth * (1 - PEEK))}px)`;
 
       // S0 동안 노트북은 화면 하단 중앙에 작게(0.8) 있다. 레이아웃 위치(우측 칼럼)와의 차이를 함수로 둔다.
       const S0_SCALE = 0.8;
@@ -138,11 +136,11 @@ export default function Stage() {
         (window as unknown as { __stageTl?: gsap.core.Timeline }).__stageTl = tl; // 브라우저 검증용
       }
 
-      /* ── S0-1. 투입구에서 고지서가 빠져나온다 (스크롤 = 꺼내는 손) ── */
+      /* ── S0-1. 문틈에서 고지서가 옆으로 빠져나온다 (스크롤 = 꺼내는 손) ── */
       tl.fromTo(
         billWrap,
-        { x: slotX, y: slotY, scale: SLOT_SCALE, rotation: 1.5, clipPath: clipIn },
-        { y: outY, rotation: -1.5, clipPath: "inset(0px 0px 0px 0px)", duration: T.s0Bill, ease: "power1.out" },
+        { x: slotX, y: slotY, scale: SLOT_SCALE, rotation: 7, clipPath: clipIn },
+        { x: outX, rotation: 3, clipPath: "inset(0px 0px 0px 0px)", duration: T.s0Bill, ease: "power1.out" },
         T.s0Still,
       );
 
