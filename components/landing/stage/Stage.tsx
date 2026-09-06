@@ -154,6 +154,8 @@ export default function Stage() {
       const s0Y = () => centerDelta(laptopWrap, el).y + el.clientHeight * 0.34;
       const fullScale = () =>
         Math.min(el.clientWidth / laptop.offsetWidth, el.clientHeight / laptop.offsetHeight) * 0.96;
+      /** 화면을 꽉 채우기 직전까지만 커진다 — 다 커지는 걸 보고 나서 움직이면 늦다 */
+      const NEAR_FULL = 0.9;
       const fullY = () => centerDelta(laptopWrap, el).y + el.clientHeight * 0.02;
 
       const tl = gsap.timeline({
@@ -161,7 +163,7 @@ export default function Stage() {
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => "+=" + window.innerHeight * 9,
+          end: () => "+=" + window.innerHeight * 8,
           pin: true,
           scrub: 0.6,
           anticipatePin: 1,
@@ -301,12 +303,13 @@ export default function Stage() {
       const lastLand = T.s0Flip + (frags.length - 1) * GAP + FLIGHT;
       tl.from(logRest, { autoAlpha: 0, x: -6, duration: 1.5, stagger: 0.2 }, lastLand + 0.4);
 
-      /* ── S0-5. 노트북이 커지며 풀스크린으로 ──
-       * 고지서가 사라지자마자(21) 시작해 조각이 날아가는 내내 함께 커진다. 12 단위로 천천히 — 마지막 조각이
-       * 앉는 25.2 를 지나 33 에 다 커진다. 조각은 dest() 로 이 움직임을 따라간다. */
+      /* ── S0-5. 노트북이 커진다 (꽉 차기 직전까지) ──
+       * 고지서가 사라지자마자(21) 시작해 조각이 날아가는 내내 함께 커진다. 마지막 조각이 앉는 25.2 를
+       * 조금 지나 28 에 멈추고, 그 자리에서 곧장 CH1 의 우측 자리로 넘어간다 — 다 커진 채로 기다리지 않는다.
+       * 조각은 dest() 로 이 움직임을 따라간다. */
       tl.to(
         laptopWrap,
-        { x: () => centerDelta(laptopWrap, el).x, y: fullY, scale: fullScale, duration: 12 },
+        { x: () => centerDelta(laptopWrap, el).x, y: fullY, scale: () => fullScale() * NEAR_FULL, duration: 7 },
         T.s0Full,
       );
       tl.to([doorBack, vignette, veil], { autoAlpha: 0, duration: 6 }, T.s0Full);
