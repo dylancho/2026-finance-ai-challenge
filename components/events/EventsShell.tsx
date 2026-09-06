@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Badge from "../common/Badge";
-import AdviceBlock, { DOC_PATH } from "./AdviceBlock";
+import AdviceBlock, { clauseHref, DOC_PATH } from "./AdviceBlock";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import { applyDemoLedger, emptyLedgerState, readLedgerState } from "../../lib/ledger";
 import { insightFor } from "../../lib/insight";

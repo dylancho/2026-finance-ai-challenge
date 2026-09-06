@@ -35,6 +35,16 @@ export const DOC_PATH: Record<string, string> = {
   guardianship: "후견설계서",
 };
 
+/**
+ * 조항 링크 목적지. 2026-09-07: /plan 이 ?tab= 을 읽고, 지출설계서 카드마다 id="exp-N" 앵커가
+ * 생겨서 "지출설계서 제6조 보기" 가 그 카드로 바로 간다. 신탁·후견은 아직 앵커가 없어 탭까지만.
+ */
+export function clauseHref(clause: { doc: string; ref: string }): string {
+  const n = /제(\d+)조/.exec(clause.ref)?.[1];
+  const hash = clause.doc === "expense" && n ? `#exp-${n}` : "";
+  return `/plan?tab=${clause.doc}${hash}`;
+}
+
 export default function AdviceBlock({
   profile,
   insight,
@@ -204,7 +214,7 @@ export default function AdviceBlock({
 
               <footer className="cand-foot">
                 {c.clause && (
-                  <Link href="/plan" className="clause-jump">
+                  <Link href={clauseHref(c.clause)} className="clause-jump">
                     {DOC_PATH[c.clause.doc]} {c.clause.ref} 보기 →
                   </Link>
                 )}
