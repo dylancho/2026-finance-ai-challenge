@@ -36,8 +36,11 @@ import type { LedgerState, Profile } from "../../lib/types";
  * 계산된다. 키가 없거나 라우트가 죽으면 룰 해석기(interpretByRule)가 같은 모양을 내서
  * 데모가 멈추지 않는다. 칩 3종은 그 문장을 대신 입력해 주는 것뿐이다.
  *
- * 후보를 고르는 것은 "실행" 이 아니라 판정 원장에 "검토 후보로 기록" 하는 것이다.
- * 어떤 버튼에도 "실행" 이라는 말을 쓰지 않는다.
+ * 후보를 고르는 것은 "실행" 이 아니라 검토 기록(코드의 판정 원장)에 "선택지로 기록" 하는
+ * 것이다. 어떤 버튼에도 "실행" 이라는 말을 쓰지 않는다.
+ *
+ * 2026-09-07 문구: docs/writing-style.md 대로 해요체, 내부 용어(이벤트·후보·판정 원장·노출)는
+ * 화면에서 사람 말(상황·선택지·검토 기록·빠져나갈 수 있는 돈)로 바꿨다. 식별자는 그대로다.
  */
 
 type Turn =
@@ -59,6 +62,9 @@ const INTRO: Turn = {
 };
 
 const RESOLVED: readonly string[] = ["diagnosis", "windfall", "market_crash"];
+
+/** 말풍선 아래 출처 표시. "규칙 해석" 은 무엇으로 읽었는지 안 보여서 "규칙으로 해석" 으로. */
+const SOURCE_LABEL: Record<InterpretSource, string> = { llm: "AI 해석", rule: "규칙으로 해석" };
 
 export default function EventsShell() {
   const router = useRouter();
@@ -158,7 +164,7 @@ export default function EventsShell() {
   if (!profile) {
     return (
       <div className="shell-wide" style={{ padding: "80px 0" }}>
-        <p className="muted">상황을 준비하는 중입니다…</p>
+        <p className="muted">상황을 준비하고 있어요…</p>
       </div>
     );
   }
@@ -168,17 +174,17 @@ export default function EventsShell() {
   return (
     <div className="shell-wide">
       <div className="plan-head">
-        <div className="eyebrow">Event → Judgement</div>
+        {/* 영어 소제목 대신 헤더 메뉴와 같은 이름 */}
+        <div className="eyebrow">상황 변화</div>
         <h1>상황이 바뀌었나요?</h1>
         <p className="section-lede">
-          설계서에 적어 둔 원칙은 상황이 바뀌었을 때 쓰라고 있는 것입니다. 무슨 일이 있었는지{" "}
-          <b>자기 말로</b> 적어 주시면, AI가 그 상황을 읽고 설계서의 원칙을 근거로{" "}
-          <b>검토할 후보</b>를 늘어놓습니다. NEXT는 후보를 늘어놓을 뿐 하나를 고르지 않습니다.
-          결정은 사람이 합니다.
+          설계서에 적어 둔 원칙은 상황이 바뀌었을 때 쓰라고 있는 거예요. 무슨 일이 있었는지{" "}
+          <b>내 말로</b> 적어 주세요. AI가 상황을 읽고, 설계서 원칙에 따라 <b>선택지</b>를
+          늘어놓아요. 하나를 고르지는 않아요. 결정은 사람이 해요.
         </p>
         <p className="lg-note mono">
-          데모용 시뮬레이션입니다. 여기 적는 상황은 실제로 일어난 일이 아니라 가정이며, 특정
-          상품이나 금융회사를 추천하지 않습니다.
+          예시 화면이에요. 여기 적는 상황은 실제로 일어난 일이 아니라 가정이에요. 특정 상품이나
+          금융회사를 추천하지 않아요.
         </p>
       </div>
 
@@ -208,7 +214,7 @@ export default function EventsShell() {
                   <div className="bubble">{t.text}</div>
                   {t.source && (
                     <div className="src" data-testid="ev-source">
-                      {t.source === "llm" ? "AI 해석" : "규칙 해석"}
+                      {SOURCE_LABEL[t.source]}
                     </div>
                   )}
                 </div>
@@ -219,7 +225,7 @@ export default function EventsShell() {
                 <div className="ev-other fade-in" data-testid="ev-other">
                   <div className="ev-other-head">
                     <span className="k mono">살펴볼 점</span>
-                    <Badge tone="info">수치 없음 · AI 정성 검토</Badge>
+                    <Badge tone="info">숫자 없이 살펴본 것</Badge>
                   </div>
                   {other.considerations.length > 0 ? (
                     <ul>
@@ -229,7 +235,7 @@ export default function EventsShell() {
                     </ul>
                   ) : (
                     <p className="muted" style={{ fontSize: 13 }}>
-                      이 상황은 설계서의 특정 조항과 바로 닿지 않습니다.
+                      이 상황은 설계서의 어느 조항과도 바로 닿지 않아요.
                     </p>
                   )}
                   {other.chapter && (
@@ -267,8 +273,8 @@ export default function EventsShell() {
                 NX
               </div>
               <div>
-                <div className="bubble muted">상황을 해석하는 중…</div>
-                <div className="src">AI 해석 · 안 되면 규칙 해석으로</div>
+                <div className="bubble muted">상황을 읽는 중…</div>
+                <div className="src">AI가 먼저 읽고, 안 되면 규칙으로 읽어요</div>
               </div>
             </div>
           </div>
@@ -284,7 +290,7 @@ export default function EventsShell() {
               className="chip-btn"
               disabled={busy}
               onClick={() => send(ev.label)}
-              title="이 문장을 대신 입력합니다"
+              title="이 문장을 대신 넣어요"
             >
               {ev.label}
             </button>
@@ -314,24 +320,24 @@ export default function EventsShell() {
             onClick={() => void send(input)}
             data-testid="ev-send"
           >
-            {busy ? "해석하는 중…" : "보내기"}
+            {busy ? "읽는 중…" : "보내기"}
           </button>
         </div>
         <p className="hint">
-          Enter 로 보내고 Shift+Enter 로 줄을 바꿉니다. 금액이나 하락률이 빠지면 한 번 되묻습니다.
+          Enter로 보내고 Shift+Enter로 줄을 바꿔요. 금액이나 하락률이 빠지면 한 번 되물어요.
         </p>
       </div>
 
-      {/* ── 판정 원장 ── */}
+      {/* ── 검토 기록 (코드의 판정 원장) ── */}
       <section className="section">
         <div className="section-title">
-          <h2>판정 원장</h2>
+          <h2>검토 기록</h2>
           <Badge tone="neutral">{decisions.length}건</Badge>
         </div>
         {decisions.length === 0 ? (
           <p className="muted" style={{ fontSize: 13 }}>
-            아직 기록한 후보가 없습니다. 기록해 둔다고 실행되는 것은 아닙니다. 나중에 상담이나
-            가족 회의에서 꺼내 볼 근거로 남을 뿐입니다.
+            아직 남긴 선택지가 없어요. 기록해도 실행되지는 않아요. 나중에 상담이나 가족 회의에서
+            꺼내 볼 근거로 남아요.
           </p>
         ) : (
           decisions.map((d) => (
@@ -353,11 +359,12 @@ export default function EventsShell() {
         )}
       </section>
 
+      {/* 고지 문구는 합니다체를 유지하되 짧게 */}
       <p className="disclaimer">
-        적어 주신 상황은 AI가 읽어 세 가지 이벤트 중 하나로 해석하며, 그 해석은 틀릴 수 있습니다
-        (말풍선 아래 &lsquo;AI 해석&rsquo;·&lsquo;규칙 해석&rsquo; 표시). 후보의 숫자는 AI가 아니라
-        설계서에 적힌 원칙과 합성 이력을 바탕으로 규칙에 따라 계산한 것이며 투자 자문이 아닙니다.
-        어느 후보도 실행되지 않고, 특정 금융회사나 상품을 추천하지 않습니다.
+        적어 주신 상황은 AI가 읽어 세 가지 상황 중 하나로 해석하며, 그 해석은 틀릴 수 있습니다
+        (말풍선 아래 &lsquo;AI 해석&rsquo;·&lsquo;규칙으로 해석&rsquo; 표시). 선택지의 숫자는
+        설계서에 적힌 원칙과 예시 이력을 바탕으로 규칙에 따라 계산한 것이며 투자 자문이 아닙니다.
+        어느 선택지도 실행되지 않으며, 특정 금융회사나 상품을 추천하지 않습니다.
       </p>
     </div>
   );

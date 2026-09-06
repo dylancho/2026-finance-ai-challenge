@@ -105,13 +105,13 @@ export function scoreTransaction(tx: FraudTransaction, policy: FraudPolicy = DEF
   // 보호 원칙(S01·S02)은 점수와 별개로 상태의 하한을 정한다.
   if (tx.isNewTargetAccount) {
     if (policy.rule === "block") {
-      if (status !== "BLOCKED") policyNote = "선언한 원칙: 신규 개인 계좌 송금은 금액과 관계없이 우선 차단";
+      if (status !== "BLOCKED") policyNote = "내가 정한 원칙: 처음 보는 개인 계좌로는 금액과 관계없이 우선 차단해요";
       status = "BLOCKED";
     } else if (tx.amount >= policy.newAccountThreshold) {
       const floor: FraudStatus = policy.rule === "guardian" ? "BLOCKED" : "REVIEW";
       if (status === "ALLOW" || (status === "REVIEW" && floor === "BLOCKED")) {
-        policyNote = `선언한 원칙: 신규 개인 계좌로 ${policy.newAccountThreshold.toLocaleString("ko-KR")}원 이상은 ${
-          policy.rule === "guardian" ? "보호자 승인 후 진행" : "본인 재인증 후 진행"
+        policyNote = `내가 정한 원칙: 처음 보는 개인 계좌로 ${policy.newAccountThreshold.toLocaleString("ko-KR")}원 이상은 ${
+          policy.rule === "guardian" ? "보호자가 승인한 뒤 진행해요" : "본인이 다시 인증한 뒤 진행해요"
         }`;
         status = floor;
       }
@@ -121,39 +121,39 @@ export function scoreTransaction(tx: FraudTransaction, policy: FraudPolicy = DEF
 
   const signals: FraudSignal[] = [
     {
-      key: "amount", label: "거래 금액", score: scores.amount, level: level(scores.amount),
-      observed: won(tx.amount), baseline: `상위 5% ${won(BASELINE.p95Amount)}`,
-      detail: scores.amount ? `평소 고액 이체 기준의 ${ratio.toFixed(1)}배입니다.` : "평소 고액 이체 범위 안입니다.",
+      key: "amount", label: "보내는 금액", score: scores.amount, level: level(scores.amount),
+      observed: won(tx.amount), baseline: `평소 큰 이체 ${won(BASELINE.p95Amount)}`,
+      detail: scores.amount ? `평소 큰 이체 기준의 ${ratio.toFixed(1)}배예요.` : "평소 큰 이체 범위 안이에요.",
     },
     {
-      key: "recipient", label: "거래 대상", score: scores.recipient, level: level(scores.recipient),
-      observed: tx.isNewTargetAccount ? "신규 개인 수취계좌" : "기등록 수취계좌",
-      baseline: tx.isNewTargetAccount ? "최근 10년 거래 이력 없음" : "최근 10년 거래 이력 있음",
+      key: "recipient", label: "받는 계좌", score: scores.recipient, level: level(scores.recipient),
+      observed: tx.isNewTargetAccount ? "처음 보는 개인 계좌" : "전에도 보낸 계좌",
+      baseline: tx.isNewTargetAccount ? "최근 10년간 보낸 적 없는 계좌" : "최근 10년간 여러 번 보낸 계좌",
       detail: tx.isNewTargetAccount
-        ? "평소 거래 계좌가 아니며, 최근 10년간 송금 이력이 없는 신규 개인 계좌입니다."
-        : "반복 거래 이력이 확인된 계좌입니다.",
+        ? "평소 거래하던 계좌가 아니에요. 최근 10년간 한 번도 보낸 적 없는 개인 계좌예요."
+        : "여러 번 보낸 적 있는 계좌예요.",
     },
     {
-      key: "time", label: "사용 시간", score: scores.time, level: level(scores.time),
+      key: "time", label: "이용 시간", score: scores.time, level: level(scores.time),
       observed: tx.requestTime, baseline: `평소 ${BASELINE.usualHours}`,
-      detail: scores.time ? "평소 모바일뱅킹 활동 시간 밖의 요청입니다." : "평소 이용 시간대입니다.",
+      detail: scores.time ? "평소 은행 앱을 쓰는 시간이 아니에요." : "평소 쓰는 시간대예요.",
     },
     {
-      key: "pin", label: "로그인·인증 행동", score: scores.pin, level: level(scores.pin),
-      observed: tx.pinErrorCount ? `비밀번호 오입력 ${tx.pinErrorCount}회` : "비밀번호 오류 없음",
-      baseline: `평균 ${BASELINE.typicalPinErrors}회`,
-      detail: scores.pin ? "송금 직전 인증 실패가 반복되었습니다." : "인증 실패 패턴이 없습니다.",
+      key: "pin", label: "비밀번호 입력", score: scores.pin, level: level(scores.pin),
+      observed: tx.pinErrorCount ? `비밀번호 ${tx.pinErrorCount}번 틀림` : "한 번에 맞게 입력",
+      baseline: `평소 ${BASELINE.typicalPinErrors}번 틀림`,
+      detail: scores.pin ? "보내기 직전에 비밀번호를 여러 번 틀렸어요." : "비밀번호를 평소처럼 입력했어요.",
     },
     {
-      key: "biometric", label: "사용자 행동 패턴", score: scores.biometric, level: level(scores.biometric),
-      observed: `터치 패턴 이탈 ${Math.round(tx.biometricAnomalyScore * 100)}%`,
-      baseline: `평균 이탈 ${Math.round(BASELINE.typicalBiometricDeviation * 100)}%`,
-      detail: scores.biometric ? "평소 터치 속도·압력·입력 리듬과 차이가 큽니다." : "등록된 행동 패턴 범위입니다.",
+      key: "biometric", label: "화면 다루는 습관", score: scores.biometric, level: level(scores.biometric),
+      observed: `평소와 ${Math.round(tx.biometricAnomalyScore * 100)}% 다름`,
+      baseline: `평소 차이 ${Math.round(BASELINE.typicalBiometricDeviation * 100)}% 안팎`,
+      detail: scores.biometric ? "화면을 누르는 속도와 세기, 입력 리듬이 평소와 많이 달라요." : "평소 화면 다루는 습관과 같아요.",
     },
     {
-      key: "device", label: "접속 환경", score: scores.device, level: level(scores.device),
-      observed: tx.isNewDevice ? "신규 기기" : "등록 기기", baseline: "최근 사용 기기",
-      detail: tx.isNewDevice ? "이 기기에서의 최근 거래 이력이 없습니다." : "기기 신뢰 이력이 있습니다.",
+      key: "device", label: "사용한 기기", score: scores.device, level: level(scores.device),
+      observed: tx.isNewDevice ? "처음 쓰는 기기" : "늘 쓰던 기기", baseline: "최근에 쓰던 기기",
+      detail: tx.isNewDevice ? "이 기기에서 거래한 적이 없어요." : "전부터 쓰던 기기예요.",
     },
   ];
 
@@ -163,12 +163,12 @@ export function scoreTransaction(tx: FraudTransaction, policy: FraudPolicy = DEF
 /** 판정층이 없을 때 쓰는 룰 기반 서술. Claude 가 실패해도 화면은 이걸로 완주한다. */
 export function fallbackDecision(status: FraudStatus): string {
   if (status === "BLOCKED") {
-    return "평소 패턴과 다른 고위험 신호가 여러 개 겹쳤습니다. 명의 도용이나 타인의 강요에 의한 인출 가능성이 있어 거래를 일시 정지하고 보호자 확인을 요청했습니다.";
+    return "평소와 다른 위험 신호가 여러 개 겹쳤어요. 명의 도용이나 누군가의 강요로 돈이 나갈 가능성이 있어요. 그래서 거래를 잠시 멈추고 보호자에게 확인을 요청했어요.";
   }
   if (status === "REVIEW") {
-    return "일부 신호가 평소와 다릅니다. 본인 재인증 또는 보호자 확인 후 진행할 수 있습니다.";
+    return "일부 신호가 평소와 달라요. 본인이 다시 인증하거나 보호자가 확인한 뒤 진행할 수 있어요.";
   }
-  return "평소 수취계좌·이용 시간·인증 행동 범위 안의 거래입니다. 안전하게 처리할 수 있습니다.";
+  return "받는 계좌, 이용 시간, 비밀번호 입력 모두 평소 범위 안이에요. 그대로 처리해도 돼요.";
 }
 
 export function topReasons(signals: FraudSignal[], n = 3): string[] {

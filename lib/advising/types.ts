@@ -85,7 +85,7 @@ export type EventInterpretation =
   | {
       kind: EventKind;
       params: { amount?: number; dropPct?: number };
-      /** 이벤트 카드 제목 한 줄 (예: "목돈 2억 5,000만원이 들어왔습니다") */
+      /** 상황 카드 제목 한 줄 (예: "목돈 2억 5,000만원이 들어왔어요") */
       label: string;
       reply: string;
       source: InterpretSource;
@@ -125,7 +125,7 @@ export interface EventContext {
   hasLedgerInsight: boolean;
 }
 
-/** 판정 원장 한 줄 — 실행이 아니라 "검토 후보로 기록" 이다. */
+/** 검토 기록(화면 이름) 한 줄 — 실행이 아니라 "선택지로 기록" 이다. */
 export interface DecisionRecord {
   id: string;
   at: number;

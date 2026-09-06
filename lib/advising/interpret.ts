@@ -174,9 +174,9 @@ export function interpretByRule(
     return {
       kind,
       params: {},
-      label: "치매 진단을 받았습니다",
+      label: "치매 진단을 받았어요",
       reply:
-        "진단서가 나온 상황으로 보고, 설계서에 적어 둔 발동 조건과 한도를 기준으로 검토 후보를 늘어놓겠습니다.",
+        "진단서가 나온 상황으로 볼게요. 설계서에 적어 둔 시작 조건과 한도를 기준으로 선택지를 늘어놓을게요.",
       source: "rule",
     };
   }
@@ -198,8 +198,8 @@ export function interpretByRule(
     return {
       kind,
       params: { amount },
-      label: `목돈 ${won(amount)}이 들어왔습니다`,
-      reply: `목돈 ${won(amount)}이 들어온 상황으로 보고, 설계서의 배분 원칙과 보호 장치를 기준으로 검토 후보를 늘어놓겠습니다.`,
+      label: `목돈 ${won(amount)}이 들어왔어요`,
+      reply: `목돈 ${won(amount)}이 들어온 상황으로 볼게요. 설계서의 배분 원칙과 보호 장치를 기준으로 선택지를 늘어놓을게요.`,
       source: "rule",
     };
   }
@@ -208,7 +208,7 @@ export function interpretByRule(
     kind: "other",
     source: "rule",
     reply:
-      "말씀하신 상황은 NEXT가 숫자로 계산할 수 있는 세 가지(진단서 제출, 목돈 유입, 시장 급락)에 들어가지 않습니다. 계산 없이, 설계서의 어느 원칙과 닿아 있는지만 정리합니다.",
+      "말씀하신 상황은 NEXT가 숫자로 계산할 수 있는 세 가지(진단서가 나옴, 목돈이 들어옴, 시장 급락)에 들지 않아요. 숫자 없이, 설계서의 어느 원칙과 닿는지만 정리할게요.",
     considerations: OTHER_CONSIDERATIONS,
   };
 }
@@ -218,8 +218,8 @@ function crashOf(pct: number): EventInterpretation {
   return {
     kind: "market_crash",
     params: { dropPct },
-    label: `시장이 ${dropPct}% 급락했습니다`,
-    reply: `위험자산이 ${dropPct}% 떨어진 상황으로 보고, 급락 때 하기로 정해 둔 원칙과 이력에서 보인 행동을 나란히 놓겠습니다.`,
+    label: `시장이 ${dropPct}% 급락했어요`,
+    reply: `위험자산이 ${dropPct}% 떨어진 상황으로 볼게요. 급락 때 하기로 정해 둔 원칙과 실제로 해 온 행동을 나란히 놓을게요.`,
     source: "rule",
   };
 }
@@ -310,9 +310,9 @@ export function fromApi(raw: Raw): EventInterpretation | null {
 }
 
 function defaultLabel(kind: EventKind, params: { amount?: number; dropPct?: number }): string {
-  if (kind === "windfall") return `목돈 ${won(params.amount)}이 들어왔습니다`;
-  if (kind === "market_crash") return `시장이 ${params.dropPct ?? DEFAULT_DROP_PCT}% 급락했습니다`;
-  return "치매 진단을 받았습니다";
+  if (kind === "windfall") return `목돈 ${won(params.amount)}이 들어왔어요`;
+  if (kind === "market_crash") return `시장이 ${params.dropPct ?? DEFAULT_DROP_PCT}% 급락했어요`;
+  return "치매 진단을 받았어요";
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   EVENT_META,
   narrateAdvice,
   ruleAdviceNarration,
+  runoutLabel,
   yearsLabel,
   type Advice,
   type AdviceNarration,
@@ -25,8 +26,11 @@ import type { LedgerInsight, Profile } from "../../lib/types";
  * 판정층(narrateAdvice)이 문장을 쓴다. 블록마다 자기 이벤트를 들고 있어서 새 이벤트가
  * 와도 앞선 블록은 그대로 남는다.
  *
- * 어떤 버튼에도 "실행" 이라는 말을 쓰지 않는다. 후보를 고르는 것은 판정 원장에
- * "검토 후보로 기록" 하는 것이다.
+ * 어떤 버튼에도 "실행" 이라는 말을 쓰지 않는다. 후보를 고르는 것은 검토 기록에
+ * "선택지로 기록" 하는 것이다.
+ *
+ * 2026-09-07 문구: 화면에서는 후보 → 선택지, 판정 원장 → 검토 기록, 소진 → 바닥나는 때,
+ * 규칙 문장 → 규칙으로 계산 (docs/writing-style.md). 식별자·타입 이름은 그대로다.
  */
 
 export const DOC_PATH: Record<string, string> = {
@@ -44,6 +48,9 @@ export function clauseHref(clause: { doc: string; ref: string }): string {
   const hash = clause.doc === "expense" && n ? `#exp-${n}` : "";
   return `/plan?tab=${clause.doc}${hash}`;
 }
+
+/** 해설 문장 옆 출처 표시. "규칙 문장" 은 무엇을 했는지 안 보여서 "규칙으로 계산" 으로. */
+const NARRATION_SOURCE = { llm: "AI 해설", rule: "규칙으로 계산" } as const;
 
 export default function AdviceBlock({
   profile,
@@ -88,18 +95,18 @@ export default function AdviceBlock({
   return (
     <div className="ev-block fade-in" data-testid="ev-block" data-event-kind={event.kind}>
       <div className="ev-block-head">
-        <span>Event → Judgement</span>
+        <span>상황</span>
         <span className="ev-block-label">{event.label}</span>
       </div>
 
-      {/* ── 재진입 카드 ── */}
+      {/* ── 재진입 카드 (화면 이름: 이어서 답하기) ── */}
       {advice.reentry.map((ch) => (
         <div className="gap-item chapter high" key={ch}>
           <div>
-            <div className="r mono">먼저 정해야 할 것이 있습니다</div>
-            <div className="w">이 판단에는 {CHAPTER_META[ch].label} 선언이 필요합니다</div>
+            <div className="r mono">먼저 정할 것이 있어요</div>
+            <div className="w">이 검토에는 {CHAPTER_META[ch].label} 영역의 답이 필요해요</div>
             <div className="c">
-              {CHAPTER_META[ch].withoutIt} 아래 후보는 그 기준 없이 만든 것이라 근거가 약합니다.
+              {CHAPTER_META[ch].withoutIt} 아래 선택지는 그 기준 없이 만든 것이라 근거가 약해요.
             </div>
           </div>
           <Link href={`/interview?chapter=${ch}`} className="btn sm">
@@ -108,7 +115,7 @@ export default function AdviceBlock({
         </div>
       ))}
 
-      {/* ── 선언 vs 관측 (급락) ── */}
+      {/* ── 내가 정한 것 vs 실제로 해 온 것 (급락) ── */}
       {advice.contrast && (
         <section className="section ev-contrast">
           <div className="section-title">
@@ -116,11 +123,11 @@ export default function AdviceBlock({
           </div>
           <div className="ct-cols">
             <div className="ct-col">
-              <div className="k mono">인터뷰에서 정한 것</div>
+              <div className="k mono">내가 정한 것</div>
               <p>{advice.contrast.declared}</p>
             </div>
             <div className="ct-col">
-              <div className="k mono">이력에서 보인 것</div>
+              <div className="k mono">실제로 해 온 것</div>
               <p>{advice.contrast.observed}</p>
             </div>
           </div>
@@ -137,9 +144,7 @@ export default function AdviceBlock({
           {narration?.contrastNote && (
             <p className="ev-note">
               {narration.contrastNote.text}{" "}
-              <span className="src mono">
-                {narration.contrastNote.source === "llm" ? "AI 해설" : "규칙 문장"}
-              </span>
+              <span className="src mono">{NARRATION_SOURCE[narration.contrastNote.source]}</span>
             </p>
           )}
         </section>
@@ -148,26 +153,22 @@ export default function AdviceBlock({
       {/* ── 요약 ── */}
       <section className="section">
         <div className="section-title">
-          <h2>검토 후보 {advice.candidates.length}개</h2>
-          <Badge tone="neutral">
-            지금 설계서대로면 {yearsLabel(advice.baselineRunwayYears)} 뒤 소진
-          </Badge>
+          <h2>선택지 {advice.candidates.length}가지</h2>
+          <Badge tone="neutral">지금대로면 {runoutLabel(advice.baselineRunwayYears)}</Badge>
         </div>
         {narration && (
           <p className="ev-summary">
             {narration.summary.text}{" "}
             <span className="src mono">
               {narrating
-                ? "규칙 문장 (AI 해설을 기다리는 중)"
-                : narration.summary.source === "llm"
-                  ? "AI 해설"
-                  : "규칙 문장"}
+                ? "규칙으로 계산 (AI 해설을 기다리는 중)"
+                : NARRATION_SOURCE[narration.summary.source]}
             </span>
           </p>
         )}
         <p className="muted" style={{ fontSize: 12.5, marginBottom: 14 }}>
-          &lsquo;{meta.exposureLabel}&rsquo;은 {meta.exposureHelp}입니다. 소진 시점은 설계서
-          제6조와 같은 방식으로, 수익률과 물가는 빼고 계산했습니다.
+          &lsquo;{meta.exposureLabel}&rsquo;은 {meta.exposureHelp}이에요. 자산이 바닥나는 때는
+          설계서 제6조와 같은 방식으로 계산했어요. 수익률과 물가는 뺐어요.
         </p>
 
         {/* ── 후보 카드. do-nothing 도 시각적으로 동급이다. ── */}
@@ -177,16 +178,16 @@ export default function AdviceBlock({
               <header className="cand-head">
                 <h3>{c.title}</h3>
                 <div className="cand-badges">
-                  {c.isDoNothing && <Badge tone="neutral">현상 유지</Badge>}
+                  {c.isDoNothing && <Badge tone="neutral">지금 그대로</Badge>}
                   <Badge tone={c.reversible ? "ok" : "warn"}>
-                    {c.reversible ? "되돌릴 수 있음" : "되돌리기 어려움"}
+                    {c.reversible ? "되돌릴 수 있어요" : "되돌리기 어려워요"}
                   </Badge>
                 </div>
               </header>
 
               <div className="cand-impact">
                 <div className="kv-row">
-                  <span>자산 소진 시점</span>
+                  <span>자산이 바닥나는 때</span>
                   <span className="mono">
                     {yearsLabel(c.impact.runwayYears ?? null)}
                     {advice.baselineRunwayYears !== (c.impact.runwayYears ?? null) && (
@@ -219,10 +220,10 @@ export default function AdviceBlock({
                   </Link>
                 )}
                 {recorded.has(c.id) ? (
-                  <span className="cand-recorded mono">판정 원장에 기록됨</span>
+                  <span className="cand-recorded mono">검토 기록에 남겼어요</span>
                 ) : (
                   <button className="btn outline sm" onClick={() => onRecord(event, c)}>
-                    검토 후보로 기록
+                    선택지로 기록
                   </button>
                 )}
               </footer>
