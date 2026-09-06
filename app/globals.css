@@ -2138,7 +2138,7 @@ table.data tfoot td {
 
 /* ── 랜딩 v3 (스토리보드 v2: docs/landing-storyboard.md) ─────────── */
 
-.ld { overflow-x: clip; }
+.ld { overflow-x: clip; background: #1b1e27; }
 .ld .footer { margin-top: 0; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
@@ -2159,7 +2159,7 @@ html.lenis, html.lenis body { height: auto; }
 /* 헤더 다크 변주 — Stage / CH3 / S9 가 body.ld-dark 를 토글한다 */
 .header { transition: background 0.35s, border-color 0.35s; }
 .brand, .nav, .nav a { transition: color 0.35s; }
-body.ld-dark .header { background: rgba(10, 14, 24, 0.55); border-color: rgba(255, 255, 255, 0.08); }
+body.ld-dark .header { background: rgba(10, 14, 24, 0.72); border-color: rgba(255, 255, 255, 0.08); }
 body.ld-dark .brand, body.ld-dark .nav, body.ld-dark .nav a { color: #fff; }
 body.ld-dark .nav .btn { background: #fff; color: var(--navy); }
 body.ld-dark .nav .nav-signout { color: #fff; }
@@ -2201,10 +2201,10 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 .ld-still { position: absolute; inset: 0; }
 .ld-doorart { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ld-veil { position: absolute; inset: 0; background: #0f1219; opacity: 0; }
-.ld-s0-copy { position: absolute; left: 50%; top: 13vh; transform: translateX(-50%); width: min(880px, 92vw); text-align: center; }
+.ld-s0-copy { position: absolute; left: 50%; top: 11vh; transform: translateX(-50%); width: min(880px, 92vw); text-align: center; }
 .ld-s0-copy h1, .ld-s0-copy h2 { color: #fff; font-size: clamp(30px, 4.4vw, 56px); letter-spacing: -0.045em; line-height: 1.2; word-break: keep-all; }
 .ld-foot { margin-top: 14px; font-size: 12.5px; color: #9aa3b4; }
-.ld-bill-wrap { position: absolute; left: 50%; top: 50%; translate: -50% -38%; width: min(360px, 78vw); }
+.ld-bill-wrap { position: absolute; left: 50%; top: 55%; translate: -50% -50%; width: min(360px, 78vw); z-index: 3; }
 .ld-bill {
   background: #f7f3e8;
   color: #2a2a2a;
@@ -2460,7 +2460,7 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 .ld-people-photo { position: absolute; inset: 0; }
 .ld-basket { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ld-people-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(233, 226, 214, 0.94) 0%, rgba(233, 226, 214, 0.7) 45%, rgba(233, 226, 214, 0) 100%); }
-.ld-people .shell-wide { position: relative; }
+.ld-people .shell-wide { position: relative; width: 100%; }
 .ld-people-copy { max-width: 30em; }
 .ld-people-copy h2 { font-size: clamp(28px, 3.8vw, 48px); letter-spacing: -0.045em; line-height: 1.2; word-break: keep-all; margin-bottom: 18px; }
 .ld-people-copy p { color: #5d5648; font-size: 16px; line-height: 1.85; word-break: keep-all; }
@@ -2487,7 +2487,7 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 @media (max-width: 640px) {
   .ld-stage { min-height: 560px; }
   .ld-s0-copy { top: 96px; }
-  .ld-bill-wrap { translate: -50% -30%; }
+  .ld-bill-wrap { top: 44%; }
   .ld-log-line { grid-template-columns: 1fr auto; }
   .ld-log-line .t { display: none; }
 }

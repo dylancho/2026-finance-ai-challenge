@@ -17,14 +17,20 @@ export default function AssetsSection() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // 마운트 직후의 첫 콜백(false)이 Stage 가 켜 둔 다크를 지우면 안 된다 — 들어왔다 나갈 때만 끈다.
+    let wasIn = false;
     const io = new IntersectionObserver(
-      ([e]) => document.body.classList.toggle("ld-dark", e.isIntersecting),
+      ([e]) => {
+        if (e.isIntersecting) document.body.classList.add("ld-dark");
+        else if (wasIn) document.body.classList.remove("ld-dark");
+        wasIn = e.isIntersecting;
+      },
       { rootMargin: "-68px 0px -100% 0px", threshold: 0 },
     );
     io.observe(el);
     return () => {
       io.disconnect();
-      document.body.classList.remove("ld-dark");
+      if (wasIn) document.body.classList.remove("ld-dark");
     };
   }, []);
 

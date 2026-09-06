@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { layoutOffset, fitDelta, centerDelta, type Box } from "../layout";
+import { layoutOffset, fitDelta, centerDelta, layoutCenter, type Box } from "../layout";
 
 const box = (l: number, t: number, w: number, h: number, parent: Box | null = null): Box => ({
   offsetLeft: l,
@@ -36,5 +36,14 @@ describe("centerDelta", () => {
     const root = box(0, 0, 1000, 800);
     const el = box(700, 600, 200, 100, root);
     expect(centerDelta(el, root)).toEqual({ x: -300, y: -250 });
+  });
+});
+
+describe("layoutCenter", () => {
+  it("중첩된 요소의 중심을 root 좌표로 낸다", () => {
+    const root = box(0, 0, 1000, 800);
+    const col = box(500, 100, 400, 600, root);
+    const el = box(20, 30, 100, 40, col);
+    expect(layoutCenter(el, root)).toEqual({ x: 570, y: 150 });
   });
 });

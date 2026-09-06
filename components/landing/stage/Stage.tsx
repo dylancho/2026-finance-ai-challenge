@@ -6,7 +6,7 @@ import StartLink from "../StartLink";
 import Bill from "./Bill";
 import { Laptop, AlertCard } from "./Laptop";
 import Drawdown from "./Drawdown";
-import { centerDelta, fitDelta } from "./layout";
+import { centerDelta, layoutCenter } from "./layout";
 import { T, TOTAL, isDark } from "./phases";
 
 /**
@@ -72,9 +72,10 @@ export default function Stage() {
       const stamp = one(".ld-tr-stamp");
       const trCopy = one(".ld-tr-copy");
 
-      // S0 동안 노트북은 화면 하단 중앙에 있다. 레이아웃 위치(우측 칼럼)와의 차이를 함수로 둔다.
+      // S0 동안 노트북은 화면 하단 중앙에 작게(0.8) 있다. 레이아웃 위치(우측 칼럼)와의 차이를 함수로 둔다.
+      const S0_SCALE = 0.8;
       const s0X = () => centerDelta(laptopWrap, el).x;
-      const s0Y = () => centerDelta(laptopWrap, el).y + el.clientHeight * 0.24;
+      const s0Y = () => centerDelta(laptopWrap, el).y + el.clientHeight * 0.34;
       const fullScale = () =>
         Math.min(el.clientWidth / laptop.offsetWidth, el.clientHeight / laptop.offsetHeight) * 0.96;
       const fullY = () => centerDelta(laptopWrap, el).y + el.clientHeight * 0.02;
@@ -89,15 +90,24 @@ export default function Stage() {
           scrub: 0.6,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          onUpdate: (st) => document.body.classList.toggle("ld-dark", isDark(st.progress)),
+          onUpdate: (st) => {
+            document.body.classList.toggle("ld-dark", isDark(st.progress));
+            // 문자열 attr 은 트윈이 아니라 진행률로 정한다 (attr 트윈은 렌더를 멈춘다)
+            chScene.dataset.tone = st.progress >= (T.ch2 + 3) / TOTAL ? "dark" : "light";
+          },
+          // 첫 페인트(progress 0)에서도 헤더가 어두워야 한다 — onUpdate 는 스크롤 전엔 안 불린다
+          onRefresh: (st) =>
+            document.body.classList.toggle("ld-dark", st.scroll() <= st.end && isDark(st.progress)),
           onLeave: () => document.body.classList.remove("ld-dark"),
           onLeaveBack: () => document.body.classList.add("ld-dark"),
         },
       });
 
+      if (process.env.NODE_ENV !== "production") {
+        (window as unknown as { __stageTl?: gsap.core.Timeline }).__stageTl = tl; // 브라우저 검증용
+      }
+
       /* ── S0. 고지서 오프닝 ── */
-      tl.set(laptopWrap, { x: s0X, y: s0Y }, 0);
-      tl.set(el, { backgroundColor: BG.dusk }, 0);
       tl.from(stillHand, { autoAlpha: 0, duration: 5 }, T.s0Still);
       tl.from(
         billWrap,
@@ -113,14 +123,27 @@ export default function Stage() {
       tl.to(veil, { opacity: 0.86, duration: 8 }, T.s0Bill);
       tl.from(copy1, { autoAlpha: 0, y: 28, duration: 4 }, T.s0Bill + 4);
 
-      tl.from(laptopWrap, { yPercent: 120, duration: 8 }, T.s0Laptop);
+      // 타임라인 0초의 set() 은 리프레시 때 되돌려지므로, S0 위치는 fromTo 의 from 으로 박는다.
+      tl.fromTo(
+        laptopWrap,
+        { x: s0X, y: s0Y, scale: S0_SCALE, yPercent: 120 },
+        { yPercent: 0, duration: 8 },
+        T.s0Laptop,
+      );
       tl.to(copy1, { autoAlpha: 0, duration: 3 }, T.s0Laptop + 2);
       tl.from(copy2, { autoAlpha: 0, y: 28, duration: 4 }, T.s0Laptop + 5);
 
       frags.forEach((f, i) => {
+        // 도착점: 노트북이 S0 위치(x,y 오프셋 + 0.8 배)에 있을 때 target 이 실제로 보이는 자리
         const d = () => {
-          const v = fitDelta(f, targets[i], el);
-          return { x: v.x + s0X(), y: v.y + s0Y(), scale: v.scale };
+          const lc = layoutCenter(laptopWrap, el);
+          const tc = layoutCenter(targets[i], el);
+          const fc = layoutCenter(f, el);
+          return {
+            x: lc.x + (tc.x - lc.x) * S0_SCALE + s0X() - fc.x,
+            y: lc.y + (tc.y - lc.y) * S0_SCALE + s0Y() - fc.y,
+            scale: (targets[i].offsetWidth * S0_SCALE) / f.offsetWidth,
+          };
         };
         tl.to(
           f,
@@ -163,7 +186,6 @@ export default function Stage() {
 
       /* ── CH2. 금융보호 ── */
       tl.to(el, { backgroundColor: BG.navy, duration: 6 }, T.ch2);
-      tl.to(chScene, { attr: { "data-tone": "dark" }, duration: 0.01 }, T.ch2 + 3);
       tl.to(ind01, { autoAlpha: 0, duration: 2 }, T.ch2);
       tl.from(ind02, { autoAlpha: 0, x: -18, duration: 3 }, T.ch2 + 2);
       tl.to(scrLim, { autoAlpha: 0, duration: 2 }, T.ch2);

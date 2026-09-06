@@ -26,10 +26,12 @@ export function layoutOffset(el: Box, root: Box): { left: number; top: number } 
   return { left, top };
 }
 
-const center = (el: Box, root: Box) => {
+/** el 의 레이아웃 중심 (root 좌표) */
+export function layoutCenter(el: Box, root: Box): { x: number; y: number } {
   const o = layoutOffset(el, root);
   return { x: o.left + el.offsetWidth / 2, y: o.top + el.offsetHeight / 2 };
-};
+}
+const center = layoutCenter;
 
 /** src 를 dst 자리·크기로 보내는 transform (transform-origin: center 기준) */
 export function fitDelta(src: Box, dst: Box, root: Box): { x: number; y: number; scale: number } {
