@@ -71,8 +71,6 @@ export default function Bill() {
       role="img"
       aria-label="한국전력공사 2026년 9월분 주택용 전기요금 청구서. 청구금액 38,500원, 납기일 9월 25일"
     >
-      {/* 문틈에 꽂혀 있을 때 종이가 틈으로 들어가는 쪽의 그늘. 빠져나오며 GSAP 이 지운다. */}
-      <i className="ld-bill-fold" data-bill-fade aria-hidden />
       {/* 왼쪽 천공 줄 */}
       <i className="ld-bill-holes" data-bill-fade aria-hidden />
 

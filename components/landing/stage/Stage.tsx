@@ -6,9 +6,7 @@ import StartLink from "../StartLink";
 import Bill from "./Bill";
 import { Laptop, AlertCard } from "./Laptop";
 import Candles, { CRASH_INDEX } from "./Candles";
-import { DoorBack, DOOR } from "./DoorScene";
-import { BillHand, HAND, PERSON, armPath } from "./Person";
-import { centerDelta, layoutCenter, layoutOffset, sliceToScreen } from "./layout";
+import { centerDelta, layoutCenter, layoutOffset } from "./layout";
 import { T, TOTAL, isDark } from "./phases";
 
 /**
@@ -21,15 +19,12 @@ import { T, TOTAL, isDark } from "./phases";
  * 그래서 reduced-motion(static) 에서는 타임라인 없이 완성 화면이 세로로 쌓여 보인다.
  * 위치 계산은 전부 함수형 값 — 리사이즈 시 ScrollTrigger 가 다시 계산한다.
  *
- * S0 는 짧은 영화 비트다 (2026-09-06 연출 변경: "문에 꽂힌 고지서" → "사람이 꺼내 클로즈업").
- *  A. 와이드 숏 — 실제 비례의 현관문 앞에 선 사람이 문틈에 꽂힌 고지서로 팔을 뻗고 있다.
- *     문과 사람이 가운데를 차지하므로 소개 글(h1)은 좌우 여백에 나눠 앉고, 스크롤을 시작하면 위로 옅어지며 사라진다.
- *  B. 손이 고지서를 뽑는다(0→s0Bill) — DOM 고지서가 문틈 선을 따라 빠져나오고, 문틈 선 왼쪽을 잘라 둔
- *     clip-path 가 함께 풀린다. 꽂혀 있는 동안은 회전 0 — 기울이면 잘린 모서리(고지서 로컬 좌표)가 세로
- *     문틈 선과 어긋나 종이가 문에 붙인 것처럼 보인다. 손은 고지서 래퍼 안에 있어 종이와 같이 움직이고,
- *     사람의 팔은 매 프레임 IK 로 그 손목을 따라간다(updateArm).
- *  C. 카메라 푸시인(s0Bill→s0Laptop) — 고지서가 중앙으로 와 읽히는 크기가 되고, 문+사람은 문틈을 축으로
- *     살짝 커지며 서리 베일 아래로 사라진다.
+ * S0 오프닝은 영상이다 (2026-09-07 연출 변경: DOM 문·사람 → 실사 일러스트 영상).
+ *  A. 영상(0→VIDEO_SPAN) — 복도를 걸어와 현관문에서 고지서를 꺼내 들여다보는 데까지. 스크롤에 맞춰
+ *     currentTime 을 직접 옮긴다(재생하지 않는다). 그래서 되감아도 그대로 따라온다. 매 프레임이 키프레임인
+ *     파일이라 탐색이 끊기지 않는다. 소개 글(h1)은 좌우 여백에 앉고 스크롤을 시작하면 위로 옅어진다.
+ *  B. 인계(VIDEO_HAND→) — 영상이 옅어지는 동안 DOM 고지서가 제자리 클로즈업으로 떠오른다. 영상 속
+ *     고지서는 표 글자가 가짜라 읽히는 크기가 되기 전에 넘긴다. 조각이 날아가는 글자는 전부 DOM 이다.
  * 고지서는 노트북 위 겹에 있어야 조각이 화면 위로 날아간다 — 그래서 S0 장면 밖, 스테이지 직속이다.
  *
  * S0·CH1 은 밝은 장면(토스풍), CH2·TR 은 딥네이비. BG.light 는 .ld-stage 의 CSS 배경과 같은 값이다.
@@ -44,12 +39,11 @@ const BEATS = [
   { id: 3, h: "한도는 내가 정한 만큼만", p1: "1회 한도를 100만원으로 정하면", p2: "하루 한도 200만원은 자동으로 따라옵니다" },
 ];
 
-/** 문틈에 꽂혀 있을 때 고지서 너비 (문 장면 viewBox 단위) — 배율은 화면마다 여기서 역산한다. 문짝 폭 200 의 64%(1.9:1 이라 세로가 낮아진 만큼 조금 키웠다) */
-const SEAM_W = 128;
-/** 꽂혀 있을 때 문틈 밖으로 보이는 비율 (고지서 너비 기준). .ld-bill-fold 의 그늘 위치(55%)와 짝이다. */
-const PEEK = 0.45;
-/** 손이 종이에서 떨어지는(사라지는) 데 걸리는 시간 — 그동안만 팔 IK 를 돌린다 */
-const HAND_OFF = 1.5;
+/** 오프닝 영상 길이(초)와 그것이 차지하는 타임라인 구간 */
+const VIDEO_DUR = 4.4;
+const VIDEO_SPAN = 10;
+/** 영상 → DOM 고지서 인계 시작. 여기서 4 단위에 걸쳐 겹쳐 넘긴다 */
+const VIDEO_HAND = 8;
 
 export default function Stage() {
   const root = useRef<HTMLDivElement>(null);
@@ -68,16 +62,11 @@ export default function Stage() {
       const q = gsap.utils.selector(el);
       const one = (s: string) => q(s)[0] as HTMLElement;
       const all = (s: string) => q(s) as HTMLElement[];
-      const doorBack = one(".ld-door--back");
-      const vignette = one(".ld-vignette");
-      const veil = one(".ld-veil");
+      const video = one(".ld-s0-video") as HTMLVideoElement;
+      const wash = one(".ld-s0-wash");
       const intro = all(".ld-s0-intro span");
       const billWrap = one(".ld-bill-wrap");
       const bill = one(".ld-bill");
-      const billFold = one(".ld-bill-fold");
-      const billHand = one(".ld-bill-hand");
-      const person = one(".ld-person");
-      const personArm = one(".ld-person-arm");
       const billFade = all("[data-bill-fade]");
       const billRows = all("[data-bill-row]");
       const laptopWrap = one(".ld-laptop-wrap");
@@ -106,46 +95,15 @@ export default function Stage() {
       const stamp = one(".ld-tr-stamp");
       const trCopy = one(".ld-tr-copy");
 
-      /* ── 좌표 함수 (리사이즈마다 다시 계산) ── */
-      // 문틈의 화면 좌표 (x 는 틈의 왼쪽 = 문짝 모서리, s 는 viewBox→화면 배율)
-      const gap = () => sliceToScreen(DOOR.vw, DOOR.vh, el.clientWidth, el.clientHeight, DOOR.gap.x, DOOR.gap.y);
-      // 종이가 틈에서 나오는 선: 틈 폭의 절반 지점. 왼쪽에 어두운 홈이 한 줄 남아야 "틈에 끼어 있다" 로 읽힌다.
-      const seamX = () => {
-        const g = gap();
-        return g.x + DOOR.gap.w * g.s * 0.5;
-      };
-      // 꽂혀 있을 때 배율: 어느 화면에서든 문 대비 같은 크기(SEAM_W)여야 사람·문과 비례가 맞는다
-      const slotScale = () => (SEAM_W * gap().s) / billWrap.offsetWidth;
-      // 꽂혀 있을 때: 왼쪽 (1-PEEK) 은 문틈 안, 오른쪽 PEEK 만 밖으로 보인다. 잘린 모서리가 정확히 seamX 에 온다.
-      const slotX = () => seamX() + SEAM_W * gap().s * (PEEK - 0.5) - layoutCenter(billWrap, el).x;
-      const slotY = () => gap().y - layoutCenter(billWrap, el).y;
-      // 완전히 빠져나온 자리: 문틈 바로 오른쪽
-      const outX = () => seamX() + SEAM_W * gap().s * 0.5 + 6 * gap().s - layoutCenter(billWrap, el).x;
-      // 꽂혀 있을 때 문틈 선 왼쪽으로 잘리는 너비 (고지서 로컬 px). 오른쪽·위아래는 음수로 넓혀 종이 밖의 손이 잘리지 않게 한다
-      const clipIn = () => `inset(-50% -50% -50% ${Math.round(billWrap.offsetWidth * (1 - PEEK))}px)`;
-      const CLIP_OUT = "inset(-50% -50% -50% 0px)";
-      // 푸시인 축: 문틈의 고지서 자리. 문+사람이 여기를 중심으로 커져야 카메라가 종이로 다가가는 느낌이 난다
-      const pushOrigin = () => `${seamX()}px ${gap().y}px`;
-
-      /* ── 팔 IK: 고지서 위 손의 손목이 지금 화면 어디 있는지 → 문 장면 viewBox 좌표 → 어깨에서 그리로 가는 팔 ──
-       * 손은 고지서 래퍼 안에 있어 래퍼의 transform(x·y·scale·rotation, 원점 중앙)을 그대로 따른다.
-       * 손이 종이에서 떨어진 뒤(s0Bill + HAND_OFF)에는 마지막 자세로 멈춘다 — 푸시인 중에 팔이 화면 중앙으로 늘어나면 안 된다. */
-      const updateArm = () => {
-        const g = gap();
-        const c = layoutCenter(billWrap, el);
-        const tx = Number(gsap.getProperty(billWrap, "x"));
-        const ty = Number(gsap.getProperty(billWrap, "y"));
-        const sc = Number(gsap.getProperty(billWrap, "scale"));
-        const rot = (Number(gsap.getProperty(billWrap, "rotation")) * Math.PI) / 180;
-        const lx = billHand.offsetLeft + billHand.offsetWidth * HAND.wrist.x - billWrap.offsetWidth / 2;
-        const ly = billHand.offsetTop + billHand.offsetHeight * HAND.wrist.y - billWrap.offsetHeight / 2;
-        const px = c.x + tx + sc * (lx * Math.cos(rot) - ly * Math.sin(rot));
-        const py = c.y + ty + sc * (lx * Math.sin(rot) + ly * Math.cos(rot));
-        const offX = (el.clientWidth - DOOR.vw * g.s) / 2;
-        const offY = (el.clientHeight - DOOR.vh * g.s) / 2;
-        // 사람 그룹 자체가 x 로 살짝 물러나므로 그만큼 빼서 그룹 로컬 좌표로 만든다
-        const lean = Number(gsap.getProperty(person, "x")) || 0;
-        personArm.setAttribute("d", armPath(PERSON, { x: (px - offX) / g.s - lean, y: (py - offY) / g.s }));
+      /* ── 오프닝 영상: 스크롤이 곧 재생 헤드 ──
+       * 재생하지 않고 currentTime 만 옮긴다. 한 번 play→pause 해 두는 이유는 브라우저가 그래야 디코딩을
+       * 시작하기 때문이다(muted 라 사용자 조작 없이도 허용된다). */
+      video.muted = true;
+      video.play().then(() => video.pause()).catch(() => {});
+      const seekVideo = (t: number) => {
+        if (video.readyState < 1) return;
+        const want = (Math.min(Math.max(t, 0), VIDEO_SPAN) / VIDEO_SPAN) * VIDEO_DUR;
+        if (Math.abs(video.currentTime - want) > 0.02) video.currentTime = want;
       };
 
       // S0 동안 노트북은 화면 하단 중앙에 작게(0.8) 있다. 레이아웃 위치(우측 칼럼)와의 차이를 함수로 둔다.
@@ -176,7 +134,6 @@ export default function Stage() {
           // 리프레시(리사이즈·복원) 시점에도 진행률에 맞는 헤더 톤이어야 한다 — onUpdate 는 스크롤 전엔 안 불린다
           onRefresh: (st) => {
             document.body.classList.toggle("ld-dark", st.scroll() <= st.end && isDark(st.progress));
-            updateArm(); // 함수형 좌표가 다시 계산된 뒤 팔도 새 손목 위치로
           },
           // 핀 밖 양쪽 모두 밝은 장면(S0 오프닝 / CH1 다음은 CH3 가 스스로 토글)
           onLeave: () => document.body.classList.remove("ld-dark"),
@@ -188,45 +145,27 @@ export default function Stage() {
         (window as unknown as { __stageTl?: gsap.core.Timeline }).__stageTl = tl; // 브라우저 검증용
       }
 
-      // 팔 IK 는 손이 종이를 쥐고 있는 동안만 — 스크럽 프레임마다 손목을 다시 찾는다
+      // 영상은 트윈이 아니라 매 프레임 탐색으로 돌린다 — 스크럽이 되감겨도 그대로 따라온다
       tl.eventCallback("onUpdate", () => {
-        if (tl.time() <= T.s0Bill + HAND_OFF) updateArm();
+        if (tl.time() <= VIDEO_SPAN + 2) seekVideo(tl.time());
       });
 
       /* ── S0-0. 첫 화면 소개 — 스크롤을 시작하면 위로 옅어지며 사라진다 ──
        * CSS 기본 상태가 보이는 상태다: 첫 페인트(하이드레이션 전)와 reduced-motion 에서 그대로 읽힌다. */
       tl.to(intro, { autoAlpha: 0, y: -44, duration: 4, ease: "power1.in", stagger: 0.4 }, 0);
+      tl.to(wash, { opacity: 0, duration: 4.4, ease: "power1.in" }, 0);
 
-      /* ── S0-1 (비트 B). 손이 문틈에서 고지서를 뽑는다 ── */
+      /* ── S0-1. 영상 → DOM 고지서 인계 ──
+       * 영상이 옅어지는 동안 DOM 고지서가 살짝 큰 상태에서 제자리로 내려앉는다. 회전 -1.5 는 예전 클로즈업과
+       * 같은 값 — 조각이 날아갈 때의 기울기가 달라지지 않도록 그대로 둔다. */
+      tl.to(video, { autoAlpha: 0, duration: 4, ease: "power1.inOut" }, VIDEO_HAND);
       tl.fromTo(
         billWrap,
-        { x: slotX, y: slotY, scale: slotScale, rotation: 0, clipPath: clipIn },
-        { x: outX, clipPath: CLIP_OUT, duration: T.s0Bill, ease: "power1.out" },
-        T.s0Still,
+        { autoAlpha: 0, scale: 1.08, rotation: 0 },
+        { autoAlpha: 1, scale: 1, rotation: -1.5, duration: 4, ease: "power2.out" },
+        VIDEO_HAND,
       );
-      // 회전은 틈을 거의 다 벗어난 뒤에 붙는다(power2.in) — 끼어 있는 동안 잘린 모서리가 세로 문틈 선과 맞아야 한다
-      tl.to(billWrap, { rotation: 4, duration: T.s0Bill, ease: "power2.in" }, T.s0Still);
-      // 틈 쪽 그늘·접힘은 종이가 펴지면서 사라진다
-      tl.to(billFold, { autoAlpha: 0, duration: T.s0Bill * 0.8, ease: "power1.in" }, T.s0Still);
-      // 당기는 사람은 몸을 살짝 뒤로 뺀다 (viewBox 단위)
-      tl.fromTo(person, { x: 0 }, { x: 7, duration: T.s0Bill, ease: "power1.out" }, T.s0Still);
-
-      // 틈을 벗어나면 클립을 푼다 — 안 풀면 종이 박스 밖으로 날아가는 조각까지 잘린다
-      tl.set(billWrap, { clipPath: "none" }, T.s0Bill);
-
-      /* ── S0-2 (비트 C). 카메라 푸시인: 고지서는 중앙 클로즈업, 문+사람은 문틈을 축으로 커지며 베일 아래로 ── */
-      tl.to(billWrap, { x: 0, y: 0, scale: 1, rotation: -1.5, duration: 8, ease: "power1.inOut" }, T.s0Bill);
-      tl.to(billHand, { autoAlpha: 0, duration: HAND_OFF }, T.s0Bill);
-      tl.fromTo(
-        doorBack,
-        { scale: 1, transformOrigin: pushOrigin },
-        { scale: 1.15, transformOrigin: pushOrigin, duration: 8, ease: "power1.inOut" },
-        T.s0Bill,
-      );
-      tl.to(person, { autoAlpha: 0, duration: 5 }, T.s0Bill + 1);
-      tl.to(veil, { opacity: 0.86, duration: 8 }, T.s0Bill);
-      // 첫 프레임: fromTo 가 즉시 렌더된 뒤이므로 팔을 지금 손목 자리에 맞춘다
-      updateArm();
+      seekVideo(0);
 
       /* ── S0-3. 노트북이 떠오른다 ── */
       // 타임라인 0초의 set() 은 리프레시 때 되돌려지므로, S0 위치는 fromTo 의 from 으로 박는다.
@@ -312,7 +251,6 @@ export default function Stage() {
         { x: () => centerDelta(laptopWrap, el).x, y: fullY, scale: () => fullScale() * NEAR_FULL, duration: 7 },
         T.s0Full,
       );
-      tl.to([doorBack, vignette, veil], { autoAlpha: 0, duration: 6 }, T.s0Full);
       // 고지서 래퍼는 조각이 다 앉은 뒤에 치운다 — s0Full 과 같이 지우면 아직 날고 있는 조각까지 사라진다
       tl.set(billWrap, { autoAlpha: 0 }, lastLand + 1);
       tl.to(el, { backgroundColor: BG.ivory, duration: 8 }, T.s0Full + 2);
@@ -409,24 +347,29 @@ export default function Stage() {
 
   return (
     <div ref={root} className="ld-stage" data-mode={mode} aria-label="소개">
-      {/* S0 — 문 → 비네트 → 베일. 고지서는 아래 스테이지 직속(노트북 위 겹). */}
+      {/* S0 — 오프닝 영상. 고지서는 아래 스테이지 직속(노트북 위 겹). */}
       <section className="ld-scene ld-scene--s0">
-        <div className="ld-door ld-door--back" aria-hidden>
-          <DoorBack />
-        </div>
-        <div className="ld-vignette" aria-hidden />
-        <div className="ld-veil" aria-hidden />
+        <video
+          className="ld-s0-video"
+          src="/s0-opening.mp4"
+          poster="/s0-opening.jpg"
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden
+        />
+        {/* 밝기 막 — 소개 글이 움직이는 장면 위에서도 읽히게. 글과 같이 걷히며 장면이 드러난다 */}
+        <i className="ld-s0-wash" aria-hidden />
         <h1 className="ld-s0-intro">
           <span className="l">미래의 나를 위해</span>
           <span className="r">지금의 내가</span>
         </h1>
       </section>
 
-      {/* 고지서 — 문틈에서 손에 뽑혀 중앙으로, 조각이 노트북 위로 날아간다. 손은 종이와 같이 움직이도록 래퍼 안에 */}
+      {/* 고지서 — 영상에서 넘겨받아 중앙 클로즈업으로, 조각이 노트북 위로 날아간다 */}
       <div className="ld-bill-anchor">
         <div className="ld-bill-wrap">
           <Bill />
-          <BillHand />
         </div>
       </div>
 
