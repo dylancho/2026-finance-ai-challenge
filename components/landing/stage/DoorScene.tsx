@@ -1,35 +1,37 @@
-import { Person } from "./Person";
+import { Person, FLOOR, BILL_Y } from "./Person";
 
 /**
  * S0 오프닝의 현관문 장면 — 한국 아파트 철문 앞에 선 사람. 실사 대신 밝고 평평한 일러스트(토스풍).
  *
- * 와이드 숏이다: 문 전체가 벽과 함께 화면 중앙 근처에 실제 비례로 보이고(데스크톱에서 세로 ≈ 60%),
- * 사람은 도어락 쪽에 서서 문짝과 문틀 사이 "문틈"에 꽂힌 고지서로 팔을 뻗는다. 고지서는 DOM(.ld-bill-wrap)
+ * 와이드 숏이다: 문 전체가 벽과 함께 실제 비례로 보이고(데스크톱에서 세로 ≈ 55%), 위쪽 벽은 헤더 아래로 조금만 남기고
+ * 바닥은 발 아래까지 온전히 보인다(2026-09-06: "바닥까지 나오게 위쪽 여백 줄여"). 사람은 도어락 쪽에 서서 문짝과 문틀 사이 "문틈"에 꽂힌 고지서로 팔을 뻗는다. 고지서는 DOM(.ld-bill-wrap)
  * 이고 왼쪽 일부가 문틈 선 안쪽으로 clip-path 로 잘려 있다가 스크롤에 따라 옆으로 빠져나온다.
  * 그래서 문틈은 폭이 일정한 진짜 어두운 홈으로 읽혀야 한다 — 종이가 그 홈에서 나온다.
  *
  * 좌표는 viewBox(1600×1000) 기준이며 Stage 가 sliceToScreen 으로 화면 좌표로 옮긴다.
  * viewBox 를 16:10 으로 둔 이유: slice 는 세로가 남는 쪽을 맞추므로, 세로 화면(390×844)에서 보이는 가로 폭이
  * 1000/844×390 ≈ 462 단위가 되어 문틀 왼쪽(570) ~ 사람 오른쪽(1026) 구도가 잘리지 않고 들어온다.
- * 데스크톱(16:9)에서는 0.9배로 조금 작아질 뿐이다(문 세로 ≈ 화면의 55%).
+ * 데스크톱 16:10 은 viewBox 가 그대로 다 보이고, 16:9(1920×1080)는 위아래 50 단위씩만 잘린다 — 문틀 위(180)와
+ * 바닥(736~)은 그 안에 있다.
  */
 
 const FRAME_X = 570; // 문틀 바깥 왼쪽
 const FRAME_W = 268;
 const FRAME_T = 26; // 문틀 두께
 const GAP = 8; // 문짝과 문틀 사이 틈 — 모바일(≈0.84배)에서도 한 줄로 또렷이 보이는 폭
-const DOOR_TOP = 264; // 문틀 바깥 위
+const DOOR_H = 556; // 문틀 바깥 높이. 폭 268 과 함께 실제 현관문(≈ 1:2.1) 비례
+const DOOR_TOP = FLOOR - DOOR_H; // 문틀 바깥 위 = 180
 const LEAF_X = FRAME_X + FRAME_T + GAP; // 문짝 왼쪽
 const LEAF_R = FRAME_X + FRAME_W - FRAME_T - GAP; // 문짝 오른쪽 = 고지서가 꽂히는 틈의 왼쪽
 const LEAF_TOP = DOOR_TOP + FRAME_T + GAP;
-const FLOOR = 820; // 문 아래 = 바닥 선. Person 의 발도 여기 선다 (Person.FLOOR 와 같아야 한다)
+// 바닥선 FLOOR 는 Person.tsx 에서 온다 — 문 아래·사람의 발·바닥 타일이 한 선이어야 해서 한 곳에만 둔다
 const LOCK_Y = FLOOR - 270; // 도어락 위 — 고지서 아래, 손잡이 높이
 
 export const DOOR = {
   vw: 1600,
   vh: 1000,
   /** 고지서가 꽂힌 문틈 — 오른쪽(도어락 쪽) 틈. x 는 틈의 왼쪽(문짝 모서리), w 는 틈 폭, y 는 꽂힌 높이(고지서 세로 중심) */
-  gap: { x: LEAF_R, w: GAP, y: 520 },
+  gap: { x: LEAF_R, w: GAP, y: BILL_Y },
 } as const;
 
 export function DoorBack() {
@@ -131,13 +133,15 @@ export function DoorBack() {
       <rect x={LEAF_R - 3} y={LEAF_TOP} width="3" height={leafH} fill="rgba(12,28,54,0.16)" />
       <rect x={LEAF_X} y={LEAF_TOP} width="2" height={leafH} fill="rgba(255,255,255,0.5)" />
 
-      {/* 바닥 타일 */}
+      {/* 바닥 타일 — 바닥이 264 단위(화면 아래까지)라 줄눈을 세 줄 두어 바닥으로 읽히게 한다 */}
       <rect x="0" y={FLOOR} width="1600" height={1000 - FLOOR} fill={`url(#${id}-floor)`} />
       <rect x="0" y={FLOOR} width="1600" height="2" fill="rgba(255,255,255,0.7)" />
       {[80, 400, 720, 1040, 1360].map((x) => (
         <rect key={x} x={x} y={FLOOR} width="2" height={1000 - FLOOR} fill="rgba(12,28,54,0.08)" />
       ))}
-      <rect x="0" y={FLOOR + 66} width="1600" height="2" fill="rgba(12,28,54,0.06)" />
+      {[84, 172, 260].map((dy) => (
+        <rect key={dy} x="0" y={FLOOR + dy} width="1600" height="2" fill="rgba(12,28,54,0.06)" />
+      ))}
       {/* 문 아래 그림자 + 현관 매트 */}
       <rect x={FRAME_X - 16} y={FLOOR} width={FRAME_W + 32} height="24" fill="rgba(12,28,54,0.16)" filter={`url(#${id}-soft)`} />
       <rect x={LEAF_X - 6} y={FLOOR + 10} width={leafW + 12} height="30" rx="4" fill="#c6ccd6" />

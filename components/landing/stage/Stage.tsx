@@ -42,8 +42,8 @@ const BEATS = [
   { id: 3, h: "한도는 당신이 정한 만큼만", p1: "한 번에 100만원을 정하면", p2: "하루 200만원이 자동으로 따라옵니다" },
 ];
 
-/** 문틈에 꽂혀 있을 때 고지서 너비 (문 장면 viewBox 단위) — 배율은 화면마다 여기서 역산한다. 문짝 폭 200 의 60% */
-const SEAM_W = 120;
+/** 문틈에 꽂혀 있을 때 고지서 너비 (문 장면 viewBox 단위) — 배율은 화면마다 여기서 역산한다. 문짝 폭 200 의 64%(1.9:1 이라 세로가 낮아진 만큼 조금 키웠다) */
+const SEAM_W = 128;
 /** 꽂혀 있을 때 문틈 밖으로 보이는 비율 (고지서 너비 기준). .ld-bill-fold 의 그늘 위치(55%)와 짝이다. */
 const PEEK = 0.45;
 /** 손이 종이에서 떨어지는(사라지는) 데 걸리는 시간 — 그동안만 팔 IK 를 돌린다 */
@@ -250,8 +250,8 @@ export default function Stage() {
             scale: (targets[i].offsetWidth * S0_SCALE) / f.offsetWidth,
           };
         };
-        // 종이 조각처럼 떨어져 나온다: 배경·그림자를 얻고, 살짝 떠오른 뒤 포물선으로 떨어진다
-        tl.to(f, { backgroundColor: "#ffffff", boxShadow: "0 18px 34px -10px rgba(12,28,54,.38)", duration: 1 }, at);
+        // 종이 조각처럼 떨어져 나온다: 배경(고지서와 같은 누런 종이색)·그림자를 얻고, 살짝 떠오른 뒤 포물선으로 떨어진다
+        tl.to(f, { backgroundColor: "#f7f1d9", boxShadow: "0 18px 34px -10px rgba(12,28,54,.38)", duration: 1 }, at);
         tl.to(f, { x: () => d().x, duration: FLIGHT }, at);
         tl.to(f, { y: () => d().y - 40, duration: FLIGHT * 0.35, ease: "power2.out" }, at);
         tl.to(f, { y: () => d().y, duration: FLIGHT * 0.65, ease: "power2.in" }, at + FLIGHT * 0.35);
@@ -267,10 +267,10 @@ export default function Stage() {
           land,
         );
       });
-      // 종이만 사라진다 — 조각은 남아서 날아간다
+      // 종이만 사라진다 — 조각은 남아서 날아간다. 배경은 .ld-bill 의 종이색(#f5eed2)을 알파 0 으로 — 흰색으로 가면 사라지며 색이 변한다
       tl.to(billFade, { autoAlpha: 0, duration: 3 }, T.s0Flip + 1);
       tl.to(billRows, { borderColor: "rgba(0,0,0,0)", duration: 3 }, T.s0Flip + 1);
-      tl.to(bill, { backgroundColor: "rgba(255,255,255,0)", boxShadow: "0 0 0 0 rgba(0,0,0,0)", duration: 3 }, T.s0Flip + 1);
+      tl.to(bill, { backgroundColor: "rgba(245,238,210,0)", boxShadow: "0 0 0 0 rgba(0,0,0,0)", duration: 3 }, T.s0Flip + 1);
       const lastLand = T.s0Flip + (frags.length - 1) * GAP + FLIGHT;
       tl.from(logRest, { autoAlpha: 0, x: -6, duration: 1.5, stagger: 0.2 }, lastLand + 0.4);
 

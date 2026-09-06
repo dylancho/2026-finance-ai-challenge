@@ -9,8 +9,18 @@
  * 손(BillHand)은 사람이 아니라 고지서 래퍼 안에 있다 — 고지서와 같이 움직여야 "종이를 쥔 손" 으로
  * 읽히기 때문이다. 손목 위치(HAND.wrist)가 곧 IK 의 목표점이다.
  *
- * 좌표는 DoorScene 과 같은 viewBox(1600×1000). 바닥은 y=820 (DoorScene 의 FLOOR 와 같다).
+ * 좌표는 DoorScene 과 같은 viewBox(1600×1000). 바닥선 FLOOR 는 여기서 정하고 DoorScene 이 가져다 쓴다 —
+ * 사람의 발·문 아래·바닥 타일이 한 선에 서야 하는데, 두 파일에 같은 숫자를 따로 두면 한쪽만 고쳐 어긋난다(2026-09-06 에 겪음).
  */
+
+/**
+ * 바닥선(viewBox y). 736 인 이유: 문 높이 556 을 얹으면 문틀 위가 180 — 16:10 화면(1440×900)에서 헤더(68px) 아래로
+ * 벽이 ≈ 94px(10%) 만 남고, 바닥은 264 단위(≈ 240px)가 온전히 보인다. 16:9(1920×1080)는 위아래 50 씩 잘리는데
+ * 그래도 문틀 위 ≈ 88px, 바닥 214 단위가 남는다.
+ */
+export const FLOOR = 736;
+/** 문틈에 꽂힌 고지서의 세로 중심 — DoorScene.DOOR.gap.y 와 같은 값. 어깨보다 살짝 아래, 도어락보다 위 */
+export const BILL_Y = FLOOR - 300;
 
 export interface Pt {
   x: number;
@@ -19,11 +29,15 @@ export interface Pt {
 
 /** 사람의 IK 상수 — 어깨 관절(뻗는 팔 쪽)과 위팔·아래팔 길이(viewBox 단위) */
 export const PERSON = {
-  shoulder: { x: 937, y: 506 } as Pt,
+  shoulder: { x: 937, y: FLOOR - 314 } as Pt,
   upper: 56,
   fore: 58,
-  /** 첫 페인트(하이드레이션 전) 손목 위치 — 데스크톱 기준 문틈에 꽂힌 고지서 가장자리 */
-  restWrist: { x: 878, y: 526 } as Pt,
+  /**
+   * 첫 페인트(하이드레이션 전) 손목 위치 — 데스크톱 기준 문틈에 꽂힌 고지서 가장자리.
+   * x = 고지서 중심(문틈 선 − 6.4) − 폭/2 + 폭 × (HAND.left + HAND.width × HAND.wrist.x), 폭 = Stage.SEAM_W(128).
+   * y 는 손목이 고지서 세로 중앙에 오도록 HAND.marginTop 을 맞춰 두어 BILL_Y 와 같다.
+   */
+  restWrist: { x: 883, y: BILL_Y } as Pt,
 } as const;
 
 /**
@@ -83,10 +97,11 @@ const BAG_SHADE = "#c7ad86";
  */
 export function Person() {
   const cx = 975; // 몸 중심 x. 문 오른쪽(도어락 쪽)에 서서 몸을 문 쪽으로 살짝 튼 뒷모습
-  const floor = 820;
-  const shoulderY = 502;
-  const hipY = 662;
-  const headC = { x: cx - 13, y: 447, r: 27 };
+  const floor = FLOOR;
+  // 키 ≈ 400 단위(문틀 556 대비 0.72 — 50~60대 평균). 전부 바닥선 기준이라 FLOOR 만 옮기면 사람이 같이 선다
+  const shoulderY = floor - 318;
+  const hipY = floor - 158;
+  const headC = { x: cx - 13, y: floor - 373, r: 27 };
   return (
     <g className="ld-person" aria-hidden>
       {/* 바닥 그림자 */}
