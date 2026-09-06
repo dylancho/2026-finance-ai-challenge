@@ -55,6 +55,60 @@ export function ruleReport(tx: FraudTransaction, guardian = "김하나", policy?
   };
 }
 
+/** 인라인 분석 상단의 거래 한 줄 라벨. 모달의 STATUS 와 달리 거래 자체를 가리킨다. */
+const TRANSACTION_LABEL: Record<FraudStatus, { label: string; className: string }> = {
+  BLOCKED: { label: "차단된 거래", className: "blocked" },
+  REVIEW: { label: "추가 확인이 필요한 거래", className: "review" },
+  ALLOW: { label: "정상 인정 거래", className: "allowed" },
+};
+
+/**
+ * 모달을 열지 않고 페이지 안에 바로 펼치는 판단 근거 (2026-09-07, origin/fsd 11378df 이지수).
+ * 금융 보호 화면은 "오늘의 거래" 카드 아래에 거래마다 이 블록을 나열한다.
+ * 기본은 주요 근거 3개만 보이고, 토글로 나머지를 연다 — 판단 이유를 찾으러 클릭할 필요가 없어야 한다.
+ * REVIEW(추가 확인)는 그녀의 원본에 없던 상태라 라벨과 색을 따로 둔다.
+ */
+export function FraudAnalysisDetails({
+  report,
+  expanded = false,
+  onToggle,
+}: {
+  report: FraudReportUI;
+  expanded?: boolean;
+  onToggle?: () => void;
+}) {
+  const signals = expanded ? report.signals : report.signals.slice(0, 3);
+  const label = TRANSACTION_LABEL[report.status];
+  const rest = report.signals.length - 3;
+  return (
+    <section className="inline-fraud-analysis" aria-label="위험 분석 상세 정보">
+      <div className={`inline-fraud-analysis-transaction ${label.className}`}>
+        <span>{label.label}</span>
+        <b>{report.transaction.requestTime} · {report.transaction.targetAccount} · {report.transaction.amount.toLocaleString("ko-KR")}원</b>
+      </div>
+      <p className="inline-fraud-analysis-decision">{report.decision}</p>
+      <p className="inline-fraud-analysis-count">{expanded ? `전체 근거 ${report.signals.length}개` : "주요 근거 3개"}</p>
+      <div className="fds-signals">
+        {signals.map((signal) => (
+          <article className={`fds-signal ${signal.level}`} key={signal.key}>
+            <div className="fds-signal-top"><h4>{signal.label}</h4><span>{signal.score ? `+${signal.score}` : "정상"}</span></div>
+            <p>{signal.detail}</p>
+            <dl>
+              <div><dt>이번 거래</dt><dd>{signal.observed}</dd></div>
+              <div><dt>평소 기준</dt><dd>{signal.baseline}</dd></div>
+            </dl>
+          </article>
+        ))}
+      </div>
+      {rest > 0 && onToggle && (
+        <button className="inline-fraud-analysis-toggle" onClick={onToggle} aria-expanded={expanded}>
+          {expanded ? "주요 근거만 보기" : `나머지 근거 ${rest}개 자세히 보기`} <span aria-hidden>{expanded ? "↑" : "↓"}</span>
+        </button>
+      )}
+    </section>
+  );
+}
+
 /**
  * 모달은 body 에 포털로 띄운다.
  * 인터뷰 패널처럼 transform 애니메이션이 끝난 채 남아 있는 조상 아래에서는
