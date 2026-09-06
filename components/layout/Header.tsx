@@ -164,7 +164,7 @@ export default function Header() {
   return (
     <>
       <header
-        className="header"
+        className={`header${panelOpen ? " is-panel-open" : ""}`}
         ref={headerRef}
         onBlur={onHeaderBlur}
         onPointerLeave={(e) => {
