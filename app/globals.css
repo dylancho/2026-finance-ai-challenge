@@ -3496,6 +3496,65 @@ body.ld-dark .nav .nav-signout { color: #fff; }
   min-width: 92px;
 }
 
+/* ── 둘러보기 (2026-09-06) ──
+   헤더 바로 아래의 얇은 안내 바. 예시 데이터로 보고 있다는 사실을 어느 화면에서도
+   놓치지 않게 하고, 나가는 길을 한 곳에 둔다. */
+.nav .btn.outline.sm {
+  padding: 7px 12px;
+  font-size: 12.5px;
+}
+
+.tour-bar {
+  background: var(--navy);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.tour-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.tour-bar p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.tour-bar b {
+  color: #fff;
+  font-weight: 600;
+}
+
+.tour-exit {
+  flex: none;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.tour-exit:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 640px) {
+  .tour-bar-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
 /* ── 서비스 목록 ── */
 .stage-list {
   list-style: none;

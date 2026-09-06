@@ -146,6 +146,23 @@ export interface GenerateOptions {
   decline?: boolean;
   /** decline 이 시작되는 지점 (년차, 1-based) */
   declineFromYear?: number;
+  /**
+   * 2026-09-06 심사용 데모 K(김영수) 의 보정값. docs/demo-data-plan.md 가 정한 목표
+   * 수치(생활비 중앙값·주거래 기관·최대 이체·의료비 규모)는 프리셋 상수만으로는 못 맞춘다 —
+   * 프리셋의 living 은 성향 묶음이고 거래 기관은 난수로 뽑는다. 프리셋을 늘리거나
+   * BANKS 를 건드리면 A·B·D 의 난수 순서가 흔들려 기존 데모 숫자가 바뀌므로, 난수를
+   * 소비하지 않는 "값 덮어쓰기" 만 둔다. 지정하지 않으면 예전과 완전히 같은 결과다.
+   */
+  calibrate?: {
+    /** 월 생활비 기준선 (프리셋 living 대체) */
+    living?: number;
+    /** 고액 이체가 발생하는 달의 기준 금액 (기본 6,500,000) */
+    largeTransfer?: number;
+    /** 거래 기관을 난수 대신 고정한다. 비중 내림차순으로 준다. */
+    institutions?: Institution[];
+    /** 가장 깊은 낙폭의 매도에 겹칠 큰 지출 */
+    outflow?: { label: string; amount: number };
+  };
 }
 
 /**
@@ -187,6 +204,9 @@ export function generateLedger(seed: string, opts: GenerateOptions = {}): Ledger
   const declineFrom = opts.declineFromYear ?? Math.max(1, years - 2);
 
   const rule = PRESETS[preset];
+  const cal = opts.calibrate ?? {};
+  const livingBase = cal.living ?? rule.living;
+  const largeTransfer = cal.largeTransfer ?? 6_500_000;
   const rng = makeRng(seed);
 
   const months: MonthRoll[] = [];
@@ -207,7 +227,7 @@ export function generateLedger(seed: string, opts: GenerateOptions = {}): Ledger
 
       // 물가 상승 반영
       const drift = 1 + yi * 0.021;
-      let living = jitter(rng, rule.living * drift, 0.09);
+      let living = jitter(rng, livingBase * drift, 0.09);
       if (holiday) living += jitter(rng, 900_000, 0.25);
 
       const fixed: Record<string, number> = {};
@@ -240,7 +260,7 @@ export function generateLedger(seed: string, opts: GenerateOptions = {}): Ledger
 
       const maxTransfer =
         rng() < 0.12
-          ? jitter(rng, 6_500_000, 0.5)
+          ? jitter(rng, largeTransfer, 0.5)
           : jitter(rng, 1_450_000, 0.45);
 
       months.push({
@@ -364,6 +384,8 @@ export function generateLedger(seed: string, opts: GenerateOptions = {}): Ledger
       amount: jitter(rng, 42_000_000, 0.25),
     };
   }
+  // 보정값이 있으면 난수는 위에서 그대로 소비한 채 값만 바꾼다.
+  if (deepest && cal.outflow) deepest.coincidingOutflow = { ...cal.outflow };
 
   trades.sort((a, b) => a.date.localeCompare(b.date));
   incidents.sort((a, b) => a.date.localeCompare(b.date));
@@ -384,7 +406,8 @@ export function generateLedger(seed: string, opts: GenerateOptions = {}): Ledger
     baselineYears,
     months,
     trades,
-    institutions: pickInstitutions(rng),
+    // pickInstitutions 는 마지막 난수 소비자라, 고정값으로 건너뛰어도 앞의 결과는 그대로다.
+    institutions: cal.institutions ? cal.institutions.map((i) => ({ ...i })) : pickInstitutions(rng),
     incidents,
     drawdowns,
     holdings: {
@@ -405,6 +428,32 @@ export const DEMO_LEDGER_SEEDS: Record<string, GenerateOptions & { seed: string 
   A: { seed: "demo-A-spender", preset: "spender", decline: false },
   B: { seed: "demo-B-panic", preset: "panic_seller", decline: true, declineFromYear: 8 },
   D: { seed: "demo-D-holder", preset: "holder", decline: false },
+  /**
+   * K — 심사용 둘러보기(김영수, 68). docs/demo-data-plan.md "금융 이력 10년".
+   *
+   * 시드는 3,000개를 돌려 문서의 목표에 가장 가까운 것을 골랐다:
+   *   생활비 중앙값 약 157만 (선언 190만보다 20% 넘게 낮아 대조가 뜬다)
+   *   하락 5회 중 4회 매도 · 가장 깊은 낙폭(감염병 급락) 매도에 의료비 2,600만 동반
+   *   베이스라인 최대 1회 이체 약 762만 (A05 한도 300만과 모순)
+   *   8년차부터 저하 신호 → 바이오마커 70점대 경보
+   * 주거래 NH농협은행 54% 는 문서 값 그대로 고정한다 — 의뢰서 수신처가 여기서 나온다.
+   */
+  K: {
+    seed: "demo-K-kim-241",
+    preset: "panic_seller",
+    decline: true,
+    declineFromYear: 8,
+    calibrate: {
+      living: 1_400_000,
+      largeTransfer: 5_600_000,
+      institutions: [
+        { name: "NH농협은행", trustDesk: true, share: 0.54 },
+        { name: "KB국민은행", trustDesk: true, share: 0.29 },
+        { name: "신한은행", trustDesk: true, share: 0.17 },
+      ],
+      outflow: { label: "배우자 수술비", amount: 26_000_000 },
+    },
+  },
 };
 
 export function demoLedger(key: string): Ledger | null {
