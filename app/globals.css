@@ -1654,6 +1654,144 @@ input[type="range"] {
   padding: 9px 12px;
 }
 
+/* ── 신탁설계서 조항 목록 ─────────────────────────────
+ * 조항 열두 개를 카드 열두 장으로 쪼개면 각각이 독립된 사건처럼 보인다.
+ * 실제로는 한 계약서의 이어진 조항이므로 한 장의 문서로 그린다.
+ *
+ * 좌측 컬러바와 "설정됨" 배지도 뺀다. 열두 개가 전부 초록이면 색이
+ * 정보를 잃고 화면만 시끄러워진다. 손봐야 하는 조항에만 표시가 붙는다.
+ *
+ * 모든 규칙이 .clause-list 안쪽으로만 적용된다. 후견설계서·지출설계서·
+ * 대조 패널이 쓰는 단독 .clause 카드는 그대로 둔다.
+ */
+.clause-list {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 2px 24px 18px;
+}
+
+.clause-list > .clause {
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--line-soft);
+  border-radius: 0;
+  padding: 17px 0;
+  margin-bottom: 0;
+}
+
+.clause-list > .clause:first-child {
+  border-top: none;
+}
+
+/* 번호를 제목 위 작은 라벨로 올린다. 한 줄에 나란히 두면 무엇이 제목인지 흐리다. */
+.clause-list > .clause .clause-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-bottom: 7px;
+}
+
+.clause-list > .clause .clause-head .no {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--faint);
+  letter-spacing: 0;
+}
+
+.clause-list > .clause .clause-head .ti {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.clause-list > .clause .clause-head .badge {
+  margin-left: 0;
+  order: -1;
+  margin-bottom: 4px;
+}
+
+/* 정상 조항은 배지도 수정 링크도 두지 않는다. 손볼 것이 없기 때문이다. */
+.clause-list > .clause.set .clause-head .badge,
+.clause-list > .clause.set .clause-edit {
+  display: none;
+}
+
+.clause-list > .clause .clause-body li {
+  line-height: 1.72;
+  margin-bottom: 2px;
+}
+
+.clause-list > .clause .clause-note {
+  margin-top: 7px;
+  background: transparent;
+  padding: 0;
+  line-height: 1.65;
+}
+
+/* 아직 채우지 못한 조항만 배경으로 드러낸다 */
+.clause-list > .clause.missing,
+.clause-list > .clause.partial {
+  margin: 0 -24px;
+  padding: 19px 24px;
+}
+
+.clause-list > .clause.missing {
+  background: #fffaf9;
+}
+
+.clause-list > .clause.partial {
+  background: var(--warn-soft);
+}
+
+.clause-list > .clause.missing .clause-head .ti {
+  color: var(--danger);
+}
+
+.clause-list > .clause.missing .clause-head .no {
+  color: #c88b86;
+}
+
+.clause-list > .clause.missing .clause-edit a {
+  color: var(--danger);
+  text-decoration: none;
+}
+
+.clause-list > .clause.partial .clause-edit a {
+  color: var(--warn);
+  text-decoration: none;
+}
+
+/* 문서 하단의 단 하나뿐인 수정 진입점 */
+.clause-foot {
+  border-top: 1px solid var(--line);
+  margin: 0 -24px;
+  padding: 15px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.clause-foot .m {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.clause-foot a {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.clause-foot a:hover {
+  text-decoration: underline;
+}
+
 .flag {
   border-radius: 8px;
   padding: 15px 17px;

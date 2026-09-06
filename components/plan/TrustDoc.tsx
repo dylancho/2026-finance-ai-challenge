@@ -1,8 +1,12 @@
+import Link from "next/link";
 import { ClauseCard, FlagCard } from "./ClauseCard";
 import Disclaimer from "../common/Disclaimer";
 import type { TrustDesign } from "../../lib/types";
 
 export default function TrustDoc({ design }: { design: TrustDesign }) {
+  const setCount = design.clauses.filter((c) => c.status === "set").length;
+  const missingCount = design.clauses.filter((c) => c.status === "missing").length;
+
   if (!design.available) {
     return (
       <div>
@@ -57,9 +61,21 @@ export default function TrustDoc({ design }: { design: TrustDesign }) {
           </div>
         </div>
 
-        {design.clauses.map((c) => (
-          <ClauseCard key={c.no} clause={c} />
-        ))}
+        <div className="clause-list">
+          {design.clauses.map((c) => (
+            <ClauseCard key={c.no} clause={c} />
+          ))}
+
+          {/* 조항마다 수정 링크를 두면 열두 개가 된다. 손봐야 하는 조항에만
+              남기고, 나머지는 여기 하나로 모은다. */}
+          <div className="clause-foot">
+            <span className="m">
+              {design.clauses.length}개 조항 중 {setCount}개 설정
+              {missingCount > 0 ? ` · ${missingCount}개 미설정` : ""}
+            </span>
+            <Link href="/interview">답변 고쳐서 다시 만들기 →</Link>
+          </div>
+        </div>
 
         <Disclaimer />
       </div>
