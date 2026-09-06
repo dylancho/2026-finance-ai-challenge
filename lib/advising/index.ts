@@ -5,9 +5,32 @@ export type {
   CandidateImpact,
   DeclaredObserved,
   DecisionRecord,
+  EventChatMessage,
+  EventContext,
+  EventInterpretation,
   EventKind,
+  InterpretSource,
   LifeEvent,
 } from "./types";
-export { adviseEvent, applyForbidden, EVENT_META, EVENTS, evaluateEvent, yearsLabel } from "./evaluate";
+export {
+  adviseEvent,
+  applyForbidden,
+  DEFAULT_DROP_PCT,
+  DEFAULT_WINDFALL_AMOUNT,
+  dropPctOf,
+  EVENT_META,
+  EVENTS,
+  evaluateEvent,
+  windfallAmountOf,
+  yearsLabel,
+} from "./evaluate";
+export {
+  eventContextOf,
+  eventOf,
+  interpretByRule,
+  interpretEvent,
+  parseKoreanAmount,
+  parsePercent,
+} from "./interpret";
 export { narrateAdvice, ruleAdviceNarration } from "./narrate";
 export { clearDecisions, readDecisions, recordDecision } from "./store";

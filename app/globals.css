@@ -3920,6 +3920,197 @@ button.feed-item.here .edit {
   color: var(--ok);
 }
 
+/* ── events chat (2026-09-06) ─────────────────────────
+ * 이벤트 3종 버튼 대신 대화형 입력. 말풍선은 인터뷰의 .msg/.bubble/.avatar 를 그대로 쓰고,
+ * 후보 블록(.ev-block)은 말풍선 폭 제한을 받지 않도록 .ev-turn 안에서 따로 둔다.
+ * 아바타 폭(30px) + 간격(12px) = 42px 만큼 들여써서 말풍선과 세로선이 맞는다. */
+
+.ev-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 26px 0 0;
+}
+
+.ev-turn {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  /* 새 턴으로 scrollIntoView 할 때 고정 헤더 아래로 숨지 않게 */
+  scroll-margin-top: 96px;
+}
+
+.ev-turn.user {
+  align-items: flex-end;
+}
+
+.ev-turn .msg {
+  max-width: 82%;
+}
+
+.ev-block {
+  margin-left: 42px;
+  padding: 16px 22px 8px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--navy);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.ev-block-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.ev-block-head .ev-block-label {
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* 블록 안에서는 페이지용 섹션 여백(76px)이 과하다 */
+.ev-block .section {
+  padding: 22px 0 10px;
+}
+
+.ev-block .section:first-of-type {
+  border-top: 0;
+}
+
+.ev-block .gap-item {
+  margin-top: 14px;
+}
+
+.ev-block .ev-contrast {
+  padding: 20px 22px;
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.ev-block .section-title h2 {
+  font-size: 18px;
+}
+
+/* 급락 대조표의 이력 증거는 문장이 길다. 원장 화면용 nowrap 을 풀지 않으면 폰 폭에서
+ * 페이지가 가로로 늘어난다. */
+.ev-block .obs-lines .v {
+  white-space: normal;
+  text-align: left;
+}
+
+.ev-block .obs-lines li {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ev-other {
+  margin-left: 42px;
+  padding: 16px 20px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.ev-other-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ev-other-head .k {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.ev-other ul {
+  display: grid;
+  gap: 6px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.ev-other li {
+  padding-left: 14px;
+  position: relative;
+}
+
+.ev-other li::before {
+  content: "·";
+  position: absolute;
+  left: 3px;
+  color: var(--faint);
+}
+
+.ev-input {
+  margin: 22px 0 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.ev-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ev-chips .chip-btn {
+  font-size: 13px;
+  padding: 7px 14px;
+}
+
+.ev-chips .chip-btn:disabled {
+  opacity: 0.5;
+}
+
+.ev-input .free-row textarea {
+  min-height: 54px;
+}
+
+.ev-input .free-row textarea:disabled {
+  opacity: 0.6;
+}
+
+.ev-input .hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+@media (max-width: 720px) {
+  .ev-turn .msg {
+    max-width: 100%;
+  }
+  .ev-block,
+  .ev-other {
+    margin-left: 0;
+  }
+  .ev-block {
+    padding: 14px 16px 6px;
+  }
+  .ev-input .free-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 /* 되돌아가 보고 있는 질문의 말풍선 강조 */
 .msg.here .bubble {
   box-shadow: 0 0 0 2px var(--blue);

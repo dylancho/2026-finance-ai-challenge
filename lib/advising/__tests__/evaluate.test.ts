@@ -3,7 +3,7 @@ import { DEMO_PROFILES, emptyProfile } from "../../profile";
 import { demoLedger } from "../../ledger/generate";
 import { insightFor } from "../../insight";
 import { buildExpenseDesign } from "../../design/expense";
-import { adviseEvent, EVENTS, evaluateEvent, ruleAdviceNarration } from "..";
+import { adviseEvent, dropPctOf, EVENTS, evaluateEvent, ruleAdviceNarration, windfallAmountOf } from "..";
 import type { Profile } from "../../types";
 
 const base = (extra: Partial<Profile> = {}): Profile => ({
@@ -141,5 +141,51 @@ describe("룰 폴백 서술", () => {
     expect(n.summary.source).toBe("rule");
     expect(n.summary.text).not.toMatch(/권장|추천/);
     for (const c of adv.candidates) expect(n.tradeoffs[c.id]?.text.length).toBeGreaterThan(0);
+  });
+});
+
+/* 2026-09-06: 자유 입력에서 뽑은 숫자가 params 로 흘러 들어온다 */
+describe("event.params 가 후보 숫자를 바꾼다", () => {
+  const p = base({
+    chaptersCompleted: ["core", "invest"],
+    answers: {
+      I01: { kind: "multi", values: ["none"] },
+      I02: { kind: "choice", value: "low" },
+      I03: { kind: "choice", value: "do_nothing" },
+    },
+  });
+  const insight = insightFor(ledger, p);
+
+  it("market_crash dropPct 30 은 25 보다 노출액이 작고 평가손이 크다", () => {
+    const at = (pct: number) =>
+      evaluateEvent(p, insight, { id: `t-${pct}`, kind: "market_crash", label: "", params: { dropPct: pct } });
+    const c25 = at(25).find((c) => c.isDoNothing)!;
+    const c30 = at(30).find((c) => c.isDoNothing)!;
+    expect(c30.impact.riskExposure!).toBeLessThan(c25.impact.riskExposure!);
+    expect(c30.basis.some((b) => b.includes("30% 하락"))).toBe(true);
+    expect(c25.basis.some((b) => b.includes("25% 하락"))).toBe(true);
+  });
+
+  it("dropPct 가 없거나 이상하면 기본 25", () => {
+    const base25 = evaluateEvent(p, insight, ev("market_crash")).find((c) => c.isDoNothing)!;
+    const noParam = evaluateEvent(p, insight, { id: "t", kind: "market_crash", label: "", params: {} }).find((c) => c.isDoNothing)!;
+    expect(noParam.impact.riskExposure).toBe(base25.impact.riskExposure);
+    expect(dropPctOf({ id: "t", kind: "market_crash", label: "", params: { dropPct: 0 } })).toBe(25);
+    expect(dropPctOf({ id: "t", kind: "market_crash", label: "", params: { dropPct: 250 } })).toBe(25);
+    expect(dropPctOf({ id: "t", kind: "market_crash", label: "", params: { dropPct: "30" } })).toBe(30);
+  });
+
+  it("windfall amount 2.5억은 3억과 노출액·소진 시점이 다르다", () => {
+    const at = (amount: number) =>
+      evaluateEvent(p, null, { id: `w-${amount}`, kind: "windfall", label: "", params: { amount } });
+    const n25 = at(250_000_000).find((c) => c.isDoNothing)!;
+    const n30 = at(300_000_000).find((c) => c.isDoNothing)!;
+    expect(n25.impact.riskExposure).toBe(250_000_000);
+    expect(n30.impact.riskExposure).toBe(300_000_000);
+    const a25 = at(250_000_000).find((c) => c.id === "wf-allocate")!;
+    const a30 = at(300_000_000).find((c) => c.id === "wf-allocate")!;
+    expect(a25.impact.riskExposure).toBe(50_000_000);
+    expect(a30.impact.riskExposure).toBe(60_000_000);
+    expect(windfallAmountOf({ id: "t", kind: "windfall", label: "", params: {} })).toBe(300_000_000);
   });
 });
