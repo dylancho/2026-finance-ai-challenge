@@ -41,7 +41,7 @@ const FEATURES: readonly Feature[] = [
   { href: "/start", label: "시작하기", desc: "지금 상태를 알리고 인터뷰로 설계를 시작합니다", Icon: Play },
   { href: "/ledger", label: "이력 연동", desc: "10년 금융 이력을 불러와 답변과 대조합니다", Icon: History },
   { href: "/plan", label: "내 설계서", desc: "지출·신탁·후견 설계서를 조항 단위로 봅니다", Icon: ScrollText },
-  { href: "/simulation", label: "미리보기", desc: "30년 뒤까지 설계서가 어떻게 집행되는지 봅니다", Icon: Eye },
+  { href: "/simulation", label: "미리보기", desc: "설계서대로라면 앞으로 돈이 어떻게 움직이는지 봅니다", Icon: Eye },
   { href: "/events", label: "상황 변화", desc: "진단·목돈·급락 같은 상황을 적으면 후보를 늘어놓습니다", Icon: Shuffle },
   { href: "/fraud-shield", label: "금융 보호", desc: "이상 거래를 원칙에 비춰 보류하고 알립니다", Icon: ShieldCheck },
 ];
