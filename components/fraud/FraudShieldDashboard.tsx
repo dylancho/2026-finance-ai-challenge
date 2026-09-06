@@ -4,9 +4,29 @@ import { useEffect, useState } from "react";
 import FraudShieldModal, { ruleReport, type FraudReportUI } from "../FraudShieldModal";
 import { scoreTransaction, type FraudTransaction } from "../../lib/fraud/score";
 import { DEFAULT_POLICY, policyFromProfile, type FraudPolicy } from "../../lib/fraud/policy";
-import { readProfile } from "../../lib/profile";
+import { personOf, readProfile } from "../../lib/profile";
+import { isTouring } from "../../lib/demo/tour";
 
 const PEOPLE = ["서연", "민준", "지우", "도윤", "하은", "준서"];
+
+/**
+ * 2026-09-06 둘러보기(김영수)의 당일 거래. docs/demo-data-plan.md "이상거래 시연용 거래 두 건".
+ * 둘 다 처음 보는 계좌라서 금액과 맥락 중 무엇이 판정을 갈랐는지 나란히 비교된다.
+ *   A 250만 — 1회 한도(A05 300만)는 통과하지만 신규 계좌 기준(S02 200만)에 걸린다.
+ *   B 760만 — 이력의 과거 최대 이체와 같은 금액. 새벽·비밀번호 오류·새 기기가 겹친다.
+ */
+const TOUR_SCENARIOS: FraudTransaction[] = [
+  {
+    transactionId: "TX_K_0250", amount: 2_500_000, targetAccount: "352-1188-0427-13",
+    isNewTargetAccount: true, requestTime: "02:00 PM", pinErrorCount: 0,
+    biometricAnomalyScore: 0.1, isNewDevice: false,
+  },
+  {
+    transactionId: "TX_K_0760", amount: 7_600_000, targetAccount: "356-0012-9981",
+    isNewTargetAccount: true, requestTime: "02:15 AM", pinErrorCount: 2,
+    biometricAnomalyScore: 0.86, isNewDevice: true,
+  },
+];
 
 /** 오늘의 거래 두 건. 첫 건은 보이스피싱 정황, 둘째 건은 평소 패턴 안의 이체. */
 const SCENARIOS: FraudTransaction[] = [
@@ -45,10 +65,20 @@ export default function FraudShieldDashboard() {
   const [loading, setLoading] = useState(false);
   /** 인터뷰의 금융 보호 영역에서 선언한 원칙. 없으면 기본값. */
   const [policy, setPolicy] = useState<FraudPolicy>(DEFAULT_POLICY);
+  /** 둘러보기 중에는 김영수의 거래 두 건과 설문의 보호자(A07)를 쓴다. */
+  const [scenarios, setScenarios] = useState<FraudTransaction[]>(SCENARIOS);
+  const [guardianName, setGuardianName] = useState<string | null>(null);
   useEffect(() => {
     setName(PEOPLE[Math.floor(Math.random() * PEOPLE.length)]);
     try {
-      setPolicy(policyFromProfile(readProfile()) ?? DEFAULT_POLICY);
+      const profile = readProfile();
+      setPolicy(policyFromProfile(profile) ?? DEFAULT_POLICY);
+      if (isTouring()) {
+        setName("김영수");
+        setScenarios(TOUR_SCENARIOS);
+        const g = personOf(profile, "A07");
+        if (g) setGuardianName([g.relation, g.name].filter(Boolean).join(" "));
+      }
     } catch {
       /* 프로필이 없으면 기본 원칙 */
     }
@@ -74,10 +104,11 @@ export default function FraudShieldDashboard() {
     );
   }
 
-  const guardian = `${name}님의 보호자`;
-  const tx = SCENARIOS[index];
+  const guardian = guardianName ?? `${name}님의 보호자`;
+  const tx = scenarios[index];
   const preview = scoreTransaction(tx, policy);
   const isBlocked = preview.status === "BLOCKED";
+  const isReview = preview.status === "REVIEW";
 
   // 룰 점수는 클라이언트에서 바로 나온다. 서버는 같은 점수 위에 Claude 해설을 얹는다.
   // 서버가 죽거나 키가 없어도 룰 문장으로 같은 화면을 완주한다.
@@ -115,18 +146,28 @@ export default function FraudShieldDashboard() {
       <section className="fraud-record" aria-label="거래별 보호 판단">
         <div className="fraud-record-head">
           <div><p className="eyebrow">TODAY&apos;S PROTECTION</p><h2>오늘의 거래</h2></div>
-          <span>{index + 1} / {SCENARIOS.length}</span>
+          <span>{index + 1} / {scenarios.length}</span>
         </div>
         <article className={`fraud-record-card ${isBlocked ? "blocked" : "allowed"}`}>
           <div className="fraud-record-status">
-            <span>{isBlocked ? "차단됨" : "정상 처리"}</span>
+            <span>{isBlocked ? "차단됨" : isReview ? "추가 확인 필요" : "정상 처리"}</span>
             <b>위험도 {preview.risk_score}%</b>
           </div>
-          <h3>{isBlocked ? "평소와 다른 신호가 동시에 감지됐습니다." : "평소 패턴 안의 거래입니다."}</h3>
+          <h3>
+            {isBlocked
+              ? preview.policyNote
+                ? "금액은 한도 안이지만, 선언한 원칙에 걸렸습니다."
+                : "평소와 다른 신호가 동시에 감지됐습니다."
+              : isReview
+                ? "일부 신호가 평소와 다릅니다."
+                : "평소 패턴 안의 거래입니다."}
+          </h3>
           <p>{tx.requestTime} · {tx.targetAccount} · {tx.amount.toLocaleString("ko-KR")}원</p>
+          {/* 룰 점수만으로는 통과했을 거래를 원칙(S01·S02)이 막았을 때 그 이유를 카드에 바로 적는다. */}
+          {preview.policyNote && <p>{preview.policyNote}</p>}
           <div className="fraud-record-actions">
             <button className="btn outline" disabled={index === 0} onClick={() => setIndex(index - 1)}>이전 거래</button>
-            <button className="btn outline" disabled={index === SCENARIOS.length - 1} onClick={() => setIndex(index + 1)}>다음 거래</button>
+            <button className="btn outline" disabled={index === scenarios.length - 1} onClick={() => setIndex(index + 1)}>다음 거래</button>
             <button className="btn" disabled={loading} onClick={openDetail}>
               {loading ? "분석 중…" : "판단 근거 보기"}
             </button>
