@@ -14,9 +14,12 @@ describe("phases", () => {
       expect(b).toBeLessThanOrEqual(1);
     }
   });
-  it("S0 오프닝과 CH2 이후는 다크, CH1 은 밝음", () => {
-    expect(isDark(0.02)).toBe(true);
+  it("S0 오프닝과 CH1 은 밝음(토스풍), CH2 이후만 다크", () => {
+    expect(isDark(0)).toBe(false);
+    expect(isDark(0.02)).toBe(false);
+    expect(isDark(T.s0Flip / TOTAL)).toBe(false);
     expect(isDark(T.ch1Beat2 / TOTAL)).toBe(false);
+    expect(isDark(T.ch2 / TOTAL)).toBe(true);
     expect(isDark(T.tr / TOTAL)).toBe(true);
   });
 });

@@ -22,11 +22,8 @@ export const T = {
 
 export const TOTAL = 118;
 
-/** 헤더를 어둡게 두는 진행 구간 (0~1) */
-export const DARK: [number, number][] = [
-  [0, T.s0Full / TOTAL],
-  [T.ch2 / TOTAL, 1],
-];
+/** 헤더를 어둡게 두는 진행 구간 (0~1). S0·CH1 은 밝은 장면이라 CH2 부터다. */
+export const DARK: [number, number][] = [[T.ch2 / TOTAL, 1]];
 
 export function isDark(progress: number): boolean {
   return DARK.some(([a, b]) => progress >= a && progress <= b);
