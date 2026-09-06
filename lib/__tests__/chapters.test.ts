@@ -142,7 +142,7 @@ describe("공백·시나리오", () => {
     const gaps = findGaps(p, buildDesign(p));
     const chapterGaps = gaps.filter((g) => g.chapter);
     expect(chapterGaps.map((g) => g.chapter).sort()).toEqual(["estate", "invest", "medical", "safe"]);
-    expect(chapterGaps.find((g) => g.chapter === "invest")?.what).toContain("투자 원칙이 선언되지 않았습니다");
+    expect(chapterGaps.find((g) => g.chapter === "invest")?.what).toContain("투자 원칙을 아직 정하지 않았어요");
     expect(chapterGaps.find((g) => g.chapter === "estate")?.consequence).toContain("법정상속");
   });
 
