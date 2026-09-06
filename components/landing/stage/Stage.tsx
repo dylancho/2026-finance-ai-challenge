@@ -251,6 +251,7 @@ export default function Stage() {
             <i>02</i>보호
           </span>
         </div>
+        <div className="ld-beats">
         {BEATS.map((b) => (
           <div className="ld-beat" data-beat={b.id} key={b.id}>
             <h2>{b.h}</h2>
@@ -276,6 +277,7 @@ export default function Stage() {
           <StartLink className="ld-cta" focus="safe">
             금융 보호 설계 시작 →
           </StartLink>
+        </div>
         </div>
       </section>
 
