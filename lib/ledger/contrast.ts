@@ -28,7 +28,7 @@ type Rule = (
 const labelOf = (qid: string) => findQuestion(qid)?.prompt ?? qid;
 
 function optionLabel(qid: string, value: string | undefined): string {
-  if (!value) return "미응답";
+  if (!value) return "답 없음";
   return findQuestion(qid)?.options?.find((o) => o.value === value)?.label ?? value;
 }
 
@@ -68,27 +68,27 @@ const livingRule: Rule = (p, insight) => {
     clause: findQuestion(qid)!.mapsTo[0],
     title: "월 생활비",
     declared: won(declared),
-    observed: `${won(observed)} (10년 중앙값)`,
+    observed: `${won(observed)} (10년 가운데값)`,
     agreement,
     reason:
       agreement === "aligned"
-        ? "실제 지출과 어긋나지 않습니다."
-        : `실제 지출보다 ${Math.abs(Math.round(gap * 100))}% ${dir} 잡으셨습니다.` +
+        ? "실제 지출과 어긋나지 않아요."
+        : `실제 지출보다 ${Math.abs(Math.round(gap * 100))}% ${dir} 잡으셨어요.` +
           (gap < 0
-            ? " 이 금액으로는 지금의 생활이 유지되지 않을 수 있습니다."
-            : " 필요한 것보다 많이 묶이면 다른 용도에 쓸 여력이 줄어듭니다."),
+            ? " 이 금액으로는 지금 생활이 유지되지 않을 수 있어요."
+            : " 필요한 것보다 많이 묶이면 다른 데 쓸 여력이 줄어요."),
     evidence: [
       {
-        label: "중앙값",
-        detail: `${won(observed)} · 상위 10% 달 ${won(insight.behavior.livingP90)}`,
+        label: "가운데값",
+        detail: `${won(observed)} · 많이 쓴 달 ${won(insight.behavior.livingP90)}`,
       },
       ...(insight.behavior.seasonalPeak
         ? [
             {
-              label: "계절 피크",
+              label: "지출이 뛴 때",
               detail: `${insight.behavior.seasonalPeak.ym} ${won(
                 insight.behavior.seasonalPeak.amount,
-              )} — ${insight.behavior.seasonalPeak.note}`,
+              )}, ${insight.behavior.seasonalPeak.note}`,
             },
           ]
         : []),
@@ -113,16 +113,16 @@ const limitRule: Rule = (p, insight) => {
   return {
     qid,
     clause: findQuestion(qid)!.mapsTo[0],
-    title: qid === "A05" ? "1회 이체 한도" : "관리자 단독 결정 상한",
+    title: qid === "A05" ? "1회 이체 한도" : "관리자가 혼자 정할 수 있는 상한",
     declared: won(declared),
     observed: `과거 최대 ${won(observed)}`,
     agreement: blocks ? "contradiction" : "aligned",
     reason: blocks
-      ? "건강할 때 실제로 하시던 이체가 이 한도에 막힙니다. 병원비·전세금처럼 정당한 큰 지출까지 함께 멈춥니다."
-      : "과거 이체 규모를 모두 수용하는 한도입니다.",
+      ? "건강할 때 실제로 하시던 이체가 이 한도에 막혀요. 병원비·전세금처럼 정당한 큰 지출까지 함께 멈춰요."
+      : "과거 이체 규모를 모두 담는 한도예요.",
     evidence: [
       {
-        label: "베이스라인 최대 이체",
+        label: "평소 기준 최대 이체",
         detail: `${won(observed)} · ${insight.baseline.span.from}~${insight.baseline.span.to} 구간`,
       },
     ],
@@ -144,17 +144,17 @@ const OBSERVABLE_PATTERNS: {
     detect: (l) => {
       const hits = l.incidents.filter((x) => x.type === "new_payee_large");
       return hits.length
-        ? `${hits.length}회 관측 · 최근 ${hits[hits.length - 1].date}`
+        ? `${hits.length}번 있었어요 · 최근 ${hits[hits.length - 1].date}`
         : null;
     },
   },
   {
     value: "night",
-    label: "심야 고액 이체",
+    label: "새벽에 큰 금액 이체",
     detect: (l) => {
       const hits = l.incidents.filter((x) => x.type === "night_large");
       return hits.length
-        ? `${hits.length}회 관측 · 최근 ${hits[hits.length - 1].date}`
+        ? `${hits.length}번 있었어요 · 최근 ${hits[hits.length - 1].date}`
         : null;
     },
   },
@@ -176,13 +176,13 @@ const fraudRule: Rule = (p, insight, ledger) => {
   return {
     qid,
     clause: findQuestion(qid)!.mapsTo[0],
-    title: "이상거래 차단 룰셋",
+    title: "기본으로 막는 거래",
     declared: declared.length ? optionLabels(qid, declared).join(", ") : "선택 없음",
     observed: seen.map((s) => s.label).join(", "),
     agreement: missing.length ? "tension" : "aligned",
     reason: missing.length
-      ? `실제 이력에 있는 패턴 ${missing.length}종이 룰셋에서 꺼져 있습니다. 꺼진 룰은 그 거래를 막지 않습니다.`
-      : "관측된 패턴이 모두 룰셋에 반영돼 있습니다.",
+      ? `실제 이력에 있던 거래 ${missing.length}가지가 보호 규칙에서 꺼져 있어요. 꺼진 규칙은 그 거래를 막지 않아요.`
+      : "실제 이력에 있던 거래가 모두 보호 규칙에 들어 있어요.",
     evidence: seen.map((s) => ({ label: s.label, detail: s.hit! })),
     observedValue: missing.length
       ? { kind: "multi", values: [...new Set([...declared, ...missing.map((m) => m.value)])] }
@@ -220,16 +220,16 @@ const fixedRule: Rule = (p, insight) => {
   return {
     qid,
     clause: q.mapsTo[0],
-    title: "자동이체 매트릭스",
+    title: "매달 자동으로 나가는 돈",
     declared: declared.length ? optionLabels(qid, declared).join(", ") : "선택 없음",
     observed: observed.map((o) => o.label).join(", "),
     agreement: missing.length ? "tension" : "aligned",
     reason: missing.length
-      ? `매달 나가고 있는데 매트릭스에 없는 항목이 ${missing.length}개(월 ${won(monthly)})입니다. 여기 없는 항목은 그때 누군가 손으로 처리해야 합니다.`
-      : "실제 납부 중인 고정비가 모두 들어 있습니다.",
+      ? `매달 나가고 있는데 목록에 없는 항목이 ${missing.length}개(매달 ${won(monthly)}) 있어요. 여기 없는 항목은 그때 누군가 손으로 처리해야 해요.`
+      : "실제로 내고 있는 고정비가 모두 들어 있어요.",
     evidence: observed.map((o) => ({
       label: o.label,
-      detail: `월 ${won(o.amount)} · 매월 ${o.day}일`,
+      detail: `매달 ${won(o.amount)} · ${o.day}일`,
     })),
     observedValue: missing.length
       ? {
@@ -259,45 +259,45 @@ const stanceRule: Rule = (p, insight) => {
   if (declared === "preserve") {
     if (d.holdRate < 0.5) {
       agreement = "contradiction";
-      reason = `팔지 않겠다고 하셨지만, 하락 구간 ${d.reactions.length}회 중 ${sold.length}회에서 매도가 있었습니다. 평균 ${d.reactionDays}일 만에 움직이셨습니다.`;
+      reason = `팔지 않겠다고 하셨지만, 주가가 떨어진 ${d.reactions.length}번 중 ${sold.length}번은 파셨어요. 평균 ${d.reactionDays}일 만에 움직이셨어요.`;
     } else if (d.holdRate < 0.8) {
       agreement = "tension";
-      reason = `대체로 버티셨지만 ${sold.length}회는 매도가 있었습니다.`;
+      reason = `대체로 버티셨지만 ${sold.length}번은 파셨어요.`;
     } else {
-      reason = "선언과 이력이 일치합니다. 하락 구간에서 대부분 보유하셨습니다.";
+      reason = "정한 것과 실제가 같아요. 주가가 떨어져도 대부분 팔지 않으셨어요.";
     }
   } else if (declared === "phased" || declared === "partial") {
     if (d.riskAversion > 0.7) {
       agreement = "tension";
-      reason = `단계적·부분 매도를 택하셨는데, 실제로는 얕은 하락에서도 큰 비중을 한 번에 정리하신 이력이 있습니다.`;
+      reason = `조금씩 팔겠다고 하셨는데, 실제로는 얕은 하락에서도 큰 비중을 한 번에 파신 적이 있어요.`;
     } else {
-      reason = "선언한 방식과 이력이 크게 어긋나지 않습니다.";
+      reason = "정한 방식과 실제가 크게 어긋나지 않아요.";
     }
   }
 
   const withContext = sold.filter((s) => s.coincidingOutflow);
   if (withContext.length && agreement !== "aligned") {
-    reason += ` 다만 ${withContext.length}건은 같은 시점에 큰 지출이 겹쳐 있어, 판단이 아니라 현금 필요였을 수 있습니다.`;
+    reason += ` 다만 ${withContext.length}건은 같은 때 큰 지출이 겹쳐 있어, 판단이 아니라 현금 필요였을 수 있어요.`;
   }
 
   return {
     qid,
     clause: findQuestion(qid)!.mapsTo[0],
-    title: "투자자산 운용지침",
+    title: "투자 자산을 어떻게 할지",
     declared: optionLabel(qid, declared),
     observed:
       `하락 ${d.reactions.length}회 중 ${sold.length}회 매도 · ` +
-      `실효 손절선 ${(d.realizedStopLoss * 100).toFixed(1)}% · 평균 ${d.reactionDays}일`,
+      `실제로 판 하락폭 ${(d.realizedStopLoss * 100).toFixed(1)}% · 평균 ${d.reactionDays}일`,
     agreement,
     reason,
     evidence: d.reactions.map((r) => ({
       label: `${r.date.slice(0, 7)} ${r.label} ${(r.drawdown * 100).toFixed(0)}%`,
       detail: r.sold
-        ? `보유분 ${Math.round(r.portionSold * 100)}% 매도 (하락 시작 +${r.reactionDays}일)` +
+        ? `갖고 있던 것의 ${Math.round(r.portionSold * 100)}% 매도 (하락 시작 ${r.reactionDays}일 뒤)` +
           (r.coincidingOutflow
-            ? ` · 같은 시점 ${r.coincidingOutflow.label} ${won(r.coincidingOutflow.amount)}`
+            ? ` · 같은 때 ${r.coincidingOutflow.label} ${won(r.coincidingOutflow.amount)}`
             : "")
-        : "매도 없음",
+        : "팔지 않았어요",
     })),
     // 관찰된 행동에 대응하는 선택지가 B11 에 없다. 억지로 매핑하지 않는다.
     // 화면은 "선언 유지" 와 "절충(조항에 손절 규칙 명문화)" 만 제공한다.
@@ -364,8 +364,8 @@ export function observationFor(
     return {
       title: "실제 생활비",
       lines: [
-        { label: "10년 중앙값", detail: won(b.livingMedian) },
-        { label: "상위 10% 달", detail: won(b.livingP90) },
+        { label: "10년 가운데값", detail: won(b.livingMedian) },
+        { label: "많이 쓴 달", detail: won(b.livingP90) },
         ...(b.seasonalPeak
           ? [{ label: b.seasonalPeak.note, detail: `${b.seasonalPeak.ym} ${won(b.seasonalPeak.amount)}` }]
           : []),
@@ -377,7 +377,7 @@ export function observationFor(
     return {
       title: "과거 이체 규모",
       lines: [
-        { label: "베이스라인 최대", detail: won(insight.baseline.maxTransfer) },
+        { label: "평소 기준 최대", detail: won(insight.baseline.maxTransfer) },
         {
           label: "기준 구간",
           detail: `${insight.baseline.span.from} ~ ${insight.baseline.span.to}`,
@@ -392,7 +392,7 @@ export function observationFor(
     );
     if (!seen.length) return null;
     return {
-      title: "관측된 이상거래 패턴",
+      title: "이력에 있던 위험 신호",
       lines: seen.map((s) => ({ label: s.label, detail: s.hit! })),
     };
   }
@@ -400,8 +400,8 @@ export function observationFor(
   if (["A01", "B10", "C09"].includes(qid)) {
     if (!b.fixed.length) return null;
     return {
-      title: "실제 납부 중인 고정비",
-      lines: b.fixed.map((f) => ({ label: f.label, detail: `월 ${won(f.amount)} · ${f.day}일` })),
+      title: "실제로 내고 있는 고정비",
+      lines: b.fixed.map((f) => ({ label: f.label, detail: `매달 ${won(f.amount)} · ${f.day}일` })),
     };
   }
 
@@ -412,17 +412,17 @@ export function observationFor(
       title: "하락장에서 실제로 하신 것",
       lines: [
         {
-          label: "매도 이력",
+          label: "판 횟수",
           detail: `하락 ${d.reactions.length}회 중 ${sold.length}회`,
         },
         {
-          label: "실효 손절선",
+          label: "실제로 판 하락폭",
           detail: `${(d.realizedStopLoss * 100).toFixed(1)}%`,
         },
-        { label: "평균 반응", detail: d.reactionDays ? `${d.reactionDays}일` : "—" },
+        { label: "팔기까지 평균", detail: d.reactionDays ? `${d.reactionDays}일` : "—" },
         ...sold.slice(0, 3).map((r) => ({
           label: `${r.date.slice(0, 7)} ${r.label}`,
-          detail: `${(r.drawdown * 100).toFixed(0)}% 구간에서 ${Math.round(r.portionSold * 100)}% 매도`,
+          detail: `${(r.drawdown * 100).toFixed(0)}% 떨어졌을 때 ${Math.round(r.portionSold * 100)}% 매도`,
         })),
       ],
     };

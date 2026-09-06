@@ -36,10 +36,10 @@ export function rulePersona(insight: LedgerInsight): Persona {
   const b = insight.behavior;
 
   parts.push(
-    `월 생활비는 ${won(b.livingMedian)} 선을 유지하셨고, 고정비 ${b.fixed.length}종이 매달 같은 날에 빠져나갔습니다.`,
+    `한 달 생활비는 ${won(b.livingMedian)} 선을 유지하셨어요. 고정비 ${b.fixed.length}가지가 매달 같은 날에 빠져나갔어요.`,
   );
   if (b.seasonalPeak) {
-    parts.push(`${b.seasonalPeak.note} 시기에 지출이 한 번씩 뜁니다.`);
+    parts.push(`${b.seasonalPeak.note} 시기에 지출이 한 번씩 뛰어요.`);
   }
 
   const d = insight.decision;
@@ -47,21 +47,21 @@ export function rulePersona(insight: LedgerInsight): Persona {
     const held = Math.round(d.holdRate * 100);
     if (d.riskAversion > 0.7) {
       parts.push(
-        `하락 구간에서 손실 회피 경향이 뚜렷하게 관측됩니다. 실효 손절선은 ${(d.realizedStopLoss * 100).toFixed(1)}%, 평균 ${d.reactionDays}일 만에 움직이셨습니다.`,
+        `주가가 떨어지면 손실을 피하려는 경향이 뚜렷해요. 실제로 판 하락폭은 ${(d.realizedStopLoss * 100).toFixed(1)}%, 평균 ${d.reactionDays}일 만에 움직이셨어요.`,
       );
     } else if (d.riskAversion > 0.35) {
       parts.push(
-        `하락 구간에서 부분적으로 대응하신 이력이 있습니다. 보유 유지 비율은 ${held}%입니다.`,
+        `주가가 떨어졌을 때 일부를 파신 적이 있어요. 팔지 않고 버틴 비율은 ${held}%예요.`,
       );
     } else {
       parts.push(
-        `하락 구간에서도 대체로 보유를 유지하셨습니다. 보유 유지 비율 ${held}%.`,
+        `주가가 떨어져도 대체로 팔지 않고 버티셨어요. 팔지 않고 버틴 비율은 ${held}%예요.`,
       );
     }
     const ctx = d.reactions.filter((r) => r.coincidingOutflow);
     if (ctx.length) {
       parts.push(
-        `다만 ${ctx.length}건은 같은 시점에 큰 지출이 겹쳐 있어 단정하기 어렵습니다.`,
+        `다만 ${ctx.length}건은 같은 때 큰 지출이 겹쳐 있어 단정하기 어려워요.`,
       );
     }
   }

@@ -38,11 +38,12 @@ interface Feature {
 }
 
 const FEATURES: readonly Feature[] = [
-  { href: "/start", label: "시작하기", desc: "지금 상태를 알리고 인터뷰로 설계를 시작합니다", Icon: Play },
-  { href: "/ledger", label: "이력 연동", desc: "10년 금융 이력을 불러와 답변과 대조합니다", Icon: History },
-  { href: "/plan", label: "내 설계서", desc: "지출·신탁·후견 설계서를 조항 단위로 봅니다", Icon: ScrollText },
-  { href: "/events", label: "상황 변화", desc: "진단·목돈·급락 같은 상황을 적으면 후보를 늘어놓습니다", Icon: Shuffle },
-  { href: "/fraud-shield", label: "금융 보호", desc: "이상 거래를 원칙에 비춰 보류하고 알립니다", Icon: ShieldCheck },
+  { href: "/start", label: "시작하기", desc: "지금 상태를 알리고 인터뷰로 설계를 시작해요", Icon: Play },
+  // "이력 연동" 은 기술 용어라 "금융 이력" 으로. 화면 제목도 "…불러와요" 로 맞췄다.
+  { href: "/ledger", label: "금융 이력", desc: "10년치 금융 이력을 불러와 답과 비교해요", Icon: History },
+  { href: "/plan", label: "내 설계서", desc: "지출·신탁·후견 설계서를 조항별로 봐요", Icon: ScrollText },
+  { href: "/events", label: "상황 변화", desc: "진단·목돈·급락 같은 상황이 생기면 선택지를 늘어놓아요", Icon: Shuffle },
+  { href: "/fraud-shield", label: "금융 보호", desc: "이상한 거래를 원칙에 비춰 멈추고 알려요", Icon: ShieldCheck },
 ];
 
 /** 항목에서 패널로 포인터를 옮기는 사이 닫히지 않게 두는 유예 */
@@ -275,8 +276,8 @@ export default function Header() {
         <div className="tour-bar" role="status">
           <div className="shell-wide tour-bar-inner">
             <p>
-              <b>둘러보기 중</b> · {TOUR_PERSONA} 예시 데이터로 모든 기능을 볼 수 있습니다. 답변은
-              가상이며 인터뷰를 거치지 않았습니다.
+              <b>둘러보기 중</b> · {TOUR_PERSONA} 예시 데이터로 모든 기능을 볼 수 있어요. 답은
+              예시이고, 인터뷰를 거치지 않았어요.
             </p>
             <button type="button" className="tour-exit" onClick={end}>
               내 데이터로 돌아가기

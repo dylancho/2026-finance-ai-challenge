@@ -76,13 +76,13 @@ export default function FraudShieldPreview({ profile, name, guardian: guardianNa
     <div className="fds-step fade-in">
       <div className="monthly-updated">
         <div>
-          <span>금융 보호 원칙이 기록되었습니다</span>
+          <span>금융 보호 원칙을 적어 두었어요</span>
           <b>
             처음 보는 계좌로 {won(policy.newAccountThreshold)} 이상 · {RULE_LABEL[policy.rule]}
           </b>
           <p>
-            지출설계서 제4조에 맥락 룰로 들어갑니다. 이 원칙이 실제 위험 거래에서 어떻게 작동하는지
-            바로 볼 수 있습니다.
+            지출설계서 제4조에 상황 기준으로 들어가요. 이 원칙이 실제 위험한 거래에서 어떻게
+            작동하는지 바로 볼 수 있어요.
           </p>
         </div>
         <i>✓</i>
@@ -92,7 +92,7 @@ export default function FraudShieldPreview({ profile, name, guardian: guardianNa
           보호 현황 전체 보기
         </Link>
         <button type="button" className="btn" disabled={loading} onClick={openPreview}>
-          {loading ? "분석 중…" : "위험 거래 판정 미리보기"}
+          {loading ? "살펴보는 중…" : "위험한 거래에서 어떻게 되는지 보기"}
         </button>
       </div>
       <FraudShieldModal report={preview} onClose={() => setPreview(null)} />

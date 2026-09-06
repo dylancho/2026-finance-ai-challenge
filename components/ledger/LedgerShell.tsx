@@ -145,7 +145,7 @@ export default function LedgerShell() {
   if (!profile || !profile.track) {
     return (
       <div className="shell-wide" style={{ padding: "80px 0" }}>
-        <p className="muted">이력을 준비하는 중입니다…</p>
+        <p className="muted">이력을 준비하고 있어요…</p>
       </div>
     );
   }
@@ -153,8 +153,9 @@ export default function LedgerShell() {
   const meta = flowMeta(profile);
   const willExtract =
     isUnified(profile) || tracksInvestment(profile.track)
-      ? ["소비 패턴", "고정비 구조", "이상거래 베이스라인", "투자 대응 성향"]
-      : ["소비 패턴", "고정비 구조", "이상거래 베이스라인"];
+      // 화면에는 내부 지표 이름 대신 "이력에서 무엇을 읽는지" 를 사람 말로 적는다.
+      ? ["평소 쓰는 돈", "매달 나가는 고정비", "평소 거래 기준", "주가가 떨어졌을 때 한 일"]
+      : ["평소 쓰는 돈", "매달 나가는 고정비", "평소 거래 기준"];
   const interviewHref = focus ? `/interview?focus=${encodeURIComponent(focus)}` : "/interview";
   // 헤더에서 들어온 경우 이미 인터뷰를 마쳤을 수 있다. 코어가 끝났으면 이력은
   // 설계서의 대조 패널에 바로 반영되므로 인터뷰 대신 설계서로 보낸다.
@@ -164,28 +165,28 @@ export default function LedgerShell() {
   return (
     <div className="shell-wide lg">
       <div className="plan-head">
-        <div className="eyebrow">Phase 1 · Baseline</div>
-        <h1>가장 건강할 때의 나를 기록해 둡니다</h1>
+        <div className="eyebrow">금융 이력</div>
+        <h1>지금까지 어떻게 돈을 써 왔는지 불러와요</h1>
         <p className="section-lede">
-          지금부터 답하실 내용은 <b>앞으로 하고 싶은 것</b>입니다. 여기서 불러오는 것은{" "}
-          <b>지금까지 실제로 해오신 것</b>입니다. 둘을 나란히 두면, 미래의 원칙이 실제 습관과
-          어긋나는 지점을 미리 찾을 수 있습니다.
+          인터뷰에서 답하는 것은 <b>앞으로 하고 싶은 것</b>이에요. 여기서 불러오는 것은{" "}
+          <b>지금까지 실제로 해 온 것</b>이에요. 둘을 나란히 두면 어긋나는 지점을 미리 찾을 수
+          있어요.
         </p>
       </div>
 
       {/* ── ① 연동 ── */}
       {blocked ? (
         <div className="gate-warn" role="alert">
-          <h4>이 트랙에서는 이력을 불러올 수 없습니다</h4>
+          <h4>이 경로에서는 이력을 불러올 수 없어요</h4>
           <p>
-            {meta.name} 경로에서는 준비하시는 분이 <b>대상자 본인이 아닙니다.</b> 마이데이터와
-            오픈뱅킹은 본인 인증을 전제로 하므로, 대리인이 부모님의 거래 이력을 열 수 있는
-            법적 경로가 없습니다.
+            {meta.name}에서는 준비하시는 분이 <b>본인이 아니에요.</b> 금융 이력은 본인 확인을
+            거쳐야 열 수 있어요. 가족이 대신 부모님의 거래 이력을 열 수 있는 법적 방법은
+            없어요.
             <br />
             <br />
-            이것이 <b>미리 준비해야 하는 이유</b>이기도 합니다. 본인이 판단할 수 있을 때
-            연동해 두었다면 지금 10년치 기준선이 남아 있었을 것입니다. 지금은 인터뷰 답변만으로
-            설계서를 만들고, 부족한 부분은 통장 사본·거래내역 등 서류로 대신합니다.
+            이것이 <b>미리 준비해야 하는 이유</b>이기도 해요. 본인이 판단할 수 있을 때
+            불러와 두었다면 지금 10년치 기준이 남아 있었을 거예요. 지금은 인터뷰 답만으로
+            설계서를 만들고, 부족한 부분은 통장 사본이나 거래내역 같은 서류로 대신해요.
           </p>
           <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
             <Link href={interviewHref} className="btn">
@@ -196,10 +197,10 @@ export default function LedgerShell() {
       ) : !ledger ? (
         <div className="lg-import">
           <div className="lg-import-body">
-            <h2>금융 이력 연동</h2>
+            <h2>10년치 금융 이력 불러오기</h2>
             <p className="muted">
-              이력에서 다음을 읽습니다. 여기서 읽은 것은 설계서를 만드는 근거가 아니라,
-              답변을 검증하는 대조군으로만 쓰입니다.
+              이력에서 다음을 읽어요. 여기서 읽은 것으로 설계서를 만들지는 않아요. 답한
+              내용을 실제와 비교하는 데만 써요.
             </p>
             <ul className="lg-extract">
               {willExtract.map((w) => (
@@ -207,12 +208,12 @@ export default function LedgerShell() {
               ))}
             </ul>
             <p className="lg-note mono">
-              프로토타입 · 실제 금융기관에 접속하지 않습니다. 시드 고정 합성 이력을 생성합니다.
+              예시 데이터예요. 실제 금융기관에는 접속하지 않아요.
             </p>
           </div>
           <div className="lg-import-actions">
             <button className="btn" onClick={connect} disabled={loading}>
-              {loading ? "불러오는 중…" : "10년 이력 불러오기"}
+              {loading ? "불러오는 중…" : "10년치 이력 불러오기"}
             </button>
             <Link href={nextHref} className="btn ghost">
               {coreDone ? "설계서로 돌아가기" : "건너뛰고 인터뷰 시작"}
@@ -224,29 +225,27 @@ export default function LedgerShell() {
           {/* ── ② 적재 ── */}
           <section className="section">
             <div className="section-title">
-              <h2>적재됨</h2>
-              <Badge tone="ok">
-                {ledger.years}년 · {ledger.months.length}개월
-              </Badge>
+              <h2>{ledger.years}년치 이력을 불러왔어요</h2>
+              <Badge tone="ok">{ledger.months.length}개월</Badge>
             </div>
 
             <div className="lg-stats">
               <div className="kv-row">
-                <span>거래 집계</span>
+                <span>거래</span>
                 <span className="mono">
                   {ledger.months.reduce((a, m) => a + m.txnCount, 0).toLocaleString("ko-KR")}건
                 </span>
               </div>
               <div className="kv-row">
-                <span>매매 이벤트</span>
-                <span className="mono">{ledger.trades.length}건</span>
+                <span>사고팔기</span>
+                <span className="mono">{ledger.trades.length}번</span>
               </div>
               <div className="kv-row">
-                <span>이상징후</span>
+                <span>평소와 다른 거래</span>
                 <span className="mono">{ledger.incidents.length}건</span>
               </div>
               <div className="kv-row">
-                <span>누적 생활비</span>
+                <span>{ledger.years}년 생활비 합계</span>
                 <span className="mono">
                   {won(ledger.months.reduce((a, m) => a + m.living, 0))}
                 </span>
@@ -260,7 +259,7 @@ export default function LedgerShell() {
           {insight && (
             <section className="section">
               <div className="section-title">
-                <h2>복제된 금융 자아</h2>
+                <h2>내 돈 습관 요약</h2>
               </div>
               <PersonaCard insight={insight} persona={persona} pending={narrating} />
             </section>
@@ -272,14 +271,14 @@ export default function LedgerShell() {
           <section className="cta-band">
             <div>
               <h2>
-                {coreDone ? "이력이 설계서에 반영됩니다" : "이제 미래의 원칙을 정할 차례입니다"}
+                {coreDone ? "이 이력은 설계서에 반영돼요" : "이제 앞으로의 원칙을 정할 차례예요"}
               </h2>
               <p>
                 {coreDone
-                  ? "이미 답하신 원칙과 이 이력이 어긋나는 지점을 설계서에서 대조해 보여드립니다."
-                  : "인터뷰 중에 관련 문항이 나오면, 이 이력이 옆에 함께 표시됩니다."}
+                  ? "이미 정한 원칙과 이 이력이 어긋나는 지점을 설계서에서 비교해 보여 드려요."
+                  : "인터뷰 중에 관련 질문이 나오면 이 이력이 옆에 함께 보여요."}
                 {contrasts.length > 0 &&
-                  ` 지금 답변 기준으로 대조할 항목이 ${contrasts.length}개 있습니다.`}
+                  ` 지금 답 기준으로 비교할 항목이 ${contrasts.length}개 있어요.`}
               </p>
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -301,9 +300,8 @@ export default function LedgerShell() {
       )}
 
       <p className="disclaimer">
-        본 화면의 이력은 데모용으로 생성된 합성 데이터이며 실제 금융거래가 아닙니다. 성향
-        지표는 관측된 행동의 요약일 뿐 투자 자문이 아니며, 어떤 판단도 진단을 대신하지
-        않습니다.
+        이 화면의 이력은 예시 데이터이며 실제 금융거래가 아닙니다. 습관 요약은 투자 자문이
+        아니며, 어떤 판단도 진단을 대신하지 않습니다.
       </p>
     </div>
   );
