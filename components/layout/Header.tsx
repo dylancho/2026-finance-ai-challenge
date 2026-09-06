@@ -24,6 +24,11 @@ export default function Header() {
                 <Link href="/start" className="hide-sm">
                   시작하기
                 </Link>
+                {/* 2026-09-06: 이력 연동은 게이트→인터뷰 사이 단계가 아니라 여기서 들어간다.
+                    시작하기와 같은 "준비" 성격이라 좁은 화면에서는 함께 숨긴다. */}
+                <Link href="/ledger" className="hide-sm">
+                  이력 연동
+                </Link>
                 <Link href="/plan">내 설계서</Link>
                 <Link href="/simulation">미리보기</Link>
                 <Link href="/events">상황 변화</Link>
