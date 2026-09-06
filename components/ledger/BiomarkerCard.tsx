@@ -75,24 +75,58 @@ export function SignalBlock({ s, heading = "지금 내 이력에서는" }: { s: 
   );
 }
 
+/**
+ * 이력 화면의 점수 카드. 2026-09-07 부터 지출설계서와 같은 언어로 선다 —
+ * 작은 라벨 → 점수 한 문장 → 뜻풀이 한 문장 → 벌어진 항목 목록.
+ * 미리보기 2장은 위의 SignalBlock 을 그대로 쓰므로 그쪽은 건드리지 않는다.
+ */
 export default function BiomarkerCard({ reading }: { reading: BiomarkerReading | null }) {
   // 이력이 없으면 점수도 없다 — 카드를 그리지 않는다.
   if (!reading) return null;
   const s = signalView(reading);
+  const calm = s.band === "normal";
   const alert = s.band === "alert";
   return (
-    <section className="section" aria-labelledby="lg-bio-t">
-      <div className="section-title">
-        <h2 id="lg-bio-t">평소 패턴과 비교한 점수</h2>
-      </div>
-      <div className="lg-bio">
-        <SignalBlock s={s} />
-        <p className="lg-bio-note">
-          <b>{alert ? "지금 이 점수 때문에 보호자에게 알림이 가요." : "이 점수가 경보 구간에 들면 보호자에게 알림이 가요."}</b>{" "}
-          지출설계서 제5조에 정해 둔 사람에게 먼저 알리고, 승인 단계를 늘려요. 신탁 지급처럼
-          되돌리기 어려운 일은 점수만으로는 열리지 않아요. 의사 진단서가 확인돼야 넘어가요.
+    <section className={`lg-card lg-score ${s.band}`} aria-labelledby="lg-bio-t">
+      <header className="lg-head">
+        <div className="lg-no">
+          이력에서 읽은 신호
+          <span className={`lg-band ${s.band}`}>{s.bandLabel}</span>
+        </div>
+        <h3 id="lg-bio-t">
+          평소와 비교하면 <em>{s.score}점</em>이에요
+        </h3>
+        <p className="lg-lede">
+          {calm ? "아직 평소와 다른 신호가 없어요." : s.meaning}
         </p>
-      </div>
+      </header>
+
+      {!calm && s.signals.length > 0 && (
+        <ul className="lg-list">
+          {s.signals.map((x) => (
+            <li className="lg-row" key={x.label}>
+              <div className="lg-row-main">
+                <div className="l">{x.label}</div>
+                <div className="s">평소 {x.baseline}</div>
+              </div>
+              <span className="lg-val">최근 {x.observed}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="lg-note-box">
+        <b>
+          {alert
+            ? "지금 이 점수 때문에 보호자에게 알림이 가요."
+            : "이 점수가 경보 구간에 들면 보호자에게 알림이 가요."}
+        </b>{" "}
+        지출설계서 제5조에 정해 둔 사람에게 먼저 알리고, 승인 단계를 늘려요. 신탁 지급처럼
+        되돌리기 어려운 일은 점수만으로는 열리지 않아요. 의사 진단서가 확인돼야 넘어가요.
+      </p>
+      <p className="lg-footnote">
+        진단이 아니에요. 평소와 달라진 지점을 표시할 뿐이에요. 판단은 의료기관의 몫이에요.
+      </p>
     </section>
   );
 }

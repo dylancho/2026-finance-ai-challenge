@@ -4627,78 +4627,236 @@ body.ld-dark .nav-panel, body.ld-dark .nav-sheet { color: var(--ink); }
 
 /* ══════════════════════════════════════════════════════
    Ledger — 과거 금융이력 축
+   ══════════════════════════════════════════════════════
+   2026-09-07: 지출설계서(.xd-*)와 같은 시각 언어로 맞췄다. 카드 한 장에 메시지 하나,
+   큰 숫자 하나와 그 숫자를 설명하는 한 문장이 먼저 오고, 표 대신 목록 행으로 세부를 본다.
+   .xd-* 는 설계서·미리보기가 함께 쓰므로 손대지 않고, 필요한 규칙만 여기에 .lg- 이름으로
+   옮겨 적었다. 이 구역 밖의 규칙은 이 화면에서 쓰지 않는다.
    ══════════════════════════════════════════════════════ */
 
-/* ── 연동 ── */
-.lg-import {
+/* ── 카드 껍데기: 작은 라벨 → 제목 → 한 문장 → 세부 ── */
+.lg-col {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 32px;
-  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.lg-card {
   background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 30px 32px;
+  border-radius: 20px;
   box-shadow: var(--shadow);
+  padding: 26px 28px;
 }
-.lg-import h2 {
-  font-size: 20px;
-  margin: 0 0 8px;
+.lg-no {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.lg-import .muted {
-  margin: 0 0 14px;
-  max-width: 56ch;
+.lg-head {
+  margin-bottom: 18px;
 }
-.lg-extract {
+/* 머리만 있는 카드(불러온 이력 요약)는 아래 여백을 남기지 않는다 */
+.lg-card > .lg-head:last-child {
+  margin-bottom: 0;
+}
+.lg-head h2,
+.lg-head h3 {
+  font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 8px 0 0;
+  word-break: keep-all;
+}
+.lg-head h3 {
+  font-size: 22px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+.lg-head h2 {
+  font-size: 28px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+.lg-head em {
+  font-style: normal;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+.lg-lede {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ink);
+  margin: 10px 0 0;
+  word-break: keep-all;
+}
+.lg-lede b {
+  font-weight: 600;
+  color: var(--navy);
+}
+.lg-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+  list-style: none;
+  padding: 0;
+}
+.lg-facts b {
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 목록 행: 왼쪽 라벨(+회색 둘째 줄), 오른쪽 값 */
+.lg-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.lg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.lg-row:first-child {
+  border-top: 0;
+}
+.lg-row-main {
+  min-width: 0;
+}
+.lg-row .l {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.5;
+  word-break: keep-all;
+}
+.lg-row .s {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-top: 2px;
+  word-break: keep-all;
+}
+.lg-val {
+  flex: none;
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  max-width: 55%;
+  word-break: keep-all;
+}
+.lg-val.muted {
+  color: var(--faint);
+  font-weight: 500;
+}
+
+/* 요약 칩 */
+.lg-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px;
-}
-.lg-extract li {
-  font-size: 13px;
-  border: 1px solid var(--line);
-  background: var(--bg);
-  padding: 5px 11px;
-  border-radius: 999px;
-  color: var(--ink);
-}
-.lg-note {
-  font-size: 11.5px;
-  color: var(--faint);
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.lg-import-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 210px;
+.lg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 13px;
+}
+.lg-chip.calm {
+  background: var(--line-soft);
+  color: var(--muted);
 }
 
-/* ── 적재 통계 ── */
-.lg-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0 26px;
-  margin-bottom: 22px;
+/* 펼쳐 보는 세부 */
+.lg-more {
+  margin-top: 14px;
+}
+.lg-more summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--blue);
+  padding: 12px 0;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lg-more summary::-webkit-details-marker {
+  display: none;
+}
+.lg-more summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  margin-right: 4px;
+  transition: transform 0.15s ease;
+}
+.lg-more[open] summary::after {
+  transform: rotate(-135deg);
+}
+
+/* 카드 아래 회색 한 문단 · 각주 */
+.lg-note-box {
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--line-soft);
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--muted);
+  word-break: keep-all;
+}
+.lg-note-box b {
+  color: var(--navy);
+  font-weight: 600;
+}
+.lg-footnote {
+  font-size: 12px;
+  color: var(--faint);
+  line-height: 1.6;
+  margin: 14px 0 0;
+  word-break: keep-all;
+}
+
+/* ── 불러오기 카드 ── */
+.lg-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.lg-note {
+  font-size: 12px;
+  color: var(--faint);
+  margin: 14px 0 0;
 }
 
 /* ── 10년 차트 ── */
 .lg-chart {
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 18px 20px 14px;
-}
-.lg-chart-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 12px;
+  margin-top: 4px;
 }
 .lg-bars,
 .lg-marks {
@@ -4762,11 +4920,12 @@ body.ld-dark .nav-panel, body.ld-dark .nav-sheet { color: var(--ink); }
   margin-top: 8px;
 }
 .lg-span {
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--muted);
-  padding: 4px 8px;
+  padding: 6px 8px 0;
   border-top: 2px solid var(--line);
   text-align: center;
+  word-break: keep-all;
 }
 .lg-span.base {
   border-top-color: var(--muted);
@@ -4774,11 +4933,11 @@ body.ld-dark .nav-panel, body.ld-dark .nav-sheet { color: var(--ink); }
 .lg-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 6px 16px;
   list-style: none;
-  padding: 12px 0 0;
+  padding: 14px 0 0;
   margin: 0;
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--muted);
 }
 .lg-legend li {
@@ -4791,157 +4950,133 @@ body.ld-dark .nav-panel, body.ld-dark .nav-sheet { color: var(--ink); }
 .lg-legend .err { color: var(--warn); }
 .lg-legend .late { color: var(--danger); }
 
-/* ── 성향 카드 ── */
-.lg-persona {
-  display: grid;
-  grid-template-columns: minmax(280px, 380px) 1fr;
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-.lg-persona-metrics,
-.lg-persona-read {
-  background: var(--paper);
-  padding: 22px 24px 24px;
-}
-.lg-block-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  text-transform: uppercase;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 14px;
-}
-.lg-block-title .mono {
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--faint);
-}
-.lg-metric {
-  padding: 9px 0;
-  border-bottom: 1px solid var(--line-soft);
-}
-.lg-metric:last-child {
-  border-bottom: none;
-}
-.lg-metric-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-}
-.lg-metric-top .l {
-  font-size: 13.5px;
-  color: var(--ink);
-}
-.lg-metric-top .v {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--navy);
-  white-space: nowrap;
-}
-.lg-metric-bar {
-  height: 3px;
-  background: var(--line);
-  border-radius: 2px;
-  margin: 7px 0 5px;
-  overflow: hidden;
-}
-.lg-metric-bar i {
-  display: block;
-  height: 100%;
-  background: var(--navy);
-}
-.lg-metric-hint {
-  font-size: 11.5px;
-  color: var(--faint);
-  line-height: 1.5;
-}
-/* ── 평소 패턴과 비교한 점수 (2026-09-07, 미리보기 2장의 블록을 옮김) ──
- * 점수 블록(.sv-signal)은 미리보기 CSS 그대로. 틀은 성향 카드(.lg-persona)와 같은 선·모서리. */
-.lg-bio {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--paper);
-  padding: 8px 8px 0;
-}
-.lg-bio .sv-signal {
-  margin-bottom: 0;
-}
-.lg-bio-note {
-  margin: 0;
-  padding: 14px 16px 16px;
-  font-size: 13px;
-  line-height: 1.75;
-  color: var(--muted);
-  word-break: keep-all;
-}
-.lg-bio-note b {
-  color: var(--navy);
-  font-weight: 600;
-}
-
+/* ── 지출 요약: 큰 숫자 아래 AI 해설 한 문단 ── */
 .lg-read-text {
   font-size: 15px;
   line-height: 1.8;
-  margin: 0 0 20px;
+  color: var(--ink);
+  margin: 10px 0 0;
+  word-break: keep-all;
 }
-.lg-reactions {
-  border-top: 1px solid var(--line);
-  padding-top: 4px;
+
+/* 0~1 값을 가로 막대 하나로. 행의 둘째 줄 자리에 눕는다. */
+.lg-meter {
+  height: 4px;
+  background: var(--line-soft);
+  border-radius: 999px;
+  margin-top: 8px;
+  max-width: 220px;
+  overflow: hidden;
 }
+.lg-meter i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--blue);
+}
+
+/* ── 주가가 떨어졌을 때 한 일 ── */
 .lg-reaction {
   display: grid;
   grid-template-columns: 62px 1fr;
   gap: 12px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--line-soft);
+  padding: 12px 0;
+  border-top: 1px solid var(--line-soft);
 }
-.lg-reaction:last-child {
-  border-bottom: none;
+.lg-reaction:first-child {
+  border-top: 0;
 }
 .lg-reaction .d {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--faint);
   padding-top: 2px;
+  font-variant-numeric: tabular-nums;
 }
 .lg-reaction .t {
-  font-size: 13.5px;
+  font-size: 15px;
+  color: var(--ink);
 }
 .lg-reaction .dd {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 .lg-reaction .s {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
+  line-height: 1.55;
+  margin-top: 2px;
 }
 .lg-reaction.sold .s {
   color: var(--warn);
 }
 .lg-reaction .ctx {
-  font-size: 11.5px;
-  color: var(--faint);
-  margin-top: 3px;
-  padding-left: 9px;
-  border-left: 2px solid var(--line);
-}
-.lg-footnote {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--faint);
   line-height: 1.6;
-  margin: 20px 0 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--line-soft);
+  margin-top: 6px;
+  padding-left: 10px;
+  border-left: 2px solid var(--line);
+  word-break: keep-all;
+}
+
+/* ── 평소와 비교한 점수 ──
+ * 미리보기(/simulation)의 점수 블록(.sv-signal)은 그대로 두고, 이 화면은 카드 언어로 다시 짠다.
+ * 구간은 색만으로 알리지 않는다 — 칩에 "정상 범위 / 주의 / 경보" 글자가 함께 선다. */
+.lg-band {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--line-soft);
+  color: var(--muted);
+}
+.lg-band::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.lg-band.watch {
+  background: #fdf3e6;
+  color: #9a6412;
+}
+.lg-band.alert {
+  background: #fdeceb;
+  color: var(--danger);
+}
+.lg-score.watch .lg-head em {
+  color: #9a6412;
+}
+.lg-score.alert .lg-head em {
+  color: var(--danger);
+}
+
+/* ── 좁은 화면 ── */
+@media (max-width: 720px) {
+  .lg-card {
+    padding: 22px 20px;
+    border-radius: 18px;
+  }
+  .lg-head h2 {
+    font-size: 24px;
+  }
+  .lg-head h3 {
+    font-size: 20px;
+  }
+  .lg-row {
+    flex-wrap: wrap;
+  }
+  .lg-val {
+    max-width: 100%;
+  }
+  .lg-import-actions .btn {
+    width: 100%;
+  }
 }
 
 /* ══════════════════════════════════════════════════════
