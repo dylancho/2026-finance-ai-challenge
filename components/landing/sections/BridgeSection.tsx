@@ -12,9 +12,9 @@ export default function BridgeSection() {
       <div className="shell-wide">
         <Reveal className="ld-bridge-inner" threshold={0.4}>
           <h2>
-            지키는 준비 다음은,
+            지키는 것은 정했습니다.
             <br />
-            남기는 준비입니다
+            이제 남기는 것을 정할 차례입니다
           </h2>
           <p className="ld-bridge-line">
             미뤄 두었던{" "}
@@ -23,7 +23,7 @@ export default function BridgeSection() {
                 {c}
               </Reveal>
             ))}
-            , 이제 정할 차례입니다
+            , 지금 하나씩 정해 둡니다
           </p>
         </Reveal>
       </div>

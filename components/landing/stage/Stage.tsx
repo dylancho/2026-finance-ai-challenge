@@ -28,7 +28,7 @@ import { T, TOTAL, isDark } from "./phases";
  *     문틈 선과 어긋나 종이가 문에 붙인 것처럼 보인다. 손은 고지서 래퍼 안에 있어 종이와 같이 움직이고,
  *     사람의 팔은 매 프레임 IK 로 그 손목을 따라간다(updateArm).
  *  C. 카메라 푸시인(s0Bill→s0Laptop) — 고지서가 중앙으로 와 읽히는 크기가 되고, 문+사람은 문틈을 축으로
- *     살짝 커지며 서리 베일 아래로 사라진다. 카피 1 이 뜬다.
+ *     살짝 커지며 서리 베일 아래로 사라진다.
  * 고지서는 노트북 위 겹에 있어야 조각이 화면 위로 날아간다 — 그래서 S0 장면 밖, 스테이지 직속이다.
  *
  * S0·CH1 은 밝은 장면(토스풍), CH2·TR 은 딥네이비. BG.light 는 .ld-stage 의 CSS 배경과 같은 값이다.
@@ -70,8 +70,6 @@ export default function Stage() {
       const doorBack = one(".ld-door--back");
       const vignette = one(".ld-vignette");
       const veil = one(".ld-veil");
-      const copy1 = one(".ld-s0-copy--1");
-      const copy2 = one(".ld-s0-copy--2");
       const billWrap = one(".ld-bill-wrap");
       const bill = one(".ld-bill");
       const billFold = one(".ld-bill-fold");
@@ -219,22 +217,21 @@ export default function Stage() {
       );
       tl.to(person, { autoAlpha: 0, duration: 5 }, T.s0Bill + 1);
       tl.to(veil, { opacity: 0.86, duration: 8 }, T.s0Bill);
-      tl.from(copy1, { autoAlpha: 0, y: 28, duration: 4 }, T.s0Bill + 3);
       // 첫 프레임: fromTo 가 즉시 렌더된 뒤이므로 팔을 지금 손목 자리에 맞춘다
       updateArm();
 
-      /* ── S0-3. 노트북이 떠오르고 카피가 바뀐다 ── */
+      /* ── S0-3. 노트북이 떠오른다 ── */
       // 타임라인 0초의 set() 은 리프레시 때 되돌려지므로, S0 위치는 fromTo 의 from 으로 박는다.
       tl.fromTo(
         laptopWrap,
         { x: s0X, y: s0Y, scale: S0_SCALE, yPercent: 120 },
-        { yPercent: 0, duration: 8 },
+        { yPercent: 0, duration: 6 },
         T.s0Laptop,
       );
-      tl.to(copy1, { autoAlpha: 0, duration: 3 }, T.s0Laptop + 2);
-      tl.from(copy2, { autoAlpha: 0, y: 28, duration: 4 }, T.s0Laptop + 5);
 
-      /* ── S0-4. 조각이 날아가 실행 기록 줄에 안착한다 ── */
+      /* ── S0-4. 조각이 날아가 실행 기록 줄에 안착한다 ──
+       * 이륙은 노트북이 다 올라오기 전(s0Flip=17, 상승 완료 20)이라 고지서와 노트북이 완전히 겹치는 순간이 없다.
+       * 도착점은 노트북의 레이아웃 위치 + S0 오프셋으로 계산해 상승 중에도 흔들리지 않는다 — 첫 착지(22)는 상승이 끝난 뒤다. */
       const FLIGHT = 5;
       const GAP = 1.6;
       tl.to(logWait, { autoAlpha: 0, duration: 1 }, T.s0Flip);
@@ -281,7 +278,7 @@ export default function Stage() {
         { x: () => centerDelta(laptopWrap, el).x, y: fullY, scale: fullScale, duration: 8 },
         T.s0Full,
       );
-      tl.to([doorBack, vignette, veil, copy2, billWrap], { autoAlpha: 0, duration: 6 }, T.s0Full);
+      tl.to([doorBack, vignette, veil, billWrap], { autoAlpha: 0, duration: 6 }, T.s0Full);
       tl.to(el, { backgroundColor: BG.ivory, duration: 8 }, T.s0Full + 2);
 
       /* ── CH1. 일상관리 ── */
@@ -376,30 +373,13 @@ export default function Stage() {
 
   return (
     <div ref={root} className="ld-stage" data-mode={mode} aria-label="소개">
-      {/* S0 — 문 → 비네트 → 베일 → 카피. 고지서는 아래 스테이지 직속(노트북 위 겹). */}
+      {/* S0 — 문 → 비네트 → 베일. 고지서는 아래 스테이지 직속(노트북 위 겹). */}
       <section className="ld-scene ld-scene--s0">
         <div className="ld-door ld-door--back" aria-hidden>
           <DoorBack />
         </div>
         <div className="ld-vignette" aria-hidden />
         <div className="ld-veil" aria-hidden />
-        <div className="ld-s0-copy ld-s0-copy--1">
-          <h1>
-            매달 옵니다.
-            <br />
-            그리고, 잊는 날이 옵니다
-          </h1>
-          <p className="ld-foot">
-            치매 진단 6년 전부터 공과금 연체가 늘어납니다 (Nicholas 외, JAMA Internal Medicine, 2020)
-          </p>
-        </div>
-        <div className="ld-s0-copy ld-s0-copy--2">
-          <h2>
-            당신이 잊어도,
-            <br />
-            원칙은 기억합니다
-          </h2>
-        </div>
       </section>
 
       {/* 고지서 — 문틈에서 손에 뽑혀 중앙으로, 조각이 노트북 위로 날아간다. 손은 종이와 같이 움직이도록 래퍼 안에 */}
@@ -461,7 +441,7 @@ export default function Stage() {
       {/* TR — 알림 카드가 이 차트의 폭락 캔들이 된다 */}
       <section className="ld-scene ld-scene--tr">
         <h2 className="ld-tr-copy">
-          그리고 어떤 날은,
+          그리고 어느 날,
           <br />
           시장이 무너집니다
         </h2>
