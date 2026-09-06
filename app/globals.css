@@ -1525,6 +1525,654 @@ input[type="range"] {
   gap: 14px;
 }
 
+/* ── expense doc (2026-09-06, toss-style) ──
+ * 지출설계서 전용. 좁은 한 열(최대 720px)에 테두리 없는 흰 카드를 쌓는다.
+ * 카드 하나 = 원칙 하나. 큰 숫자 하나, 문장 하나, 그 아래 목록 행. 표·모노 대문자·빨강/초록 금액 없음.
+ * 오른쪽 레일은 조항 이동 링크만 두고 데이터는 두지 않는다. */
+.xd {
+  display: grid;
+  grid-template-columns: minmax(0, 720px) 160px;
+  justify-content: start;
+  gap: 40px;
+  align-items: start;
+}
+
+.xd-col {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.xd-card {
+  background: var(--paper);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 26px 28px;
+  scroll-margin-top: 96px;
+}
+
+.xd-no {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 조항 라벨 옆 "수정 →". 제목 옆 h4 훅(.doc h4 .clause-jump)을 쓰지 않으므로 여기서 따로 잡는다. */
+.xd-no .clause-jump {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--blue);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.xd-no .clause-jump:hover {
+  text-decoration: underline;
+}
+
+.xd-head {
+  margin-bottom: 18px;
+}
+
+.xd-head h3 {
+  font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+  margin: 8px 0 0;
+  word-break: keep-all;
+}
+
+.xd-lede {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ink);
+  margin-top: 10px;
+  word-break: keep-all;
+}
+
+.xd-lede b {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+/* 첫 카드: 월 현금흐름 */
+.xd-hero h2 {
+  font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
+  font-size: 28px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.015em;
+  margin: 8px 0 0;
+  word-break: keep-all;
+}
+
+.xd-hero h2 em {
+  font-style: normal;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.xd-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--muted);
+  list-style: none;
+  padding: 0;
+}
+
+.xd-facts b {
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.xd-bars {
+  margin-top: 22px;
+  display: grid;
+  gap: 10px;
+}
+
+.xd-bar {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.xd-bar .k {
+  color: var(--muted);
+}
+
+.xd-bar .v {
+  text-align: right;
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.xd-bar .track {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+
+.xd-bar .track i,
+.xd-legend i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.xd-bar .track i.income,
+.xd-bar .track i.living,
+.xd-legend i.living {
+  background: var(--blue);
+}
+
+.xd-bar .track i.fixed,
+.xd-legend i.fixed {
+  background: #a9c4ea;
+}
+
+.xd-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12.5px;
+  color: var(--muted);
+  padding-left: 46px;
+}
+
+.xd-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.xd-legend i {
+  width: 8px;
+  height: 8px;
+}
+
+/* 검토 지점 카드 안의 flag 는 카드 여백만 맞춘다 */
+.xd-flags {
+  margin-top: 14px;
+}
+
+.xd-flags .flag:last-child {
+  margin-bottom: 0;
+}
+
+/* 목록 행: 왼쪽 라벨(+회색 둘째 줄), 오른쪽 값. 카드 안쪽 실선만 hairline. */
+.xd-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.xd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.xd-row:first-child {
+  border-top: 0;
+}
+
+.xd-row-main {
+  min-width: 0;
+}
+
+.xd-row .l {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.xd-row .s {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-top: 2px;
+  word-break: keep-all;
+}
+
+.xd-val {
+  flex: none;
+  margin-left: auto; /* 좁은 폭에서 줄바꿈돼도 값은 오른쪽에 붙는다 */
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  max-width: 55%;
+  word-break: keep-all;
+}
+
+.xd-val.muted {
+  color: var(--faint);
+  font-weight: 500;
+}
+
+.xd-row.total {
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+}
+
+.xd-row.total .l {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.xd-row.total .xd-val {
+  font-size: 18px;
+}
+
+.xd-row.off .l,
+.xd-row.off .s {
+  color: var(--faint);
+}
+
+.xd-state {
+  flex: none;
+  font-size: 12.5px;
+  color: var(--faint);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.xd-state::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.xd-state.on {
+  color: var(--blue);
+}
+
+.xd-state.on::before {
+  background: var(--blue);
+}
+
+/* 제1조: 3층 타일. 층마다 옅은 색 하나. */
+.xd-tiers {
+  display: grid;
+  gap: 10px;
+}
+
+.xd-tier {
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+
+.xd-tier.l1 {
+  background: var(--blue-soft);
+}
+
+.xd-tier.l2 {
+  background: #eaf6f5;
+}
+
+.xd-tier.l3 {
+  background: #eef1f6;
+}
+
+.xd-tier-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.xd-tier .ic {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--blue);
+}
+
+.xd-tier.l2 .ic {
+  color: var(--teal);
+}
+
+.xd-tier.l3 .ic {
+  color: var(--navy-soft);
+}
+
+.xd-tier-amt {
+  font-family: var(--font-pretendard), var(--font-noto-kr), sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+  margin-top: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.xd-tier-p {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-top: 4px;
+  word-break: keep-all;
+}
+
+.xd-tier-meta {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.xd-tier-meta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.xd-tier-meta li::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+/* 제4조: 요약 칩 + 펼침 */
+.xd-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.xd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 13px;
+}
+
+.xd-chip b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.xd-chip.off {
+  background: var(--line-soft);
+  color: var(--muted);
+}
+
+.xd-more {
+  margin-top: 14px;
+}
+
+.xd-more summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--blue);
+  padding: 12px 0;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.xd-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.xd-more summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  margin-right: 4px;
+  transition: transform 0.15s ease;
+}
+
+.xd-more[open] summary::after {
+  transform: rotate(-135deg);
+}
+
+.xd-group {
+  margin-top: 6px;
+}
+
+.xd-group + .xd-group {
+  margin-top: 18px;
+}
+
+.xd-group-t {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+/* 제5조: 세로 2단계 타임라인 */
+.xd-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+}
+
+.xd-steps li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.xd-steps .dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+
+.xd-steps li.gap {
+  min-height: 44px;
+  align-items: center;
+}
+
+.xd-steps .dot.line {
+  width: 2px;
+  height: 100%;
+  min-height: 44px;
+  border-radius: 0;
+  background: var(--line);
+  justify-self: center;
+}
+
+.xd-steps .l {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 28px;
+}
+
+.xd-steps .s {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* 제6조 차트: 선 하나, 면 하나, 격자 없음. 글자는 HTML 이라 좁은 폭에서도 크기가 유지된다. */
+.xd-chart {
+  margin: 4px 0 0;
+}
+
+.xd-chart-top {
+  position: relative;
+  height: 22px;
+  font-size: 12.5px;
+}
+
+.xd-chart-top .start {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.xd-chart-top .mark {
+  position: absolute;
+  top: 0;
+  transform: translateX(8px);
+  font-weight: 600;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.xd-chart-top .mark.end {
+  transform: translateX(calc(-100% - 8px));
+}
+
+.xd-chart-plot {
+  position: relative;
+  height: 150px;
+}
+
+.xd-chart-plot svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.xd-chart-plot .pt {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 2.5px solid var(--blue);
+  transform: translate(-50%, -50%);
+}
+
+.xd-chart-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* 오른쪽 레일: 조항 이동 목록 */
+.xd-rail {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 2px;
+  padding-top: 6px;
+}
+
+.xd-rail a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  word-break: keep-all;
+}
+
+.xd-rail a .no {
+  font-size: 11.5px;
+  color: var(--faint);
+  flex: none;
+}
+
+.xd-rail a:hover {
+  background: var(--paper);
+  color: var(--navy);
+}
+
+@media (max-width: 1080px) {
+  .xd {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .xd-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .xd-card {
+    padding: 22px 20px;
+    border-radius: 18px;
+  }
+  .xd-head h3 {
+    font-size: 20px;
+  }
+  .xd-hero h2 {
+    font-size: 24px;
+  }
+  .xd-row {
+    flex-wrap: wrap;
+  }
+  .xd-val {
+    max-width: 100%;
+  }
+  .xd-legend {
+    padding-left: 0;
+  }
+  .xd-chart-plot {
+    height: 120px;
+  }
+}
+
 .verdict {
   background: var(--navy);
   color: #e4ecf8;
@@ -1868,51 +2516,6 @@ input[type="range"] {
   color: #6b2b26;
 }
 
-table.data {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-  background: var(--paper);
-}
-
-table.data th,
-table.data td {
-  text-align: left;
-  padding: 11px 13px;
-  border-bottom: 1px solid var(--line);
-  vertical-align: top;
-  line-height: 1.65;
-}
-
-table.data th {
-  font-size: 11.5px;
-  font-family: var(--mono);
-  letter-spacing: 0.06em;
-  color: var(--faint);
-  text-transform: uppercase;
-  background: var(--line-soft);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-table.data tr.off td {
-  color: var(--faint);
-  background: #fbfcfd;
-}
-
-table.data td.num {
-  font-family: var(--mono);
-  text-align: right;
-  white-space: nowrap;
-}
-
-table.data tfoot td {
-  font-weight: 600;
-  color: var(--navy);
-  background: var(--line-soft);
-  border-bottom: 0;
-}
-
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--line);
@@ -2123,70 +2726,6 @@ table.data tfoot td {
   color: var(--faint);
   text-transform: uppercase;
   margin-bottom: 14px;
-}
-
-.accounts {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.account {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 16px 18px;
-  background: var(--paper);
-  display: grid;
-  grid-template-columns: 30px 1fr;
-  gap: 14px;
-}
-
-.account .lv {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  background: var(--blue-soft);
-  color: var(--blue);
-  font-family: var(--mono);
-  font-size: 12px;
-  display: grid;
-  place-items: center;
-}
-
-.account h5 {
-  font-size: 14.5px;
-  color: var(--navy);
-  margin-bottom: 4px;
-  font-weight: 600;
-  display: flex;
-  gap: 10px;
-  align-items: baseline;
-  flex-wrap: wrap;
-}
-
-.account h5 span {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--teal);
-}
-
-.account p {
-  font-size: 12.8px;
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-.account .pol {
-  margin-top: 7px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.chart {
-  width: 100%;
-  height: 190px;
-  overflow: visible;
 }
 
 /* ── 시뮬레이션 ───────────────────────────────── */
