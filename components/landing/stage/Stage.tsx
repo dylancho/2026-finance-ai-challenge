@@ -21,11 +21,14 @@ import { T, TOTAL, isDark } from "./phases";
  * 위치 계산은 전부 함수형 값 — 리사이즈 시 ScrollTrigger 가 다시 계산한다.
  *
  * S0 의 고지서는 처음부터 현관문 문틈에 "꽂힌" DOM 고지서다(한국식). 스크롤이 곧 꺼내는 손이다.
- * 문틈 선 왼쪽을 clip-path 로 잘라 두었다가 옆으로 빠져나오면서 풀어 준다.
+ * 문틈 선 왼쪽을 clip-path 로 잘라 두었다가 옆으로 빠져나오면서 풀어 준다. 꽂혀 있는 동안은
+ * 회전 0 — 기울이면 잘린 모서리(고지서 로컬 좌표)가 세로 문틈 선과 어긋나 종이가 문에 붙인 것처럼 보인다.
  * 고지서는 노트북 위 겹에 있어야 조각이 화면 위로 날아간다 — 그래서 S0 장면 밖, 스테이지 직속이다.
+ *
+ * S0·CH1 은 밝은 장면(토스풍), CH2·TR 은 딥네이비. BG.light 는 .ld-stage 의 CSS 배경과 같은 값이다.
  */
 
-const BG = { dusk: "#1b1e27", ivory: "#f5f3ee", navy: "#0c1c36", dark: "#0a0e18" };
+const BG = { light: "#f2f4f8", ivory: "#f5f3ee", navy: "#0c1c36", dark: "#0a0e18" };
 
 const BEATS = [
   { id: 1, h: "공과금, 잊어도 됩니다", p1: "직접 납부 버튼을 누를 필요 없이", p2: "정해둔 원칙이 대신 냅니다" },
@@ -34,9 +37,9 @@ const BEATS = [
 ];
 
 /** 문틈에 꽂혀 있을 때 고지서 배율 */
-const SLOT_SCALE = 0.5;
-/** 꽂혀 있을 때 문틈 밖으로 보이는 비율 (고지서 너비 기준) */
-const PEEK = 0.6;
+const SLOT_SCALE = 0.6;
+/** 꽂혀 있을 때 문틈 밖으로 보이는 비율 (고지서 너비 기준). .ld-bill-fold 의 그늘 위치(54%)와 짝이다. */
+const PEEK = 0.46;
 
 export default function Stage() {
   const root = useRef<HTMLDivElement>(null);
@@ -62,6 +65,7 @@ export default function Stage() {
       const copy2 = one(".ld-s0-copy--2");
       const billWrap = one(".ld-bill-wrap");
       const bill = one(".ld-bill");
+      const billFold = one(".ld-bill-fold");
       const billFade = all("[data-bill-fade]");
       const billRows = all("[data-bill-row]");
       const laptopWrap = one(".ld-laptop-wrap");
@@ -91,13 +95,18 @@ export default function Stage() {
       const trCopy = one(".ld-tr-copy");
 
       /* ── 좌표 함수 (리사이즈마다 다시 계산) ── */
-      // 문틈의 화면 좌표
+      // 문틈의 화면 좌표 (x 는 틈의 왼쪽 = 문짝 모서리, s 는 viewBox→화면 배율)
       const gap = () => sliceToScreen(DOOR.vw, DOOR.vh, el.clientWidth, el.clientHeight, DOOR.gap.x, DOOR.gap.y);
-      // 꽂혀 있을 때: 왼쪽 (1-PEEK) 은 문틈 안, 오른쪽 PEEK 만 밖으로 보인다
-      const slotX = () => gap().x + billWrap.offsetWidth * SLOT_SCALE * (PEEK - 0.5) - layoutCenter(billWrap, el).x;
+      // 종이가 틈에서 나오는 선: 틈 폭의 절반 지점. 왼쪽에 어두운 홈이 한 줄 남아야 "틈에 끼어 있다" 로 읽힌다.
+      const seamX = () => {
+        const g = gap();
+        return g.x + DOOR.gap.w * g.s * 0.5;
+      };
+      // 꽂혀 있을 때: 왼쪽 (1-PEEK) 은 문틈 안, 오른쪽 PEEK 만 밖으로 보인다. 잘린 모서리가 정확히 seamX 에 온다.
+      const slotX = () => seamX() + billWrap.offsetWidth * SLOT_SCALE * (PEEK - 0.5) - layoutCenter(billWrap, el).x;
       const slotY = () => gap().y - layoutCenter(billWrap, el).y;
       // 완전히 빠져나온 자리: 문틈 바로 오른쪽
-      const outX = () => gap().x + billWrap.offsetWidth * SLOT_SCALE * 0.5 + 10 - layoutCenter(billWrap, el).x;
+      const outX = () => seamX() + billWrap.offsetWidth * SLOT_SCALE * 0.5 + 10 - layoutCenter(billWrap, el).x;
       // 꽂혀 있을 때 문틈 선 왼쪽으로 잘리는 너비 (고지서 로컬 px)
       const clipIn = () => `inset(0px 0px 0px ${Math.round(billWrap.offsetWidth * (1 - PEEK))}px)`;
 
@@ -124,11 +133,12 @@ export default function Stage() {
             // 문자열 attr 은 트윈이 아니라 진행률로 정한다 (attr 트윈은 렌더를 멈춘다)
             chScene.dataset.tone = st.progress >= (T.ch2 + 3) / TOTAL ? "dark" : "light";
           },
-          // 첫 페인트(progress 0)에서도 헤더가 어두워야 한다 — onUpdate 는 스크롤 전엔 안 불린다
+          // 리프레시(리사이즈·복원) 시점에도 진행률에 맞는 헤더 톤이어야 한다 — onUpdate 는 스크롤 전엔 안 불린다
           onRefresh: (st) =>
             document.body.classList.toggle("ld-dark", st.scroll() <= st.end && isDark(st.progress)),
+          // 핀 밖 양쪽 모두 밝은 장면(S0 오프닝 / CH1 다음은 CH3 가 스스로 토글)
           onLeave: () => document.body.classList.remove("ld-dark"),
-          onLeaveBack: () => document.body.classList.add("ld-dark"),
+          onLeaveBack: () => document.body.classList.remove("ld-dark"),
         },
       });
 
@@ -139,10 +149,14 @@ export default function Stage() {
       /* ── S0-1. 문틈에서 고지서가 옆으로 빠져나온다 (스크롤 = 꺼내는 손) ── */
       tl.fromTo(
         billWrap,
-        { x: slotX, y: slotY, scale: SLOT_SCALE, rotation: 7, clipPath: clipIn },
-        { x: outX, rotation: 3, clipPath: "inset(0px 0px 0px 0px)", duration: T.s0Bill, ease: "power1.out" },
+        { x: slotX, y: slotY, scale: SLOT_SCALE, rotation: 0, clipPath: clipIn },
+        { x: outX, clipPath: "inset(0px 0px 0px 0px)", duration: T.s0Bill, ease: "power1.out" },
         T.s0Still,
       );
+      // 회전은 틈을 거의 다 벗어난 뒤에 붙는다(power2.in) — 끼어 있는 동안 잘린 모서리가 세로 문틈 선과 맞아야 한다
+      tl.to(billWrap, { rotation: 3, duration: T.s0Bill, ease: "power2.in" }, T.s0Still);
+      // 틈 쪽 그늘·접힘은 종이가 펴지면서 사라진다
+      tl.to(billFold, { autoAlpha: 0, duration: T.s0Bill * 0.8, ease: "power1.in" }, T.s0Still);
 
       // 틈을 벗어나면 클립을 푼다 — 안 풀면 종이 박스 밖으로 날아가는 조각까지 잘린다
       tl.set(billWrap, { clipPath: "none" }, T.s0Bill);
@@ -181,7 +195,7 @@ export default function Stage() {
           };
         };
         // 종이 조각처럼 떨어져 나온다: 배경·그림자를 얻고, 살짝 떠오른 뒤 포물선으로 떨어진다
-        tl.to(f, { backgroundColor: "#fff9ea", boxShadow: "0 18px 34px -10px rgba(0,0,0,.7)", duration: 1 }, at);
+        tl.to(f, { backgroundColor: "#ffffff", boxShadow: "0 18px 34px -10px rgba(12,28,54,.38)", duration: 1 }, at);
         tl.to(f, { x: () => d().x, duration: FLIGHT }, at);
         tl.to(f, { y: () => d().y - 40, duration: FLIGHT * 0.35, ease: "power2.out" }, at);
         tl.to(f, { y: () => d().y, duration: FLIGHT * 0.65, ease: "power2.in" }, at + FLIGHT * 0.35);
@@ -200,7 +214,7 @@ export default function Stage() {
       // 종이만 사라진다 — 조각은 남아서 날아간다
       tl.to(billFade, { autoAlpha: 0, duration: 3 }, T.s0Flip + 1);
       tl.to(billRows, { borderColor: "rgba(0,0,0,0)", duration: 3 }, T.s0Flip + 1);
-      tl.to(bill, { backgroundColor: "rgba(248,244,234,0)", boxShadow: "0 0 0 0 rgba(0,0,0,0)", duration: 3 }, T.s0Flip + 1);
+      tl.to(bill, { backgroundColor: "rgba(255,255,255,0)", boxShadow: "0 0 0 0 rgba(0,0,0,0)", duration: 3 }, T.s0Flip + 1);
       const lastLand = T.s0Flip + (frags.length - 1) * GAP + FLIGHT;
       tl.from(logRest, { autoAlpha: 0, x: -6, duration: 1.5, stagger: 0.2 }, lastLand + 0.4);
 
