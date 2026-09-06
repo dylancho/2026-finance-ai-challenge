@@ -2247,82 +2247,101 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 .ld-s0-copy h1, .ld-s0-copy h2 { color: var(--navy); font-size: clamp(30px, 4.4vw, 56px); letter-spacing: -0.045em; line-height: 1.2; word-break: keep-all; }
 .ld-foot { margin-top: 14px; font-size: 12.5px; color: var(--muted); }
 /* 앵커가 스테이지를 덮고 grid 로 고지서를 가운데 놓는다 — offset 좌표가 곧 시각적 중심이 되도록 CSS translate 를 쓰지 않는다.
- * padding-top 만큼 중심이 아래로 내려가(≈ 56%) 카피 아래에 자리한다. 노트북(z auto) 위에 온다. */
+ * padding-top 만큼 중심이 아래로 내려가(≈ 57%) 카피 아래에 자리한다. 노트북(z auto) 위에 온다. */
 .ld-bill-anchor { position: absolute; z-index: 3; inset: 0; display: grid; place-items: center; padding-top: 14vh; pointer-events: none; }
-.ld-bill-wrap { position: relative; width: min(360px, 78vw); transform-origin: center; }
-/* ── 한전 청구서 ── 종이는 흰색, 강조는 한전풍 파랑. 0.5 배에서도 읽히도록 글자는 10px 아래로 내려가지 않는다 */
+/* 가로형 청구서의 클로즈업 폭. 글자는 px 고정이라 좁은 화면에서는 래퍼가 줄고 격자가 다시 흐른다(배율로 줄이지 않는다) */
+.ld-bill-wrap { position: relative; width: min(620px, 92vw); transform-origin: center; }
+/* 고지서를 쥔 손 — 위치·크기는 Person.tsx 의 HAND 상수가 인라인으로 준다. 종이 위 겹 */
+.ld-bill-hand { position: absolute; top: 50%; z-index: 4; display: block; pointer-events: none; }
+.ld-bill-hand svg { display: block; width: 100%; height: 100%; overflow: visible; }
+/* ── 한전 청구서(가로형) ── 종이는 흰색, 머리띠·구획은 청록, 라벨 칸은 연한 하늘색, 수납인은 파랑. 클로즈업(폭 620)에서 읽히는 크기 */
 .ld-bill {
-  --kb: #1e56a8; /* 한전 파랑 */
-  --kb-soft: #e8f0fb;
-  --kb-line: #c9d6ea;
+  --kt: #1a9aa3; /* 머리띠 청록 */
+  --kt-deep: #2b6e79; /* 구획 띠 */
+  --kb: #2456a8; /* 한전 파랑(워드마크·수납인) */
+  --kt-soft: #e2f1f3; /* 라벨 칸 */
+  --kb-line: #bfd3da;
   position: relative;
-  background: #fff;
+  display: flex;
+  aspect-ratio: 1.6;
+  background: #fdfdfb;
   color: #1f2937;
-  border-radius: 3px;
-  /* 가까운 접촉 그림자 + 멀리 퍼지는 그림자. 문틈에 꽂혀 0.6배일 때도 문틀 위에 떠 있는 두께가 보여야 한다 */
+  border-radius: 2px;
+  /* 가까운 접촉 그림자 + 멀리 퍼지는 그림자. 문틈에 꽂혀 작을 때도 문틀 위에 떠 있는 두께가 보여야 한다 */
   box-shadow: 0 1px 2px rgba(12, 28, 54, 0.18), 0 6px 14px -4px rgba(12, 28, 54, 0.28), 0 30px 60px -22px rgba(12, 28, 54, 0.4), 0 0 0 1px rgba(12, 28, 54, 0.06);
-  padding: 0 16px 14px;
-  font-size: 11px;
+  font-size: 10.5px;
   line-height: 1.35;
   letter-spacing: -0.01em;
+  /* overflow 는 visible 이어야 한다 — 조각이 종이 밖으로 날아간다 */
 }
 .ld-bill .mono { font-family: var(--mono); letter-spacing: 0; }
-/* 문틈 쪽 그늘·접힘 — 종이가 틈으로 들어가는 왼쪽이 어둡고 접힌 선에 빛이 맺힌다. 위치는 Stage 의 PEEK(0.46)와 같은 54% 지점 */
-.ld-bill-fold { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
+/* 문틈 쪽 그늘 — 종이가 틈으로 들어가는 왼쪽이 어둡고 접힌 선에 빛이 맺힌다. 위치는 Stage 의 PEEK(0.45)와 같은 55% 지점 */
+.ld-bill-fold { position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(12, 28, 54, 0.5) 0, rgba(12, 28, 54, 0.5) 54%, rgba(12, 28, 54, 0.42) 54.6%, rgba(12, 28, 54, 0.24) 60%, rgba(12, 28, 54, 0.09) 70%, rgba(255, 255, 255, 0) 80%),
-    linear-gradient(90deg, transparent 54.2%, rgba(255, 255, 255, 0.95) 54.6%, transparent 55.6%); }
-/* 머리띠: 좌 한전 워드마크, 우 제목. 배경은 별도 겹이라 조각이 날아갈 때 같이 사라진다 */
-.ld-bill-head { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0 -16px; padding: 12px 16px 10px; border-bottom: 2px solid var(--kb); }
-.ld-bill-head-bg { position: absolute; inset: 0; background: linear-gradient(180deg, #f4f7fc, #fff); border-top: 5px solid var(--kb); }
-.ld-bill-brand { position: relative; display: flex; align-items: center; gap: 7px; }
-.ld-bill-mark { width: 22px; height: 22px; border-radius: 50%; background: var(--kb); position: relative; flex: 0 0 auto; }
-.ld-bill-mark::before { content: ""; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px; border-radius: 50%; border: 2.5px solid #fff; border-right-color: transparent; transform: rotate(-35deg); }
-.ld-bill-mark::after { content: ""; position: absolute; left: 12px; top: 4px; width: 5px; height: 5px; border-radius: 50%; background: #e63946; }
-.ld-bill-brand-txt { display: grid; grid-template-columns: auto auto; align-items: baseline; column-gap: 0; line-height: 1.1; }
-.ld-bill-brand-txt b { font-size: 13px; font-weight: 800; color: var(--kb); letter-spacing: -0.02em; }
-.ld-bill-brand-txt small { grid-column: 1 / -1; font-size: 8.5px; letter-spacing: 0.18em; color: #6b7a90; font-weight: 600; }
-.ld-bill-title { position: relative; text-align: right; }
-.ld-bill-title b { display: block; font-size: 15px; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; }
-.ld-bill-title small { display: block; font-size: 9.5px; color: #6b7a90; margin-top: 2px; }
-/* 고객 정보 2×2 */
-.ld-bill-info { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin: 9px 0 0; padding: 0 0 8px; border-bottom: 1px solid var(--kb-line); }
-.ld-bill-info div { display: flex; justify-content: space-between; gap: 6px; font-size: 10px; }
-.ld-bill-info dt { color: #6b7a90; }
-.ld-bill-info dd { margin: 0; color: #1f2937; font-weight: 600; }
-/* 청구금액 박스 — 금액이 오른쪽 정렬이라 문틈에서 오른쪽 절반만 보여도 제목·금액이 먼저 읽힌다. 납기 스탬프는 왼쪽. */
-.ld-bill-amt { position: relative; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; align-items: center; column-gap: 12px; margin: 9px 0 0; padding: 8px 12px 8px 10px; border: 1.5px solid var(--kb); border-radius: 4px; }
-.ld-bill-amt-bg { position: absolute; inset: 0; background: var(--kb-soft); border-radius: inherit; }
-.ld-bill-amt-k { position: relative; grid-column: 2; grid-row: 1; justify-self: end; font-size: 10px; font-weight: 700; color: var(--kb); letter-spacing: 0.06em; }
-.ld-bill-amt > b[data-frag] { grid-column: 2; grid-row: 2; justify-self: end; font-size: 26px; font-weight: 800; color: var(--navy); letter-spacing: -0.03em; line-height: 1.1; }
-/* 스탬프 테두리는 data-bill-row 로 조각이 날아갈 때 함께 지워진다 — 배경을 두면 남으니 두지 않는다 */
-.ld-bill-stamp { position: relative; grid-column: 1; grid-row: 1 / span 2; display: grid; justify-items: center; padding: 3px 7px 4px; border: 2px solid #d3352b; border-radius: 4px; color: #d3352b; transform: rotate(-4deg); }
-.ld-bill-stamp small { font-size: 8.5px; font-weight: 700; letter-spacing: 0.14em; }
-.ld-bill-stamp b[data-frag] { font-size: 16px; font-weight: 800; letter-spacing: 0.01em; line-height: 1.1; color: #d3352b; }
-/* 사용량 표 */
-.ld-bill-use { width: 100%; margin-top: 9px; border-collapse: collapse; font-size: 10px; text-align: center; }
-.ld-bill-use th { font-weight: 600; color: #4b5563; background: #f3f5f9; padding: 4px 2px; border: 1px solid var(--kb-line); }
-.ld-bill-use td { padding: 5px 2px; border: 1px solid var(--kb-line); color: #1f2937; }
+    linear-gradient(90deg, rgba(12, 28, 54, 0.5) 0, rgba(12, 28, 54, 0.5) 55%, rgba(12, 28, 54, 0.4) 55.6%, rgba(12, 28, 54, 0.22) 61%, rgba(12, 28, 54, 0.08) 70%, rgba(255, 255, 255, 0) 80%),
+    linear-gradient(90deg, transparent 55.2%, rgba(255, 255, 255, 0.95) 55.6%, transparent 56.6%); }
+/* 왼쪽 천공 줄: 구멍 + 절취 점선 */
+.ld-bill-holes { position: relative; flex: 0 0 22px; border-right: 1px dashed #c9d0da; border-radius: 2px 0 0 2px;
+  background: #f7f8f6 radial-gradient(circle at 50% 50%, #d6dce6 3.2px, #e9edf3 3.6px, transparent 4.2px) 0 6px / 22px 26px repeat-y; }
+.ld-bill-body { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; padding: 8px 12px 9px 10px; }
+
+/* 머리띠 — 청록 바탕에 흰 제목. 조각을 안 품으므로 통째로 사라진다 */
+.ld-bill-band { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 8px 12px; background: linear-gradient(180deg, var(--kt), #158b94); color: #fff; border-radius: 2px; }
+.ld-bill-band b { font-size: 17px; font-weight: 800; letter-spacing: 0.22em; text-indent: 0.22em; white-space: nowrap; }
+.ld-bill-band small { font-size: 9px; opacity: 0.88; letter-spacing: 0.02em; white-space: nowrap; }
+.ld-bill-band small:last-child { text-align: right; }
+
+/* 격자 칸: 라벨 칸(연한 하늘색) | 값 칸. 4열 2행 */
+.ld-bill-cells { display: grid; grid-template-columns: 1.12fr 0.88fr 1fr 1fr; gap: 0; margin: 0; border: 1px solid var(--kb-line); border-right-width: 0; border-bottom-width: 0; }
+.ld-bill-cells div { display: grid; grid-template-columns: auto 1fr; border-right: 1px solid var(--kb-line); border-bottom: 1px solid var(--kb-line); min-width: 0; }
+.ld-bill-cells dt { padding: 5px 6px; background: var(--kt-soft); color: #3f5a68; font-size: 10px; font-weight: 600; white-space: nowrap; border-right: 1px solid var(--kb-line); }
+.ld-bill-cells dd { margin: 0; padding: 5px 6px; color: #1f2937; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 본문: 왼쪽 요금 내역, 오른쪽 납부 안내 */
+.ld-bill-main { display: grid; grid-template-columns: 1.08fr 1fr; gap: 10px; flex: 1; } /* min-height 를 0 으로 두면 좁은 화면에서 내용이 넘쳐 안내문과 겹친다 */
+.ld-bill-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ld-bill-col--pay { position: relative; }
+.ld-bill-sec { padding: 3px 8px; background: var(--kt-deep); color: #fff; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; border-radius: 2px; }
+
+.ld-bill-use { width: 100%; border-collapse: collapse; font-size: 10.5px; text-align: center; }
+.ld-bill-use th { font-weight: 600; color: #3f5a68; background: var(--kt-soft); padding: 3px 2px; border: 1px solid var(--kb-line); }
+.ld-bill-use td { padding: 4px 2px; border: 1px solid var(--kb-line); color: #1f2937; }
 .ld-bill-use td b { font-size: 13px; font-weight: 800; color: var(--navy); }
-/* 요금 내역 */
-.ld-bill-lines { margin: 8px 0 0; display: grid; gap: 0; font-size: 10px; }
-.ld-bill-lines div { display: flex; justify-content: space-between; align-items: baseline; padding: 2.5px 0; }
-.ld-bill-lines dt { color: #4b5563; }
+
+.ld-bill-lines { margin: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; font-size: 10.5px; }
+.ld-bill-lines div { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding: 3px 0; border-bottom: 1px dotted #d7dde6; }
+.ld-bill-lines dt { color: #4b5563; white-space: nowrap; }
 .ld-bill-lines dd { margin: 0; color: #1f2937; }
-.ld-bill-lines .sum { margin-top: 2px; padding-top: 4px; border-top: 1px dashed var(--kb-line); }
 .ld-bill-lines .sum dt, .ld-bill-lines .sum dd { font-weight: 700; }
-.ld-bill-lines .total { margin-top: 2px; padding-top: 4px; border-top: 1px solid var(--navy); font-size: 11px; }
+.ld-bill-lines .total { grid-column: 1 / -1; margin-top: 2px; padding-top: 4px; border-top: 1.5px solid var(--kt-deep); border-bottom: 0; font-size: 11px; }
 .ld-bill-lines .total dt, .ld-bill-lines .total dd { font-weight: 800; color: var(--navy); }
-/* 절취선 — 실제 청구서처럼 점선 가운데 글자 */
-.ld-bill-tear { position: relative; height: 0; margin: 12px -16px 10px; border-top: 1.5px dashed #b9c3d3; }
-.ld-bill-tear span { position: absolute; left: 50%; top: -7px; transform: translateX(-50%); padding: 0 6px; background: #fff; font-size: 8.5px; color: #98a1b0; letter-spacing: 0.2em; }
-/* 납부 영수증 조각 */
-.ld-bill-stub { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; align-items: center; font-size: 9.5px; }
-.ld-bill-stub-row { grid-column: 1; display: flex; justify-content: space-between; gap: 8px; }
-.ld-bill-stub-row span { color: #6b7a90; }
-.ld-bill-stub-row b { color: #1f2937; font-weight: 600; }
-.ld-bill-barcode { grid-column: 2; grid-row: 1 / span 2; width: 96px; height: 30px; background: repeating-linear-gradient(90deg, #1f2937 0 2px, transparent 2px 4px, #1f2937 4px 5px, transparent 5px 8px, #1f2937 8px 11px, transparent 11px 13px, #1f2937 13px 14px, transparent 14px 17px); }
-.ld-bill-stub small { grid-column: 1 / -1; font-size: 8.5px; color: #98a1b0; }
+
+/* 청구금액 상자: [청구금액 · 납기 스탬프] / [금액]. 조각(금액·납기)을 품어 테두리만 트윈으로 지운다 */
+.ld-bill-amt { position: relative; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; align-items: center; column-gap: 8px; row-gap: 2px; padding: 6px 10px 7px; border: 1.5px solid var(--kt); border-radius: 3px; }
+.ld-bill-amt-bg { position: absolute; inset: 0; background: linear-gradient(180deg, #f1f9fa, #fff); border-radius: inherit; }
+.ld-bill-amt-k { position: relative; grid-column: 1; grid-row: 1; font-size: 10px; font-weight: 700; color: var(--kt-deep); letter-spacing: 0.08em; }
+.ld-bill-amt > b[data-frag] { position: relative; grid-column: 1 / -1; grid-row: 2; justify-self: end; font-size: 30px; font-weight: 800; color: var(--navy); letter-spacing: -0.03em; line-height: 1.1; }
+.ld-bill-stamp { position: relative; grid-column: 2; grid-row: 1; display: inline-grid; grid-auto-flow: column; align-items: baseline; gap: 4px; padding: 1px 6px 2px; border: 1.5px solid #d3352b; border-radius: 3px; color: #d3352b; transform: rotate(-3deg); }
+.ld-bill-stamp small { font-size: 8.5px; font-weight: 700; letter-spacing: 0.12em; }
+.ld-bill-stamp b[data-frag] { font-size: 14px; font-weight: 800; letter-spacing: 0.01em; line-height: 1.1; color: #d3352b; }
+
+/* 전자납부번호 + 바코드 */
+.ld-bill-pay { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 8px; row-gap: 2px; font-size: 9.5px; }
+.ld-bill-pay > span { color: #6b7a90; }
+.ld-bill-pay > b { grid-column: 1; color: #1f2937; font-weight: 600; font-size: 10.5px; }
+.ld-bill-barcode { grid-column: 2; grid-row: 1 / span 2; width: 118px; height: 28px; background: repeating-linear-gradient(90deg, #1f2937 0 2px, transparent 2px 4px, #1f2937 4px 5px, transparent 5px 8px, #1f2937 8px 11px, transparent 11px 13px, #1f2937 13px 14px, transparent 14px 17px); }
+.ld-bill-pay small { grid-column: 1 / -1; font-size: 8.5px; color: #98a1b0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 아래 띠: 한전 워드마크(조각 "한국전력") + 둥근 수납인 */
+.ld-bill-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; min-height: 34px; }
+.ld-bill-brand { position: relative; display: flex; align-items: center; gap: 6px; }
+.ld-bill-mark { width: 20px; height: 20px; border-radius: 50%; background: var(--kb); position: relative; flex: 0 0 auto; }
+.ld-bill-mark::before { content: ""; position: absolute; left: 5.5px; top: 5.5px; width: 9px; height: 9px; border-radius: 50%; border: 2.4px solid #fff; border-right-color: transparent; transform: rotate(-35deg); }
+.ld-bill-mark::after { content: ""; position: absolute; left: 11px; top: 3.5px; width: 4.5px; height: 4.5px; border-radius: 50%; background: #e63946; }
+.ld-bill-brand-txt { display: inline-flex; align-items: baseline; line-height: 1.1; white-space: nowrap; }
+.ld-bill-brand-txt b { font-size: 13px; font-weight: 800; color: var(--kb); letter-spacing: -0.02em; }
+.ld-bill-seal { width: 54px; height: 54px; margin: -12px 4px -10px 0; color: var(--kb); opacity: 0.82; transform: rotate(-12deg); mix-blend-mode: multiply; flex: 0 0 auto; }
+.ld-bill-note { margin: 0; padding-top: 5px; border-top: 1px solid var(--kb-line); font-size: 8.5px; line-height: 1.45; color: #6b7a90; word-break: keep-all; }
 /* 조각: 날아갈 때 배경·그림자를 얻어 종이 조각처럼 보인다. 여백은 음수 마진으로 상쇄해 레이아웃을 바꾸지 않는다. */
 [data-frag] { display: inline-block; will-change: transform; transform-origin: center; padding: 2px 8px; margin: -2px -8px; border-radius: 6px; background: transparent; }
 [data-target] { display: inline-block; transform-origin: center; }
@@ -2452,7 +2471,7 @@ body.ld-dark .nav .nav-signout { color: #fff; }
 .ld-stage[data-mode="static"] .ld-scene,
 .ld-stage[data-mode="static"] .ld-laptop-col { position: relative; inset: auto; width: auto; height: auto; padding: 64px 28px; visibility: visible; }
 .ld-stage[data-mode="static"] .ld-scene--s0 { min-height: 80vh; background: #f2f4f8; color: var(--ink); display: grid; place-items: center; }
-.ld-stage[data-mode="static"] .ld-door, .ld-stage[data-mode="static"] .ld-vignette, .ld-stage[data-mode="static"] .ld-veil, .ld-stage[data-mode="static"] .ld-s0-copy--1, .ld-stage[data-mode="static"] .ld-bill-fold, .ld-stage[data-mode="static"] .ld-log-wait { display: none; }
+.ld-stage[data-mode="static"] .ld-door, .ld-stage[data-mode="static"] .ld-vignette, .ld-stage[data-mode="static"] .ld-veil, .ld-stage[data-mode="static"] .ld-s0-copy--1, .ld-stage[data-mode="static"] .ld-bill-fold, .ld-stage[data-mode="static"] .ld-bill-hand, .ld-stage[data-mode="static"] .ld-log-wait { display: none; }
 .ld-stage[data-mode="static"] .ld-s0-copy { position: static; transform: none; margin: 0 auto 32px; }
 .ld-stage[data-mode="static"] .ld-bill-anchor { position: static; display: block; inset: auto; padding: 0 28px 48px; background: #f2f4f8; }
 .ld-stage[data-mode="static"] .ld-bill-wrap { position: static; margin: 0 auto; }
@@ -2599,16 +2618,35 @@ body.ld-dark .nav .nav-signout { color: #fff; }
   .ld-tr-chart { width: 92vw; height: 36vh; top: 54%; }
   .ld-tr-stamp { right: 0; top: -10%; }
 }
-/* 낮은 화면(노트북 1280×800 등): 세로형 청구서가 카피 각주를 덮지 않도록 카피를 조이고 고지서를 조금 내린다 */
+/* 낮은 화면(노트북 1280×800 등): 청구서 클로즈업이 카피 각주를 덮지 않도록 카피를 조이고 고지서를 조금 내린다 */
 @media (max-height: 820px) and (min-width: 641px) {
   .ld-s0-copy { top: 78px; } /* 핀 상태에서 스테이지 위 68px 는 sticky 헤더 아래에 깔린다 */
   .ld-s0-copy h1, .ld-s0-copy h2 { font-size: clamp(28px, 3.6vw, 46px); }
   .ld-foot { margin-top: 10px; }
-  .ld-bill-anchor { padding-top: 19vh; }
+  .ld-bill-anchor { padding-top: 17vh; }
 }
 @media (max-width: 640px) {
   .ld-stage { min-height: 560px; }
   .ld-s0-copy { top: 96px; }
+  /* 좁은 화면의 가로형 청구서: 격자는 라벨 위·값 아래로 접고, 덜 중요한 칸은 숨겨 핵심(제목·금액·납기)이 읽히게 한다 */
+  .ld-bill-wrap { width: 94vw; }
+  .ld-bill-anchor { padding-top: 18vh; }
+  .ld-bill-body { gap: 6px; padding: 7px 9px 8px 8px; }
+  .ld-bill-band { grid-template-columns: 1fr; gap: 1px; padding: 6px 10px; text-align: center; }
+  .ld-bill-band b { font-size: 15px; }
+  .ld-bill-band small:first-child { display: none; }
+  .ld-bill-band small:last-child { text-align: center; }
+  .ld-bill-cells div { grid-template-columns: 1fr; }
+  .ld-bill-cells div:nth-child(n + 5) { display: none; }
+  .ld-bill-cells dt { border-right: 0; border-bottom: 1px solid var(--kb-line); font-size: 9px; padding: 2px 5px; }
+  .ld-bill-cells dd { font-size: 10px; padding: 3px 5px; }
+  .ld-bill-main { grid-template-columns: 1fr 1.1fr; gap: 8px; }
+  .ld-bill-lines { grid-template-columns: 1fr; }
+  .ld-bill-lines div:nth-child(2), .ld-bill-lines div:nth-child(3), .ld-bill-lines div:nth-child(4) { display: none; }
+  .ld-bill-amt > b[data-frag] { font-size: 26px; }
+  .ld-bill-barcode { width: 84px; height: 24px; }
+  .ld-bill-pay small, .ld-bill-note { display: none; }
+  .ld-bill-seal { width: 46px; height: 46px; }
   .ld-log-line { grid-template-columns: 1fr auto; }
   .ld-log-line .t { display: none; }
 }
