@@ -37,9 +37,9 @@ export interface ChapterMeta {
 export const CHAPTER_META: Record<Chapter, ChapterMeta> = {
   core: {
     label: "일상 자금 관리",
-    short: "코어",
-    caption: "들어오는 돈, 나가는 돈, 한도와 차단, 알릴 사람을 정합니다.",
-    withoutIt: "생활비와 공과금이 어떻게 나가야 하는지 아무도 모릅니다.",
+    short: "기본",
+    caption: "들어오는 돈, 나가는 돈, 한도와 막을 거래, 알릴 사람을 정해요.",
+    withoutIt: "생활비와 공과금이 어떻게 나가야 하는지 아무도 몰라요.",
     count: coreQuestions.length,
     minutes: "3분",
     required: true,
@@ -48,8 +48,8 @@ export const CHAPTER_META: Record<Chapter, ChapterMeta> = {
   invest: {
     label: "투자 원칙",
     short: "투자",
-    caption: "손대지 않을 자산, 위험자산 한도, 급락했을 때 어떻게 할지를 미리 정합니다.",
-    withoutIt: "목돈이 생기거나 시장이 급락했을 때 판단 근거가 없습니다.",
+    caption: "손대지 않을 자산, 값이 오르내리는 자산의 한도, 급락했을 때 할 일을 미리 정해요.",
+    withoutIt: "목돈이 생기거나 주가가 급락했을 때 판단할 기준이 없어요.",
     count: investQuestions.filter((q) => !q.showIf).length,
     minutes: "2분",
     required: false,
@@ -58,8 +58,8 @@ export const CHAPTER_META: Record<Chapter, ChapterMeta> = {
   estate: {
     label: "상속 의사",
     short: "상속",
-    caption: "누구에게 무엇을 남길지, 나누는 방법과 순서를 정합니다.",
-    withoutIt: "유고 시 법정상속 순위로만 처리됩니다.",
+    caption: "누구에게 무엇을 남길지, 나누는 방법과 순서를 정해요.",
+    withoutIt: "세상을 떠난 뒤 법정상속 순위로만 처리돼요.",
     count: estateQuestions.length,
     minutes: "5~10분",
     required: false,
@@ -68,8 +68,8 @@ export const CHAPTER_META: Record<Chapter, ChapterMeta> = {
   medical: {
     label: "의료·요양 기준",
     short: "의료·요양",
-    caption: "어디서 요양할지, 요양이 시작되면 지급액을 얼마나 올릴지, 의료비는 어디까지 쓸지를 정합니다.",
-    withoutIt: "요양시설 입소 시 비용 상한과 재원 순서를 정할 수 없습니다.",
+    caption: "어디서 요양할지, 요양이 시작되면 지급액을 얼마나 올릴지, 의료비는 어디까지 쓸지 정해요.",
+    withoutIt: "요양시설에 들어갈 때 비용 상한과 어떤 돈부터 쓸지 정할 수 없어요.",
     count: medicalQuestions.length,
     minutes: "2분",
     required: false,
@@ -78,8 +78,8 @@ export const CHAPTER_META: Record<Chapter, ChapterMeta> = {
   safe: {
     label: "금융 보호",
     short: "보호",
-    caption: "한도 안의 금액이라도 처음 보는 계좌·새벽·인증 실패가 겹치면 어떻게 할지를 정합니다.",
-    withoutIt: "보이스피싱 정황이 겹쳐도 한도만 넘지 않으면 그대로 나갑니다.",
+    caption: "한도 안의 금액이라도 처음 보는 계좌, 새벽, 인증 실패가 겹치면 어떻게 할지 정해요.",
+    withoutIt: "보이스피싱 정황이 겹쳐도 한도만 넘지 않으면 돈이 그대로 나가요.",
     count: safeQuestions.length,
     minutes: "2분",
     required: false,
@@ -266,17 +266,17 @@ export function flowMeta(p: Profile): { name: string; short: string; docs: strin
   if (!isUnified(p) && p.track) {
     const legacy: Record<Exclude<Track, "daily">, { name: string; short: string; docs: string[] }> = {
       future: {
-        name: "미래 판단력 저하 대비 (보류 트랙)",
+        name: "미래 판단력 저하 대비 (예전 인터뷰)",
         short: "미래 대비",
         docs: ["신탁설계서", "후견설계서", "지출설계서"],
       },
       caregiver: {
-        name: "가족을 대신한 준비 (보류 트랙)",
+        name: "가족을 대신한 준비 (예전 인터뷰)",
         short: "가족 대리",
         docs: ["후견설계서", "지출설계서"],
       },
       estate: {
-        name: "상속·증여 연계 (보류 트랙)",
+        name: "상속·증여 연계 (예전 인터뷰)",
         short: "상속 설계",
         docs: ["신탁설계서", "지출설계서"],
       },
@@ -288,9 +288,9 @@ export function flowMeta(p: Profile): { name: string; short: string; docs: strin
   for (const ch of declared) for (const d of CHAPTER_META[ch].docs) docs.add(d.replace(/ 제\d+조$/, ""));
   return {
     name: declared.length
-      ? `코어 + ${declared.map((ch) => CHAPTER_META[ch].short).join("·")}`
-      : "코어 (일상 자금 관리)",
-    short: "통합 설계",
+      ? `기본 + ${declared.map((ch) => CHAPTER_META[ch].short).join("·")}`
+      : "기본 질문 (일상 자금 관리)",
+    short: "내 설계",
     docs: [...docs],
   };
 }

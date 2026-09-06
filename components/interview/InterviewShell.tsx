@@ -7,7 +7,6 @@ import QuestionInput from "./QuestionInput";
 import ObservationCard from "./ObservationCard";
 import ChapterProposal from "./ChapterProposal";
 import FraudShieldPreview from "./FraudShieldPreview";
-import Badge from "../common/Badge";
 import { useAuth } from "../auth/AuthProvider";
 import {
   activeQuestions,
@@ -254,7 +253,7 @@ export default function InterviewShell() {
       {
         id: `ch-${ch}-${prev.length}`,
         role: "ai",
-        text: `${CHAPTER_META[ch].label} 영역으로 넘어갑니다. ${CHAPTER_META[ch].caption}`,
+        text: `${CHAPTER_META[ch].label} 영역으로 넘어가요. ${CHAPTER_META[ch].caption}`,
       },
     ]);
   }, []);
@@ -323,7 +322,7 @@ export default function InterviewShell() {
   const skip = useCallback((q: Question) => {
     setSkipped((prev) => new Set(prev).add(q.id));
     setBubbles((prev) =>
-      upsertBubble(prev, { id: `a-${q.id}`, role: "user", text: "건너뜀", qid: q.id, kind: "answer" }),
+      upsertBubble(prev, { id: `a-${q.id}`, role: "user", text: "건너뛰었어요", qid: q.id, kind: "answer" }),
     );
     setPending([]);
     setJumpTo(null);
@@ -351,7 +350,8 @@ export default function InterviewShell() {
       });
       // 답변·반영 안내 말풍선은 질문마다 하나씩이다. 고치면 그 자리에서 바뀐다.
       const ref = q.mapsTo[0];
-      const verb = wasAnswered ? "갱신했습니다" : "반영했습니다";
+      // "을(를) 반영했습니다" 는 문서 투다. 사람이 말하듯 "…에 적어 두었어요" 로 받는다.
+      const verb = wasAnswered ? "고쳐 두었어요" : "적어 두었어요";
       setBubbles((prev) =>
         upsertBubble(
           upsertBubble(prev, {
@@ -365,10 +365,10 @@ export default function InterviewShell() {
             id: `r-${q.id}`,
             role: "ai",
             text: ref
-              ? `${docName(ref.doc)} ${ref.clause} ${ref.label}을(를) ${verb}.`
+              ? `${docName(ref.doc)} ${ref.clause} ${ref.label}에 ${verb}.`
               : wasAnswered
-                ? "수정했습니다."
-                : "기록했습니다.",
+                ? "고쳐 두었어요."
+                : "적어 두었어요.",
             qid: q.id,
             kind: "reply",
           },
@@ -419,7 +419,7 @@ export default function InterviewShell() {
   if (!profile || !profile.track) {
     return (
       <div className="shell-wide" style={{ padding: "80px 0" }}>
-        <p className="muted">설계 정보를 불러오는 중입니다…</p>
+        <p className="muted">설계 정보를 불러오고 있어요…</p>
       </div>
     );
   }
@@ -539,25 +539,25 @@ export default function InterviewShell() {
                   ? "다음 영역 고르기"
                   : current
                     ? current.section
-                    : "모든 질문 완료"}{" "}
+                    : "질문을 다 마쳤어요"}{" "}
                 · {headline}
               </div>
             </div>
           </div>
-          {current && !proposing && <Badge tone="info">{current.id}</Badge>}
+          {/* 질문 번호(A05 같은 내부 id)는 사람에게 뜻이 없어 보이지 않는다. 딥링크는 ?q= 로 그대로 동작한다. */}
         </div>
 
         {unified && !ledgerState.ledger && ledgerNudge && (
           <div className="iv-nudge">
             <span>
-              10년 금융 이력을 연동하면 답변 옆에 실제 습관이 함께 표시됩니다.{" "}
-              <Link href="/ledger">이력 연동 →</Link>
+              10년치 금융 이력을 불러오면 답 옆에 실제 습관이 함께 보여요.{" "}
+              <Link href="/ledger">이력 불러오기 →</Link>
             </span>
             <button
               type="button"
               className="iv-nudge-close"
               onClick={() => setLedgerNudge(false)}
-              aria-label="이력 연동 안내 닫기"
+              aria-label="이력 안내 닫기"
             >
               ×
             </button>
@@ -584,7 +584,7 @@ export default function InterviewShell() {
                 {b.helper && <div className="helper">{b.helper}</div>}
                 {b.source && (
                   <div className="src">
-                    {b.source === "llm" ? "AI 추출" : "규칙 추출"}
+                    {b.source === "llm" ? "AI가 읽었어요" : "규칙으로 읽었어요"}
                   </div>
                 )}
               </div>
@@ -595,7 +595,7 @@ export default function InterviewShell() {
               <div className="avatar" aria-hidden>
                 NX
               </div>
-              <div className="bubble muted">답변을 해석하고 있습니다…</div>
+              <div className="bubble muted">답을 읽고 있어요…</div>
             </div>
           )}
         </div>
@@ -608,7 +608,7 @@ export default function InterviewShell() {
                   <button
                     onClick={() => applyChip(e)}
                     style={{ padding: 0, fontSize: "inherit", opacity: 1 }}
-                    title="이 값으로 확정"
+                    title="이 값으로 정하기"
                   >
                     {e.label}
                   </button>
@@ -618,7 +618,7 @@ export default function InterviewShell() {
                 </span>
               ))}
               <span className="muted" style={{ fontSize: 12, alignSelf: "center" }}>
-                눌러서 확정하거나 ×로 지우세요
+                눌러서 정하거나 ×로 지워 주세요
               </span>
             </div>
           )}
@@ -661,9 +661,9 @@ export default function InterviewShell() {
               </div>
               <p className="iv-hint">
                 {unified && remainingChapters.length === 0
-                  ? "모든 영역에 답하셨습니다. "
+                  ? "모든 영역에 답하셨어요. "
                   : ""}
-                오른쪽 조항이나 왼쪽 섹션을 누르면 그 질문으로 돌아가 답을 고칠 수 있습니다.
+                오른쪽 조항이나 왼쪽 목록을 누르면 그 질문으로 돌아가 답을 고칠 수 있어요.
               </p>
             </>
           ) : (
@@ -675,7 +675,7 @@ export default function InterviewShell() {
                     className="btn ghost sm"
                     onClick={() => prevQuestion && goTo(prevQuestion.id)}
                     disabled={!prevQuestion}
-                    title={prevQuestion ? `${prevQuestion.id} 로 돌아가기` : "첫 질문입니다"}
+                    title={prevQuestion ? "이전 질문으로 돌아가기" : "첫 질문이에요"}
                   >
                     ← 이전 질문
                   </button>
@@ -690,7 +690,7 @@ export default function InterviewShell() {
                         다음 질문 →
                       </button>
                       <span className="iv-editing">
-                        이미 답하신 질문입니다
+                        이미 답하신 질문이에요
                         <button type="button" className="btn ghost sm" onClick={resume}>
                           작성하던 곳으로 ↩
                         </button>
@@ -756,8 +756,7 @@ export default function InterviewShell() {
         <h4>작성 중인 조항</h4>
         {feed.length === 0 ? (
           <p className="feed-empty">
-            답변할 때마다 이곳에 조항이 쌓입니다. 지금 하고 계신 것은 설문 작성이 아니라 문서
-            작성입니다.
+            답할 때마다 여기에 조항이 쌓여요. 지금 하시는 것은 설문이 아니라 문서 작성이에요.
           </p>
         ) : (
           feed.map((f) => (
@@ -766,7 +765,7 @@ export default function InterviewShell() {
               className={`feed-item set${current?.id === f.qid ? " here" : ""}`}
               key={f.key}
               onClick={() => goTo(f.qid)}
-              title={`${f.qid} 질문으로 돌아가 이 조항을 고칩니다`}
+              title="이 조항의 질문으로 돌아가 고쳐요"
             >
               <div className="ref">
                 {f.ref}

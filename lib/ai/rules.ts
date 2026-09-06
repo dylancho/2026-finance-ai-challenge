@@ -506,7 +506,7 @@ export function ruleExtract(input: string, q: Question): RuleOutcome {
         extractions: [
           {
             qid: q.id,
-            label: `${shorten(q.prompt)}: 기록됨`,
+            label: `${shorten(q.prompt)}: 적어 둠`,
             value: { kind: "open", text },
             confidence: 1,
           },
@@ -612,12 +612,12 @@ function shorten(prompt: string): string {
 
 export function acknowledge(extracted: Extraction[], q: Question): string {
   if (!extracted.length) {
-    return "말씀 주신 내용을 그대로 기록해 두겠습니다. 아래 보기 중에서 골라 주시면 설계서 조항으로 바로 반영할 수 있어요.";
+    return "말씀하신 내용을 그대로 적어 둘게요. 아래 보기 중에서 골라 주시면 설계서 조항에 바로 넣을 수 있어요.";
   }
   const first = extracted[0];
   const clause = q.mapsTo[0];
   const where = clause ? `${docName(clause.doc)} ${clause.clause} ${clause.label}` : "설계서";
-  return `${first.label.replace(/^[^:]+:\s*/, "")} — 이렇게 이해했습니다. ${where}에 반영해 둘게요.`;
+  return `${first.label.replace(/^[^:]+:\s*/, "")}, 이렇게 이해했어요. ${where}에 적어 둘게요.`;
 }
 
 export function docName(doc: string): string {

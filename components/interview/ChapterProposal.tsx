@@ -34,11 +34,11 @@ export default function ChapterProposal({ profile, focus, onPick }: Props) {
 
   return (
     <div className="chapter-propose fade-in">
-      <div className="eyebrow">기본 설계 완료</div>
+      <div className="eyebrow">기본 질문 끝</div>
       <h2>더 정해 두고 싶은 영역이 있나요?</h2>
       <p className="section-lede">
-        지금까지 답하신 내용으로 지출설계서는 이미 만들어졌습니다. 아래는 선택입니다.
-        건너뛰어도 되지만, 건너뛴 영역은 설계서에 <b>아직 정하지 않은 것</b>으로 남습니다.
+        지금까지 답하신 내용으로 지출설계서는 이미 만들어졌어요. 아래는 선택이에요.
+        건너뛰어도 되지만, 건너뛴 영역은 설계서에 <b>아직 정하지 않은 것</b>으로 남아요.
       </p>
 
       {done.length > 0 && (

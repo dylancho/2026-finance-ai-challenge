@@ -160,7 +160,7 @@ function MultiInput({
         disabled={!values.length}
         onClick={() => onSubmit({ kind: "multi", values, amounts })}
       >
-        {values.length ? `${values.length}개 선택 완료` : "항목을 골라 주세요"}
+        {values.length ? `이 ${values.length}개로 정하기` : "항목을 골라 주세요"}
       </button>
     </>
   );
@@ -225,7 +225,7 @@ function AmountInput({
         </div>
       )}
       <button className="btn" onClick={() => onSubmit({ kind: "amount", value })}>
-        {isCount ? `${value}명으로 확정` : `${won(value)}으로 확정`}
+        {isCount ? `${value}명으로 정하기` : `${won(value)}으로 정하기`}
       </button>
     </>
   );
@@ -267,7 +267,7 @@ function PersonInput({
         ))}
       </div>
       <div className="multi-amount-row" style={{ marginBottom: 12 }}>
-        <label htmlFor={`nm-${q.id}`}>이름 (선택 — 설계서에 표기됩니다)</label>
+        <label htmlFor={`nm-${q.id}`}>이름 (선택, 설계서에 적혀요)</label>
         <input
           id={`nm-${q.id}`}
           className="text-input"
@@ -286,7 +286,7 @@ function PersonInput({
           })
         }
       >
-        확정
+        이대로 정하기
       </button>
     </>
   );
@@ -364,7 +364,7 @@ function AllocationInput({
           disabled={!valid.length}
           onClick={() => onSubmit({ kind: "allocation", rows: valid })}
         >
-          {valid.length}건 확정
+          {valid.length}건으로 정하기
         </button>
       </div>
     </>
@@ -393,7 +393,7 @@ function OpenInput({
       <textarea
         rows={3}
         value={text}
-        placeholder={q.placeholder ?? "자유롭게 적어 주세요."}
+        placeholder={q.placeholder ?? "편하게 적어 주세요."}
         aria-label={q.prompt}
         onChange={(e) => setText(e.target.value)}
       />
@@ -402,7 +402,7 @@ function OpenInput({
         disabled={!text.trim() && !q.optional}
         onClick={() => onSubmit({ kind: "open", text: text.trim() })}
       >
-        {text.trim() ? "기록" : "건너뛰기"}
+        {text.trim() ? "적어 두기" : "건너뛰기"}
       </button>
     </div>
   );

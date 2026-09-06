@@ -35,7 +35,7 @@ export default function LedgerChart({ ledger }: Props) {
     <div className="lg-chart">
       <div className="lg-chart-head">
         <span className="mono">
-          {ledger.startYear} — {ledger.startYear + ledger.years - 1}
+          {ledger.startYear}~{ledger.startYear + ledger.years - 1}
         </span>
         <span className="muted">월 생활비 · 최대 {won(max)}</span>
       </div>
@@ -59,7 +59,7 @@ export default function LedgerChart({ ledger }: Props) {
           const mark = lates.has(m.ym)
             ? { cls: "late", ch: "!", label: "연체" }
             : incidents.has(m.ym)
-              ? { cls: "err", ch: "?", label: "입력 오류" }
+              ? { cls: "err", ch: "?", label: "잔액 착오" }
               : sells.has(m.ym)
                 ? { cls: "sell", ch: "▼", label: "매도" }
                 : buys.has(m.ym)
@@ -82,10 +82,10 @@ export default function LedgerChart({ ledger }: Props) {
           className="lg-span base"
           style={{ flex: ledger.baselineYears }}
         >
-          베이스라인 구간 {ledger.baselineYears}년
+          평소 기준으로 삼은 {ledger.baselineYears}년
         </span>
         <span className="lg-span" style={{ flex: ledger.years - ledger.baselineYears }}>
-          관측 구간 {ledger.years - ledger.baselineYears}년
+          평소와 비교한 {ledger.years - ledger.baselineYears}년
         </span>
       </div>
 
@@ -97,10 +97,10 @@ export default function LedgerChart({ ledger }: Props) {
           <span className="sell">▼</span> 매도
         </li>
         <li>
-          <span className="err">?</span> 잔액 오류 · 중복 이체
+          <span className="err">?</span> 잔액 착오 · 같은 곳에 두 번 이체
         </li>
         <li>
-          <span className="late">!</span> 고정비 연체
+          <span className="late">!</span> 공과금 밀림
         </li>
       </ul>
     </div>

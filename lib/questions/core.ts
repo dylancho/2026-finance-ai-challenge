@@ -8,10 +8,13 @@ import type { Question } from "../types";
  *
  * 배열 순서가 곧 인터뷰 순서다. 들어오는 돈 → 갖고 있는 돈 → 나가는 돈 → 생활비
  * → 지급 방식 → 보호 장치 → 사람 → 예외 경로 순으로 물어, 현황에서 선언으로
- * 서사가 이어지게 한다. /ledger 에서 이력을 연동해 두었다면(선택, 2026-09-06 부터
+ * 서사가 이어지게 한다. /ledger 에서 이력을 불러와 두었다면(선택, 2026-09-06 부터
  * 게이트와 인터뷰 사이가 아니라 헤더 메뉴에서 들어간다) "지금까지 해온 것"이
- * 답변 옆에 대조군으로 함께 표시된다.
+ * 답변 옆에 비교용으로 함께 표시된다.
  * 질문 ID 는 설계 엔진·대조 규칙이 문자열로 참조하므로 재번호하지 않는다.
+ *
+ * 문구는 docs/writing-style.md 를 따른다 — AI 인터뷰어가 차분히 묻는 해요체, 한 문장에
+ * 생각 하나. mapsTo.label 은 문서 조항 이름이라 그대로 둔다.
  */
 export const coreQuestions: Question[] = [
   {
@@ -20,8 +23,7 @@ export const coreQuestions: Question[] = [
     chapter: "core",
     section: "현황",
     prompt: "매달 들어오는 돈은 대략 얼마인가요?",
-    helper:
-      "연금·임대료·이자·가족 지원을 모두 합한 금액입니다. 나가는 돈과 비교할 기준이 됩니다.",
+    helper: "연금, 임대료, 이자, 가족이 보내 주는 돈을 모두 합한 금액이에요. 나가는 돈과 비교할 기준이 돼요.",
     type: "amount",
     min: 0,
     max: 10_000_000,
@@ -35,8 +37,7 @@ export const coreQuestions: Question[] = [
     chapter: "core",
     section: "현황",
     prompt: "지금 바로 쓸 수 있는 돈(예금·현금)은 대략 얼마인가요?",
-    helper:
-      "이 금액으로 몇 년 버틸 수 있는지 그래프를 그립니다. 부동산처럼 당장 현금화하기 어려운 것은 빼고 적어 주세요.",
+    helper: "이 금액으로 몇 년을 버틸 수 있는지 그래프로 보여 드려요. 부동산처럼 당장 현금으로 바꾸기 어려운 것은 빼 주세요.",
     type: "amount",
     optional: true,
     min: 0,
@@ -50,9 +51,8 @@ export const coreQuestions: Question[] = [
     track: "daily",
     chapter: "core",
     section: "현황",
-    prompt: "매달 반드시 빠져나가야 하는 돈은 무엇인가요?",
-    helper:
-      "여기서 고른 항목이 자동이체 매트릭스의 각 행이 됩니다. 금액은 대략이어도 괜찮아요.",
+    prompt: "매달 꼭 빠져나가야 하는 돈은 무엇인가요?",
+    helper: "여기서 고른 항목이 자동이체 목록의 한 줄씩이 돼요. 금액은 대략이어도 괜찮아요.",
     type: "multi",
     withAmount: true,
     options: [
@@ -66,7 +66,7 @@ export const coreQuestions: Question[] = [
       { value: "subscription", label: "정기 구독 서비스" },
       { value: "care", label: "요양·간병 비용" },
       { value: "hospital", label: "병원 정기 치료비" },
-      { value: "support", label: "가족 정기 지원" },
+      { value: "support", label: "가족에게 정기적으로 보내는 돈" },
     ],
     mapsTo: [{ doc: "expense", clause: "제2조", label: "자동이체 매트릭스" }],
   },
@@ -76,8 +76,7 @@ export const coreQuestions: Question[] = [
     chapter: "core",
     section: "현황",
     prompt: "고정지출 말고, 생활비는 매달 얼마면 충분할까요?",
-    helper:
-      "식비·교통비처럼 손에 쥐고 쓰는 돈입니다. 병원비는 뒤에서 따로 설계하니 여기 넣지 않아도 됩니다.",
+    helper: "식비나 교통비처럼 손에 쥐고 쓰는 돈이에요. 병원비는 뒤에서 따로 정하니 여기에 넣지 않아도 돼요.",
     type: "amount",
     min: 300_000,
     max: 8_000_000,
@@ -90,17 +89,17 @@ export const coreQuestions: Question[] = [
     track: "daily",
     chapter: "core",
     section: "지급 방식",
-    prompt: "생활비를 어떤 주기로 받고 싶으세요?",
-    helper: "한 번에 많이 받으면 편하지만, 나눠 받으면 사기 피해 규모가 줄어듭니다.",
+    prompt: "생활비는 얼마 만에 한 번씩 받고 싶으세요?",
+    helper: "한 번에 많이 받으면 편해요. 나눠 받으면 사기를 당해도 피해가 줄어요.",
     type: "choice",
     options: [
-      { value: "monthly", label: "매달 1일에 한 번", hint: "가장 일반적" },
+      { value: "monthly", label: "매달 1일에 한 번", hint: "가장 흔해요" },
       { value: "biweekly", label: "2주에 한 번" },
-      { value: "weekly", label: "매주", hint: "피해 규모 최소화" },
+      { value: "weekly", label: "매주", hint: "피해가 가장 적어요" },
       {
         value: "ondemand",
         label: "필요할 때 청구해서",
-        warn: "청구를 잊으면 생활비가 끊깁니다. 정기 지급에 청구를 얹는 방식을 권합니다.",
+        warn: "청구를 잊으면 생활비가 끊겨요. 정기 지급에 청구를 얹는 방식이 안전해요.",
       },
     ],
     mapsTo: [{ doc: "expense", clause: "제1조", label: "지급 주기" }],
@@ -110,19 +109,18 @@ export const coreQuestions: Question[] = [
     track: "daily",
     chapter: "core",
     section: "지급 방식",
-    prompt: "자동이체가 잔액 부족으로 실패하면 어떻게 할까요?",
-    helper:
-      "연체는 신용도와 공과금 할증으로 이어집니다. 실패 시 조치를 미리 정해두는 항목입니다.",
+    prompt: "잔액이 모자라 자동이체가 실패하면 어떻게 할까요?",
+    helper: "밀리면 신용도가 떨어지고 공과금에 가산금이 붙어요. 실패했을 때 할 일을 미리 정해 두는 항목이에요.",
     type: "choice",
     options: [
-      { value: "auto_cover", label: "예비계좌에서 자동으로 채워 결제", hint: "권장" },
-      { value: "notify_guardian", label: "지정한 사람에게도 함께 알리기" },
+      { value: "auto_cover", label: "예비계좌에서 자동으로 채워서 내기", hint: "권장" },
+      { value: "notify_guardian", label: "정해 둔 사람에게도 함께 알리기" },
       {
         value: "notify_only",
         label: "나에게 알림만 보내기",
-        warn: "알림을 확인하지 못하는 날이 바로 위험한 날입니다.",
+        warn: "알림을 확인하지 못하는 날이 바로 위험한 날이에요.",
       },
-      { value: "hold", label: "결제를 보류하고 승인 요청" },
+      { value: "hold", label: "결제를 멈추고 승인 요청하기" },
     ],
     mapsTo: [{ doc: "expense", clause: "제2조", label: "이체 실패 시 조치" }],
   },
@@ -131,9 +129,8 @@ export const coreQuestions: Question[] = [
     track: "daily",
     chapter: "core",
     section: "보호 장치",
-    prompt: "한 번에 이체할 수 있는 최대 금액을 얼마로 할까요?",
-    helper:
-      "이 금액을 넘는 이체는 보류되고 확인 절차를 거칩니다. 1일 한도(1회의 2배)와 월 한도는 여기서 자동으로 산정해 제3조에 채웁니다.",
+    prompt: "한 번에 보낼 수 있는 돈은 최대 얼마로 할까요?",
+    helper: "이 금액을 넘는 이체는 멈추고 확인을 거쳐요. 하루 한도(1회의 2배)와 한 달 한도는 여기서 자동으로 계산해 제3조에 넣어요.",
     type: "amount",
     min: 100_000,
     max: 30_000_000,
@@ -146,9 +143,8 @@ export const coreQuestions: Question[] = [
     track: "daily",
     chapter: "core",
     section: "보호 장치",
-    prompt: "다음 거래는 기본으로 막아 둡니다. 빼고 싶은 것이 있나요?",
-    helper:
-      "선택된 항목이 이상거래 룰셋에서 활성화됩니다. 빼면 그 거래는 그대로 통과합니다.",
+    prompt: "다음 거래는 기본으로 막아 두려고 해요. 빼고 싶은 것이 있나요?",
+    helper: "고른 항목은 보호 규칙에서 켜져요. 빼면 그 거래는 그대로 나가요.",
     type: "multi",
     defaults: [
       "new_payee",
@@ -161,9 +157,9 @@ export const coreQuestions: Question[] = [
     ],
     options: [
       { value: "new_payee", label: "처음 보는 계좌로 큰 금액 보내기" },
-      { value: "night", label: "밤 11시~새벽 6시 사이 고액 이체" },
-      { value: "loan", label: "대출·카드 현금서비스 실행" },
-      { value: "remote", label: "원격제어 앱이 켜진 상태의 이체" },
+      { value: "night", label: "밤 11시부터 새벽 6시 사이 큰 금액 이체" },
+      { value: "loan", label: "대출·카드 현금서비스 받기" },
+      { value: "remote", label: "원격제어 앱이 켜진 상태에서 이체" },
       { value: "overseas", label: "해외 송금" },
       { value: "deposit_break", label: "정기예금 중도해지" },
       { value: "burst", label: "월 지급액의 3배가 넘는 인출·이체" },
@@ -175,9 +171,8 @@ export const coreQuestions: Question[] = [
     track: "daily",
     chapter: "core",
     section: "사람",
-    prompt: "이상 상황이 생기면 누구에게 알릴까요?",
-    helper:
-      "본인 외 최소 1명을 두는 것을 권합니다. 본인이 판단하기 어려운 상황이 바로 위험한 상황이기 때문입니다.",
+    prompt: "평소와 다른 일이 생기면 누구에게 알릴까요?",
+    helper: "나 말고 한 사람은 더 두는 편이 좋아요. 내가 판단하기 어려운 때가 바로 위험한 때예요.",
     type: "person",
     mapsTo: [{ doc: "expense", clause: "제5조", label: "알림 대상" }],
   },
@@ -186,9 +181,8 @@ export const coreQuestions: Question[] = [
     track: "daily",
     chapter: "core",
     section: "사람",
-    prompt: "그분이 12시간 안에 응답하지 못하면, 다음으로 누구에게 연락할까요?",
-    helper:
-      "없으면 해당 거래는 자동 차단됩니다. 차단이 늘 안전한 것은 아니어서, 두 번째 사람을 두면 막힘과 방치를 함께 줄일 수 있습니다.",
+    prompt: "그분이 12시간 안에 답하지 못하면, 다음으로 누구에게 연락할까요?",
+    helper: "없으면 그 거래는 자동으로 막혀요. 막는 것이 늘 안전하지는 않아요. 두 번째 사람을 두면 막힘과 방치를 함께 줄일 수 있어요.",
     type: "person",
     optional: true,
     mapsTo: [{ doc: "expense", clause: "제5조", label: "2차 승인자(감독)" }],
@@ -198,19 +192,18 @@ export const coreQuestions: Question[] = [
     track: "daily",
     chapter: "core",
     section: "예외 경로",
-    prompt: "병원비처럼 갑작스러운 큰 지출은 어떻게 처리할까요?",
-    helper:
-      "막기만 하면 정작 필요할 때 돈이 안 나갑니다. 예외 경로를 함께 설계합니다.",
+    prompt: "병원비처럼 갑자기 큰돈이 필요하면 어떻게 할까요?",
+    helper: "막기만 하면 정작 필요할 때 돈이 안 나가요. 예외로 나가는 길을 함께 정해요.",
     type: "choice",
     options: [
       {
         value: "reserve",
-        label: "의료예비계좌를 따로 만들어 거기서 집행",
+        label: "의료예비계좌를 따로 만들어 거기서 내기",
         hint: "권장",
       },
-      { value: "auto_within", label: "정해둔 한도 안에서는 자동으로 집행" },
-      { value: "approve", label: "지정한 사람의 승인을 받고 집행" },
-      { value: "notify_after", label: "먼저 집행하고 바로 통보" },
+      { value: "auto_within", label: "정해 둔 한도 안에서는 자동으로 내기" },
+      { value: "approve", label: "정해 둔 사람의 승인을 받고 내기" },
+      { value: "notify_after", label: "먼저 내고 바로 알리기" },
     ],
     mapsTo: [
       { doc: "expense", clause: "제1조", label: "의료예비계좌" },

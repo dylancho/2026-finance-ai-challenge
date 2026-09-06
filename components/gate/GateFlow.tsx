@@ -32,18 +32,18 @@ const CAPACITY_LEVELS: {
 }[] = [
   {
     value: "full",
-    title: "네, 스스로 판단하고 결정할 수 있습니다",
-    desc: "금융 업무와 계약 내용을 이해하고, 본인의 뜻에 따라 직접 결정할 수 있습니다.",
+    title: "네, 스스로 판단하고 결정할 수 있어요",
+    desc: "금융 업무와 계약 내용을 이해하고, 내 뜻대로 직접 결정할 수 있어요.",
   },
   {
     value: "declining",
-    title: "최근 기억이나 판단이 예전과 다르게 느껴집니다",
-    desc: "아직 직접 결정할 수 있지만, 기억력이나 판단력의 변화를 느끼고 있어 미리 준비하고 싶습니다.",
+    title: "최근 기억이나 판단이 예전 같지 않다고 느껴요",
+    desc: "아직 직접 결정할 수 있지만, 기억력이나 판단력이 달라진 것 같아 미리 준비하고 싶어요.",
   },
   {
     value: "diagnosed",
-    title: "인지장애·치매 등을 진단받았습니다",
-    desc: "진단을 받은 상태이며, 현재 가능한 범위 안에서 미리 준비할 방법을 확인하고 싶습니다.",
+    title: "인지장애나 치매 진단을 받았어요",
+    desc: "진단을 받은 상태예요. 지금 가능한 범위 안에서 준비할 방법을 알고 싶어요.",
   },
 ];
 
@@ -58,8 +58,8 @@ const INCIDENT_OPTIONS: {
   },
   {
     value: true,
-    title: "이미 금융 문제나 피해가 발생했습니다",
-    desc: "사기 피해, 설명하기 어려운 이체, 계좌 접근 문제 등 실제 금융 문제가 발생했습니다.",
+    title: "이미 금융 문제나 피해가 생겼어요",
+    desc: "사기 피해, 설명하기 어려운 이체, 계좌에 접근하지 못하는 문제 같은 일이 실제로 있었어요.",
   },
 ];
 
@@ -109,20 +109,20 @@ export default function GateFlow() {
     <div className="gate shell-wide">
       <div className="fade-in gate-center">
         <div className="gate-step">
-          약 {CHAPTER_META.core.count}문항 · {CHAPTER_META.core.minutes}, 필요한 부분만 더
+          기본 질문 {CHAPTER_META.core.count}개 · 약 {CHAPTER_META.core.minutes}. 필요한 부분만 더 답해요
         </div>
-        <h1>지금 상태를 알려주세요</h1>
+        <h1>지금 상태를 알려 주세요</h1>
         <p className="gate-lede">
-          이 답변에 따라 어떤 제도가 가능한지가 달라집니다.
+          이 답에 따라 쓸 수 있는 제도가 달라져요.
           <br />
-          신탁계약과 임의후견계약은 본인의 의사능력을 전제로 하기 때문에,
+          신탁계약과 임의후견계약은 본인이 스스로 결정할 수 있을 때만 맺을 수 있어요.
           <br />
-          시점을 놓치면 선택지가 법정후견으로 좁아집니다.
+          시점을 놓치면 선택지가 법정후견으로 좁아져요.
         </p>
         {focus && (
           <p className="gate-focus mono">
-            {CHAPTER_META[focus].label}을(를) 고르셨네요. 기본 질문이 끝나면 이 영역부터
-            이어서 여쭤봅니다.
+            {CHAPTER_META[focus].label} 영역을 고르셨네요. 기본 질문이 끝나면 이 영역부터
+            이어서 여쭤볼게요.
           </p>
         )}
 
@@ -144,7 +144,7 @@ export default function GateFlow() {
         </div>
 
         <div className="gate-subq">
-          <h2 className="gate-subq-title">2. 이미 금융 문제가 발생했나요?</h2>
+          <h2 className="gate-subq-title">2. 이미 금융 문제가 생긴 적이 있나요?</h2>
           <div className="gate-cards stacked">
             {INCIDENT_OPTIONS.map((o) => (
               <button
@@ -162,24 +162,24 @@ export default function GateFlow() {
 
         {blocking && (
           <div className="gate-warn fade-in" role="alert">
-            <h4>먼저 알려드릴 것이 있습니다</h4>
+            <h4>먼저 알려 드릴 것이 있어요</h4>
             <p>
-              의사능력이 이미 흠결된 상태에서는 새로운 신탁계약이나 임의후견계약을 체결하기
-              어렵습니다. 나중에 그 계약의 효력이 다투어질 수 있기 때문입니다.
+              스스로 결정하기 어려운 상태에서는 새로 신탁계약이나 임의후견계약을 맺기 어려워요.
+              나중에 그 계약이 유효한지 다툼이 생길 수 있어서예요.
               <br />
-              NEXT는 이 경우 <b>법정후견(한정후견·성년후견) 준비</b>와{" "}
-              <b>지금 바로 가능한 계좌 보호 조치</b>를 중심으로 설계서를 만듭니다. 신탁설계서는
-              생성되지 않고, 대신 그 이유와 대안을 보여드립니다.
+              이 경우 NEXT는 <b>법정후견(한정후견·성년후견) 준비</b>와{" "}
+              <b>지금 바로 할 수 있는 계좌 보호 조치</b>를 중심으로 설계서를 만들어요.
+              신탁설계서는 만들지 않고, 대신 그 이유와 다른 길을 보여 드려요.
             </p>
           </div>
         )}
 
         {capacityLevel === "declining" && !blocking && (
           <div className="gate-warn fade-in">
-            <h4>시간이 많지 않을 수 있습니다</h4>
+            <h4>시간이 많지 않을 수 있어요</h4>
             <p>
-              아직 가능한 단계입니다. 다만 이 시기에 체결한 계약은 나중에 의사능력을 두고
-              다투어질 수 있으므로, 계약 시 전문의 소견서를 함께 받아두는 것이 일반적입니다.
+              아직 가능한 때예요. 다만 이 시기에 맺은 계약은 나중에 판단 능력을 두고 다툼이
+              생길 수 있어요. 그래서 계약할 때 전문의 소견서를 함께 받아 두는 것이 보통이에요.
             </p>
           </div>
         )}
@@ -189,7 +189,7 @@ export default function GateFlow() {
             ← 홈으로
           </Link>
           <button className="btn" disabled={!canFinish} onClick={finish}>
-            {blocking ? "가능한 경로로 설계 시작" : "설계 시작"}
+            {blocking ? "가능한 길로 시작하기" : "인터뷰 시작하기"}
           </button>
         </div>
       </div>

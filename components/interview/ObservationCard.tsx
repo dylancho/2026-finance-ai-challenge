@@ -13,15 +13,16 @@ import type { Observation } from "../../lib/ledger";
  */
 
 const TONE: Record<Contrast["agreement"], { tone: "ok" | "warn" | "danger"; label: string }> = {
-  aligned: { tone: "ok", label: "이력과 일치" },
-  tension: { tone: "warn", label: "이력과 어긋남" },
-  contradiction: { tone: "danger", label: "이력과 모순" },
+  aligned: { tone: "ok", label: "실제와 같아요" },
+  tension: { tone: "warn", label: "실제와 조금 달라요" },
+  contradiction: { tone: "danger", label: "실제와 많이 달라요" },
 };
 
+/** 해소 뒤 한 줄. "선언 유지(으)로 정하셨습니다" 처럼 조사를 붙이지 않고 문장으로 둔다. */
 const RESOLUTION_LABEL: Record<Resolution, string> = {
-  declared: "선언 유지",
-  observed: "이력대로 수정",
-  adjusted: "절충",
+  declared: "내가 정한 대로 두기로 했어요",
+  observed: "실제로 해 온 대로 고쳤어요",
+  adjusted: "중간으로 정했어요",
 };
 
 interface Props {
@@ -36,7 +37,7 @@ export default function ObservationCard({ observation, contrast, onResolve }: Pr
   return (
     <div className={`obs-card${contrast ? ` ${contrast.agreement}` : ""}`}>
       <header className="obs-head">
-        <h4>{observation?.title ?? "이력 대조"}</h4>
+        <h4>{observation?.title ?? "실제와 비교"}</h4>
         {contrast && (
           <Badge tone={TONE[contrast.agreement].tone}>
             {TONE[contrast.agreement].label}
@@ -59,28 +60,28 @@ export default function ObservationCard({ observation, contrast, onResolve }: Pr
         <div className="obs-verdict">
           <p>{contrast.reason}</p>
           {contrast.resolution ? (
-            <p className="muted mono">{RESOLUTION_LABEL[contrast.resolution]}(으)로 정하셨습니다</p>
+            <p className="muted mono">{RESOLUTION_LABEL[contrast.resolution]}</p>
           ) : (
             <>
               <div className="obs-actions">
                 <button className="btn outline sm" onClick={() => onResolve(contrast, "declared")}>
-                  선언 유지
+                  내가 정한 대로
                 </button>
                 {contrast.observedValue && (
                   <button
                     className="btn outline sm"
                     onClick={() => onResolve(contrast, "observed")}
                   >
-                    이력대로
+                    실제대로
                   </button>
                 )}
                 <button className="btn sm" onClick={() => onResolve(contrast, "adjusted")}>
-                  절충
+                  중간으로
                 </button>
               </div>
               <p className="obs-defer">
-                지금 정하지 않아도 됩니다.{" "}
-                <Link href="/plan">설계서의 이력 대조 탭</Link>에서 한꺼번에 볼 수 있습니다.
+                지금 정하지 않아도 돼요. <Link href="/plan">설계서</Link>에서 한꺼번에 볼 수
+                있어요.
               </p>
             </>
           )}
@@ -89,7 +90,7 @@ export default function ObservationCard({ observation, contrast, onResolve }: Pr
 
       {!contrast && (
         <p className="obs-defer">
-          답하시면 이 이력과 맞춰 봅니다. 어긋나도 답이 틀린 것은 아닙니다.
+          답하시면 이 이력과 맞춰 봐요. 어긋나도 답이 틀린 것은 아니에요.
         </p>
       )}
     </div>

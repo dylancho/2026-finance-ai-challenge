@@ -63,7 +63,7 @@ interface SignalSpec {
 const SIGNALS: SignalSpec[] = [
   {
     key: "late_payment",
-    label: "정기 공과금 연체",
+    label: "공과금 밀림",
     weight: 0.26,
     observe: (ms) => ms.reduce((a, m) => a + m.latePayments, 0),
     base: (b) => b.latePerYear,
@@ -72,7 +72,7 @@ const SIGNALS: SignalSpec[] = [
   },
   {
     key: "balance_error",
-    label: "잔액 확인 반복 · 이체 취소",
+    label: "잔액 재확인 · 이체 취소",
     weight: 0.24,
     observe: (ms, l) => {
       const from = ms[0]?.ym ?? "";
@@ -86,7 +86,7 @@ const SIGNALS: SignalSpec[] = [
   },
   {
     key: "duplicate_transfer",
-    label: "동일 수취인 중복 이체",
+    label: "같은 사람에게 두 번 보낸 이체",
     weight: 0.2,
     observe: (ms, l) => {
       const from = ms[0]?.ym ?? "";
@@ -100,7 +100,7 @@ const SIGNALS: SignalSpec[] = [
   },
   {
     key: "night_ratio",
-    label: "심야 시간대 거래 비중",
+    label: "새벽 거래 비중",
     weight: 0.16,
     observe: (ms) => mean(ms.map((m) => m.nightRatio)),
     base: (b) => b.nightRatio,
@@ -109,7 +109,7 @@ const SIGNALS: SignalSpec[] = [
   },
   {
     key: "new_payee",
-    label: "신규 수취인 빈도",
+    label: "처음 보내는 사람 수",
     weight: 0.14,
     observe: (ms) => mean(ms.map((m) => m.newPayees)),
     base: (b) => b.newPayeesPerMonth,
@@ -204,14 +204,14 @@ export function evaluateTrigger(
   const blockedBy: string[] = [];
   if (!aiAlert) {
     blockedBy.push(
-      `바이오마커가 아직 경보 구간이 아닙니다 (현재 ${reading.score}, 경보 61 이상)`,
+      `평소와 비교한 점수가 아직 경보 구간이 아니에요 (지금 ${reading.score}점, 경보는 61점부터)`,
     );
   }
   if (!proof) {
-    blockedBy.push("의사 진단서 또는 장기요양보험 등급 발행서가 첨부되지 않았습니다");
+    blockedBy.push("의사 진단서나 장기요양보험 등급 서류가 아직 없어요");
   } else if (!proofFresh) {
     blockedBy.push(
-      `첨부된 서류가 최근 ${PROOF_FRESH_DAYS}일 이내 발행분이 아닙니다 (${proof.issuedAt})`,
+      `낸 서류가 최근 ${PROOF_FRESH_DAYS}일 안에 발행된 것이 아니에요 (${proof.issuedAt})`,
     );
   }
 
@@ -231,23 +231,23 @@ export function evaluateTrigger(
  */
 export function biomarkerMeaning(band: BiomarkerBand): string {
   return band === "alert"
-    ? "평소와 뚜렷하게 달라진 지점이 보이는 구간입니다. 진단은 아니며, 진단서가 있어야 다음 시기로 넘어갑니다."
+    ? "평소와 뚜렷하게 달라진 지점이 보여요. 진단은 아니에요. 진단서가 있어야 다음 시기로 넘어가요."
     : band === "watch"
-      ? "평소와 달라지기 시작한 지점이 보입니다. 아직은 알림만 보내는 단계입니다."
-      : "평소 패턴과 크게 다른 점이 없습니다. 이 시기는 아직 오지 않았습니다.";
+      ? "평소와 달라지기 시작한 지점이 보여요. 아직은 알림만 보내요."
+      : "평소와 크게 다른 점이 없어요. 이 시기는 아직 오지 않았어요.";
 }
 
 /** 경보 시점에 사용자에게 보여줄 요약 (단정 금지) */
 export function biomarkerSummary(reading: BiomarkerReading): string {
   const top = reading.signals[0];
   if (reading.band === "normal") {
-    return "평소 패턴과 크게 달라진 지점은 관측되지 않았습니다.";
+    return "평소와 크게 달라진 지점은 없어요.";
   }
   const head =
     reading.band === "alert"
-      ? "평소 패턴과 뚜렷하게 달라진 지점이 관측됩니다."
-      : "평소 패턴과 달라지기 시작한 지점이 관측됩니다.";
-  return `${head} 가장 크게 벌어진 항목은 ${top.label}입니다 (기준 ${top.baseline} → 최근 ${top.observed}). 이것은 진단이 아니며, 판정은 의료기관의 몫입니다.`;
+      ? "평소와 뚜렷하게 달라진 지점이 보여요."
+      : "평소와 달라지기 시작한 지점이 보여요.";
+  return `${head} 가장 크게 벌어진 항목은 ${top.label}이에요 (평소 ${top.baseline}, 최근 ${top.observed}). 진단은 아니에요. 판단은 의료기관의 몫이에요.`;
 }
 
 /** 최근 12개월 이상거래 총액 — 화면 보조 지표 */

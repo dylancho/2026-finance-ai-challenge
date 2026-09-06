@@ -53,7 +53,7 @@ export function SignalBlock({ s, heading = "지금 내 이력에서는" }: { s: 
       </div>
       <p className="sv-signal-p">
         {calm
-          ? `아직 평소와 다른 신호가 없습니다 · 점수 ${s.score}점 · ${s.bandLabel}`
+          ? `아직 평소와 다른 신호가 없어요 · ${s.score}점 · ${s.bandLabel}`
           : s.meaning}
       </p>
       {!calm && s.signals.length > 0 && (
@@ -62,14 +62,14 @@ export function SignalBlock({ s, heading = "지금 내 이력에서는" }: { s: 
             <li key={x.label}>
               <span className="l">{x.label}</span>
               <span className="v">
-                평소 {x.baseline} → 최근 {x.observed}
+                평소 {x.baseline}, 최근 {x.observed}
               </span>
             </li>
           ))}
         </ul>
       )}
       <p className="sv-signal-note">
-        진단이 아닙니다. 평소와 달라진 지점을 표시할 뿐이며, 판정은 의료기관의 몫입니다.
+        진단이 아니에요. 평소와 달라진 지점을 표시할 뿐이에요. 판단은 의료기관의 몫이에요.
       </p>
     </div>
   );
@@ -88,9 +88,9 @@ export default function BiomarkerCard({ reading }: { reading: BiomarkerReading |
       <div className="lg-bio">
         <SignalBlock s={s} />
         <p className="lg-bio-note">
-          <b>{alert ? "지금 이 점수가 보호자 알림 경로를 엽니다." : "이 점수가 경보 구간에 들면 보호자 알림 경로가 열립니다."}</b>{" "}
-          지출설계서 제5조에 정해 둔 사람에게 먼저 알리고, 승인 단계를 늘립니다. 신탁 지급처럼
-          되돌리기 어려운 일은 점수만으로 열리지 않고 의사 진단서가 확인되어야 넘어갑니다.
+          <b>{alert ? "지금 이 점수 때문에 보호자에게 알림이 가요." : "이 점수가 경보 구간에 들면 보호자에게 알림이 가요."}</b>{" "}
+          지출설계서 제5조에 정해 둔 사람에게 먼저 알리고, 승인 단계를 늘려요. 신탁 지급처럼
+          되돌리기 어려운 일은 점수만으로는 열리지 않아요. 의사 진단서가 확인돼야 넘어가요.
         </p>
       </div>
     </section>

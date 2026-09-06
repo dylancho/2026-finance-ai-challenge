@@ -71,13 +71,13 @@ describe("트리거 게이트 — AI 경보 단독으로는 발동하지 않는�
     const g = evaluateTrigger(reading(95), null, asOf);
     expect(g.fired).toBe(false);
     expect(g.aiAlert).toBe(true);
-    expect(g.blockedBy.join()).toContain("첨부되지 않았");
+    expect(g.blockedBy.join()).toContain("아직 없어요");
   });
 
   it("서류만 있고 경보가 아니면 발동하지 않는다", () => {
     const g = evaluateTrigger(reading(30), fresh, asOf);
     expect(g.fired).toBe(false);
-    expect(g.blockedBy.join()).toContain("경보 구간이 아닙니다");
+    expect(g.blockedBy.join()).toContain("경보 구간이 아니에요");
   });
 
   it("스코어가 100이어도 서류 없이는 발동하지 않는다", () => {
@@ -89,7 +89,7 @@ describe("트리거 게이트 — AI 경보 단독으로는 발동하지 않는�
     const g = evaluateTrigger(reading(80), stale, asOf);
     expect(g.fired).toBe(false);
     expect(g.proofFresh).toBe(false);
-    expect(g.blockedBy.join()).toContain("이내 발행분이 아닙니다");
+    expect(g.blockedBy.join()).toContain("안에 발행된 것이 아니에요");
   });
 
   it("정확히 30일 전 서류는 유효하다", () => {

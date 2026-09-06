@@ -30,11 +30,11 @@ export default function LoginShell() {
   return (
     <div className="login shell-wide">
       <div className="login-card">
-        <div className="eyebrow">Sign in</div>
+        <div className="eyebrow">로그인</div>
         <h1>시작하기 전에 로그인해 주세요</h1>
         <p className="login-lede">
-          작성하신 설계서와 금융 이력은 본인만 볼 수 있어야 합니다. 로그인해야 다음에 다시
-          오셨을 때 이어서 작성할 수 있습니다.
+          작성하신 설계서와 금융 이력은 본인만 볼 수 있어야 해요. 로그인해 두면 다음에 다시
+          오셨을 때 이어서 작성할 수 있어요.
         </p>
 
         <div className="login-actions">
@@ -48,9 +48,8 @@ export default function LoginShell() {
         </div>
 
         <p className="login-note mono">
-          프로토타입 · 실제 계정 인증을 수행하지 않습니다. 버튼을 누르면 로그인 상태로만
-          전환되며, 어떤 정보도 서버로 전송되지 않습니다. 소셜 로그인과 개인 데이터 저장은
-          후속 과제입니다.
+          지금은 실제 계정 인증을 하지 않아요. 버튼을 누르면 로그인 상태로만 바뀌고, 어떤
+          정보도 서버로 보내지 않아요. 소셜 로그인과 개인 데이터 저장은 다음 과제예요.
         </p>
 
         <Link href="/" className="login-back">
