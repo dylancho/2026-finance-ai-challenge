@@ -10,7 +10,8 @@ export interface Box {
   offsetTop: number;
   offsetWidth: number;
   offsetHeight: number;
-  offsetParent: Box | null;
+  /** DOM 의 offsetParent 는 Element 로 타입돼 있어 넓게 받는다 */
+  offsetParent: Box | Element | null;
 }
 
 export function layoutOffset(el: Box, root: Box): { left: number; top: number } {
@@ -20,7 +21,7 @@ export function layoutOffset(el: Box, root: Box): { left: number; top: number } 
   while (cur && cur !== root) {
     left += cur.offsetLeft;
     top += cur.offsetTop;
-    cur = cur.offsetParent;
+    cur = cur.offsetParent as Box | null;
   }
   return { left, top };
 }
