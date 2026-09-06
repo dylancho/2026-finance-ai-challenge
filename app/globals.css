@@ -2146,6 +2146,20 @@ input[type="range"] {
   color: var(--blue);
 }
 
+/* 목차 맨 아래 "답변 수정 →" — 카드마다 있던 수정 링크를 여기 하나로 모았다 */
+.xd-rail .xd-rail-edit {
+  margin-top: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  background: none;
+}
+.xd-rail .xd-rail-edit:hover {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
 @media (max-width: 1080px) {
   .xd {
     grid-template-columns: minmax(0, 1fr);

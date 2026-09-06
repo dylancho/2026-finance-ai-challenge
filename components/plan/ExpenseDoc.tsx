@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { HeartPulse, Landmark, Wallet } from "lucide-react";
 import { FlagCard } from "./ClauseCard";
-import EditClauseLink from "./EditClauseLink";
+import Link from "next/link";
 import Disclaimer from "../common/Disclaimer";
 import { won, wonShort } from "../../lib/format";
 import { choiceOf } from "../../lib/profile";
+import { entryQuestionForClause } from "../../lib/questions";
 import type { ExpenseDesign, FraudRule, Profile } from "../../lib/types";
 
 /*
@@ -41,10 +42,7 @@ function Clause({
   return (
     <section className="xd-card" id={`exp-${n}`} aria-labelledby={`exp-${n}-title`}>
       <header className="xd-head">
-        <div className="xd-no">
-          제{n}조
-          <EditClauseLink profile={profile} doc="expense" clause={`제${n}조`} />
-        </div>
+        <div className="xd-no">제{n}조</div>
         <h3 id={`exp-${n}-title`}>{title}</h3>
         {lede && <p className="xd-lede">{lede}</p>}
       </header>
@@ -286,6 +284,7 @@ export default function ExpenseDoc({
     };
   }, [design]);
 
+  const editTarget = entryQuestionForClause(profile, "expense", "제1조");
   const railLink = (id: string, no: string | null, label: string) => (
     <a key={id} href={`#${id}`} className={activeId === id ? "is-active" : undefined} aria-current={activeId === id ? "true" : undefined}>
       {no && <span className="no">{no}</span>}
@@ -299,6 +298,15 @@ export default function ExpenseDoc({
       <nav className="xd-rail" aria-label="조항 이동">
         {railLink("exp-cashflow", null, "월 현금흐름")}
         {RAIL.filter((r) => r.n !== 7 || design.invest).map((r) => railLink(`exp-${r.n}`, `제${r.n}조`, r.label))}
+        {/* 2026-09-07: 카드마다 붙어 있던 "수정 →" 를 목차 아래 하나로 모았다. 조항별 진입은
+            질문 은행의 역인덱스로 첫 조항의 질문으로 가고, 없으면 인터뷰 처음으로 간다. */}
+        <Link
+          className="xd-rail-edit"
+          href={editTarget ? `/interview?q=${editTarget.id}` : "/interview"}
+          title="인터뷰로 돌아가 답변을 고칩니다"
+        >
+          답변 수정 →
+        </Link>
       </nav>
 
       <div className="xd-col">
