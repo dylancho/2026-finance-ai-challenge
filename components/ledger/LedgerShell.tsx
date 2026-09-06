@@ -27,7 +27,12 @@ import { won } from "../../lib/format";
 import type { LedgerState, Persona, Profile } from "../../lib/types";
 
 /**
- * Phase 1 — 적재와 복제.
+ * 거래 기록 — 금융 이력 불러오기.
+ *
+ * 2026-09-07: 지출설계서(components/plan/ExpenseDoc)와 같은 시각 언어로 맞췄다.
+ * 카드 한 장에 메시지 하나, 큰 숫자 하나와 그 숫자를 설명하는 한 문장이 먼저 오고,
+ * 세부는 목록 행으로 본다. 카드 순서는 불러온 이력 → 달마다 쓴 돈 → 지출 요약 →
+ * 평소와 비교한 점수다. 데이터 흐름은 그대로다.
  *
  * 선택 단계다. 2026-09-06 부터 게이트와 인터뷰 사이가 아니라 헤더의 "이력 연동"
  * 메뉴로 들어온다 — 인터뷰 전에도, 설계서를 본 뒤에도 올 수 있어서 마지막 CTA 는
@@ -162,6 +167,9 @@ export default function LedgerShell() {
   const coreDone = isUnified(profile) && chapterCompleted(profile, "core");
   const nextHref = coreDone ? "/plan" : interviewHref;
 
+  const txnTotal = ledger ? ledger.months.reduce((a, m) => a + m.txnCount, 0) : 0;
+  const livingTotal = ledger ? ledger.months.reduce((a, m) => a + m.living, 0) : 0;
+
   return (
     <div className="shell-wide lg">
       <div className="plan-head">
@@ -174,130 +182,132 @@ export default function LedgerShell() {
         </p>
       </div>
 
-      {/* ── ① 연동 ── */}
-      {blocked ? (
-        <div className="gate-warn" role="alert">
-          <h4>이 경로에서는 이력을 불러올 수 없어요</h4>
-          <p>
-            {meta.name}에서는 준비하시는 분이 <b>본인이 아니에요.</b> 금융 이력은 본인 확인을
-            거쳐야 열 수 있어요. 가족이 대신 부모님의 거래 이력을 열 수 있는 법적 방법은
-            없어요.
-            <br />
-            <br />
-            이것이 <b>미리 준비해야 하는 이유</b>이기도 해요. 본인이 판단할 수 있을 때
-            불러와 두었다면 지금 10년치 기준이 남아 있었을 거예요. 지금은 인터뷰 답만으로
-            설계서를 만들고, 부족한 부분은 통장 사본이나 거래내역 같은 서류로 대신해요.
-          </p>
-          <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
-            <Link href={interviewHref} className="btn">
-              인터뷰로 이동
-            </Link>
-          </div>
-        </div>
-      ) : !ledger ? (
-        <div className="lg-import">
-          <div className="lg-import-body">
-            <h2>10년치 금융 이력 불러오기</h2>
-            <p className="muted">
-              이력에서 다음을 읽어요. 여기서 읽은 것으로 설계서를 만들지는 않아요. 답한
-              내용을 실제와 비교하는 데만 써요.
+      <div className="lg-col">
+        {/* ── ① 불러오기 ── */}
+        {blocked ? (
+          <div className="gate-warn" role="alert">
+            <h4>이 경로에서는 이력을 불러올 수 없어요</h4>
+            <p>
+              {meta.name}에서는 준비하시는 분이 <b>본인이 아니에요.</b> 금융 이력은 본인 확인을
+              거쳐야 열 수 있어요. 가족이 대신 부모님의 거래 이력을 열 수 있는 법적 방법은
+              없어요.
+              <br />
+              <br />
+              이것이 <b>미리 준비해야 하는 이유</b>이기도 해요. 본인이 판단할 수 있을 때
+              불러와 두었다면 지금 10년치 기준이 남아 있었을 거예요. 지금은 인터뷰 답만으로
+              설계서를 만들고, 부족한 부분은 통장 사본이나 거래내역 같은 서류로 대신해요.
             </p>
-            <ul className="lg-extract">
-              {willExtract.map((w) => (
-                <li key={w}>{w}</li>
-              ))}
-            </ul>
-            <p className="lg-note mono">
-              예시 데이터예요. 실제 금융기관에는 접속하지 않아요.
-            </p>
-          </div>
-          <div className="lg-import-actions">
-            <button className="btn" onClick={connect} disabled={loading}>
-              {loading ? "불러오는 중…" : "10년치 이력 불러오기"}
-            </button>
-            <Link href={nextHref} className="btn ghost">
-              {coreDone ? "설계서로 돌아가기" : "건너뛰고 인터뷰 시작"}
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* ── ② 적재 ── */}
-          <section className="section">
-            <div className="section-title">
-              <h2>{ledger.years}년치 이력을 불러왔어요</h2>
-              <Badge tone="ok">{ledger.months.length}개월</Badge>
-            </div>
-
-            <div className="lg-stats">
-              <div className="kv-row">
-                <span>거래</span>
-                <span className="mono">
-                  {ledger.months.reduce((a, m) => a + m.txnCount, 0).toLocaleString("ko-KR")}건
-                </span>
-              </div>
-              <div className="kv-row">
-                <span>사고팔기</span>
-                <span className="mono">{ledger.trades.length}번</span>
-              </div>
-              <div className="kv-row">
-                <span>평소와 다른 거래</span>
-                <span className="mono">{ledger.incidents.length}건</span>
-              </div>
-              <div className="kv-row">
-                <span>{ledger.years}년 생활비 합계</span>
-                <span className="mono">
-                  {won(ledger.months.reduce((a, m) => a + m.living, 0))}
-                </span>
-              </div>
-            </div>
-
-            <LedgerChart ledger={ledger} />
-          </section>
-
-          {/* ── ③ 성향 ── */}
-          {insight && (
-            <section className="section">
-              <div className="section-title">
-                <h2>지출 요약</h2>
-              </div>
-              <PersonaCard insight={insight} persona={persona} pending={narrating} />
-            </section>
-          )}
-
-          {/* ── ④ 평소 패턴과 비교한 점수 ── */}
-          <BiomarkerCard reading={reading} />
-
-          <section className="cta-band">
-            <div>
-              <h2>
-                {coreDone ? "이 이력은 설계서에 반영돼요" : "이제 앞으로의 원칙을 정할 차례예요"}
-              </h2>
-              <p>
-                {coreDone
-                  ? "이미 정한 원칙과 이 이력이 어긋나는 지점을 설계서에서 비교해 보여 드려요."
-                  : "인터뷰 중에 관련 질문이 나오면 이 이력이 옆에 함께 보여요."}
-                {contrasts.length > 0 &&
-                  ` 지금 답 기준으로 비교할 항목이 ${contrasts.length}개 있어요.`}
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button
-                className="btn ghost"
-                onClick={() => {
-                  setState(saveLedgerState(emptyLedgerState()));
-                  setPersona(null);
-                }}
-              >
-                이력 지우기
-              </button>
-              <Link href={nextHref} className="btn">
-                {coreDone ? "설계서 보기" : "인터뷰 시작"}
+            <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
+              <Link href={interviewHref} className="btn">
+                인터뷰로 이동
               </Link>
             </div>
+          </div>
+        ) : !ledger ? (
+          <section className="lg-card" aria-labelledby="lg-import-t">
+            <header className="lg-head">
+              <div className="lg-no">금융 이력 불러오기</div>
+              <h2 id="lg-import-t">
+                <em>10년치</em> 이력을 불러와요
+              </h2>
+              <p className="lg-lede">
+                이력에서 아래 {willExtract.length}가지를 읽어요. 여기서 읽은 것으로 설계서를
+                만들지는 않아요. 답한 내용을 실제와 비교하는 데만 써요.
+              </p>
+            </header>
+
+            <ul className="lg-chips" aria-label="이력에서 읽는 것">
+              {willExtract.map((w) => (
+                <li className="lg-chip" key={w}>
+                  {w}
+                </li>
+              ))}
+            </ul>
+
+            <div className="lg-import-actions">
+              <button className="btn" onClick={connect} disabled={loading}>
+                {loading ? "불러오는 중…" : "10년치 이력 불러오기"}
+              </button>
+              <Link href={nextHref} className="btn ghost">
+                {coreDone ? "설계서로 돌아가기" : "건너뛰고 인터뷰 시작"}
+              </Link>
+            </div>
+
+            <p className="lg-note">예시 데이터예요. 실제 금융기관에는 접속하지 않아요.</p>
           </section>
-        </>
-      )}
+        ) : (
+          <>
+            {/* ── ② 불러온 이력 ── */}
+            <section className="lg-card" aria-labelledby="lg-loaded-t">
+              <header className="lg-head">
+                <div className="lg-no">
+                  불러온 이력
+                  <Badge tone="ok">{ledger.months.length}개월</Badge>
+                </div>
+                <h2 id="lg-loaded-t">
+                  {ledger.years}년치 거래 <em>{txnTotal.toLocaleString("ko-KR")}건</em>을
+                  불러왔어요
+                </h2>
+                <p className="lg-lede">
+                  {ledger.startYear}년부터 지금까지예요. 이 이력으로 설계서를 만들지는 않아요.
+                  답한 내용을 실제와 비교하는 데만 써요.
+                </p>
+                <ul className="lg-facts" aria-label="불러온 이력 요약">
+                  <li>
+                    사고팔기 <b>{ledger.trades.length}번</b>
+                  </li>
+                  <li>
+                    평소와 다른 거래 <b>{ledger.incidents.length}건</b>
+                  </li>
+                  <li>
+                    {ledger.years}년 생활비 합계 <b>{won(livingTotal)}</b>
+                  </li>
+                </ul>
+              </header>
+            </section>
+
+            {/* ── ③ 달마다 쓴 돈 ── */}
+            <LedgerChart ledger={ledger} />
+
+            {/* ── ④ 지출 요약 ── */}
+            {insight && (
+              <PersonaCard insight={insight} persona={persona} pending={narrating} />
+            )}
+
+            {/* ── ⑤ 평소와 비교한 점수 ── */}
+            <BiomarkerCard reading={reading} />
+
+            <section className="cta-band">
+              <div>
+                <h2>
+                  {coreDone ? "이 이력은 설계서에 반영돼요" : "이제 앞으로의 원칙을 정할 차례예요"}
+                </h2>
+                <p>
+                  {coreDone
+                    ? "이미 정한 원칙과 이 이력이 어긋나는 지점을 설계서에서 비교해 보여 드려요."
+                    : "인터뷰 중에 관련 질문이 나오면 이 이력이 옆에 함께 보여요."}
+                  {contrasts.length > 0 &&
+                    ` 지금 답 기준으로 비교할 항목이 ${contrasts.length}개 있어요.`}
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button
+                  className="btn ghost"
+                  onClick={() => {
+                    setState(saveLedgerState(emptyLedgerState()));
+                    setPersona(null);
+                  }}
+                >
+                  이력 지우기
+                </button>
+                <Link href={nextHref} className="btn">
+                  {coreDone ? "설계서 보기" : "인터뷰 시작"}
+                </Link>
+              </div>
+            </section>
+          </>
+        )}
+      </div>
 
       <p className="disclaimer">
         이 화면의 이력은 예시 데이터이며 실제 금융거래가 아닙니다. 습관 요약은 투자 자문이
