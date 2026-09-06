@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { FraudAnalysisDetails, ruleReport, type FraudReportUI } from "../FraudShieldModal";
-import { scoreTransaction, type FraudScore, type FraudTransaction } from "../../lib/fraud/score";
+import { scoreTransaction, type FraudScore, type FraudStatus, type FraudTransaction } from "../../lib/fraud/score";
 import { DEFAULT_POLICY, policyFromProfile, type FraudPolicy } from "../../lib/fraud/policy";
+import { josa, won } from "../../lib/format";
 import { personOf, readProfile } from "../../lib/profile";
 import { isTouring } from "../../lib/demo/tour";
 import { readLedgerState, saveLedgerState, setProof } from "../../lib/ledger/store";
@@ -23,6 +24,12 @@ import type { ProofKind } from "../../lib/types";
  * 2026-09-07 문구: 구조와 정보는 이지수의 것 그대로 두고 말만 바꿨다 (docs/writing-style.md).
  * 해요체, 영어 소제목 제거, 레벨 1/2 → "1단계 · 보호 준비" / "2단계 · 보호자와 함께 승인",
  * 포트폴리오 → 투자 자산, 리밸런싱 → 투자 비중 조정, 공동 승인 모드 리포트 → 함께 승인하는 방식.
+ *
+ * 2026-09-07 서류를 알린 뒤의 화면만 지출설계서(components/plan/ExpenseDoc.tsx)의 모양으로 옮겼다.
+ * 카드 한 장에 메시지 하나, 큰 숫자 하나와 그 숫자를 설명하는 한 문장이 먼저 오고 세부는 목록 행으로
+ * 내려간다. 03 카드는 "서류 확인 → 지금 → 다음에 기다리는 것" 세 칸 타임라인이 되어 어디까지 왔는지
+ * 한눈에 읽힌다. 서류를 올리는 01·02 카드와 데이터 흐름은 그대로다. 스타일은 app/globals.css 의
+ * .pr-* 규칙이고, .xd-* 는 지출설계서 것이라 손대지 않았다.
  */
 
 /** 둘러보기가 아닐 때 4초마다 바뀌는 예시 이름 (fsd 원본의 순서 그대로). */
@@ -92,65 +99,85 @@ interface ProtectionRecord {
   report: FraudReportUI;
 }
 
+/** 거래 한 건의 상태별 라벨과 제목 끝말. 상태가 곧 그 카드의 메시지다. */
+const TX_TONE: Record<FraudStatus, { tag: string; tone: string; verb: string; lede: string }> = {
+  BLOCKED: { tag: "막았어요", tone: "blocked", verb: "이체를 멈췄어요", lede: "평소와 다른 신호가 여러 개 함께 보였어요." },
+  REVIEW: { tag: "확인이 더 필요해요", tone: "review", verb: "이체를 잠시 세워 뒀어요", lede: "일부 신호가 평소와 달라요." },
+  ALLOW: { tag: "평소대로예요", tone: "allowed", verb: "이체를 그대로 보냈어요", lede: "평소 하던 대로의 거래예요." },
+};
+
 /**
- * 오늘의 거래. 카드 두 장을 나란히 놓고(이전/다음 버튼 없음), 바로 아래에 거래마다 판단 근거를
- * 펼친다. 판단 이유가 모달 뒤에 숨어 있지 않아야 한다는 것이 fsd 쪽의 결정이다.
+ * 오늘의 거래. 거래 한 건이 카드 한 장이다. 금액이 제목이고 한 문장이 따라오고, 시각·계좌·다음
+ * 단계는 목록 행으로 내려간다. 판단 근거는 같은 카드 안에서 이어진다 — 판단 이유가 모달 뒤에
+ * 숨어 있지 않아야 한다는 것이 fsd 쪽의 결정이고, 이제 그 근거가 거래 카드에 붙어 있다.
  */
 function TodayTransactions({
   records,
+  guardian,
   expanded,
   onToggle,
 }: {
   records: ProtectionRecord[];
+  guardian: string;
   expanded: Record<string, boolean>;
   onToggle: (id: string) => void;
 }) {
   return (
-    <section className="fraud-record" aria-label="거래별 보호 판단">
-      <div className="fraud-record-head">
-        <div><p className="eyebrow">오늘 살펴본 거래</p><h2>오늘의 거래</h2></div>
-        <span>{records.length}건 살펴봤어요</span>
-      </div>
-      <div className="fraud-record-grid">
-        {records.map(({ tx, score }) => {
-          const isBlocked = score.status === "BLOCKED";
-          const isReview = score.status === "REVIEW";
-          return (
-            <article className={`fraud-record-card ${isBlocked ? "blocked" : "allowed"}`} key={tx.transactionId}>
-              <div className="fraud-record-status">
-                <span>{isBlocked ? "막았어요" : isReview ? "확인이 더 필요해요" : "평소대로예요"}</span>
-                <b>위험도 {score.risk_score}%</b>
-              </div>
-              <h3>
-                {isBlocked
-                  ? score.policyNote
-                    ? "금액은 한도 안이지만, 내가 정한 원칙에 걸렸어요."
-                    : "평소와 다른 신호가 여러 개 함께 보였어요."
-                  : isReview
-                    ? "일부 신호가 평소와 달라요."
-                    : "평소 하던 대로의 거래예요."}
-              </h3>
-              <p>{tx.requestTime} · {tx.targetAccount} · {tx.amount.toLocaleString("ko-KR")}원</p>
-              {/* 룰 점수만으로는 통과했을 거래를 원칙(S01·S02)이 막았을 때 그 이유를 카드에 바로 적는다. */}
-              {score.policyNote && <p>{score.policyNote}</p>}
-            </article>
-          );
-        })}
-      </div>
-      <section className="fraud-analysis-list" aria-labelledby="fraud-analysis-title">
-        <div className="fraud-analysis-list-head">
-          <div><p className="eyebrow">왜 이렇게 판단했나</p><h3 id="fraud-analysis-title">판단 근거</h3></div>
-          <p>거래마다 평소 돈 쓰는 방식과 비교한 결과예요.</p>
-        </div>
-        {records.map(({ tx, report }) => (
-          <FraudAnalysisDetails
-            key={`analysis-${tx.transactionId}`}
-            report={report}
-            expanded={!!expanded[tx.transactionId]}
-            onToggle={() => onToggle(tx.transactionId)}
-          />
-        ))}
-      </section>
+    <section className="pr-group" aria-label="거래별 보호 판단">
+      <header className="pr-head">
+        <p className="pr-no">오늘의 거래</p>
+        <h2>거래 {records.length}건을 하나씩 살펴봤어요</h2>
+        <p className="pr-lede">평소 돈 쓰는 방식과 비교했어요. 카드마다 왜 그렇게 판단했는지 같이 적어 뒀어요.</p>
+      </header>
+      {records.map(({ tx, score, report }) => {
+        const tone = TX_TONE[score.status];
+        const pending = score.status !== "ALLOW";
+        return (
+          <article className="pr-card pr-tx" key={tx.transactionId}>
+            <div className="pr-no">
+              <span className={`pr-tag ${tone.tone}`}>{tone.tag}</span>
+              <span>위험도 {score.risk_score}%</span>
+            </div>
+            <h3><em>{won(tx.amount)}</em> {tone.verb}</h3>
+            <p className="pr-lede">
+              {score.status === "BLOCKED" && score.policyNote ? "금액은 한도 안이지만, 내가 정한 원칙에 걸렸어요." : tone.lede}
+            </p>
+            {/* 룰 점수만으로는 통과했을 거래를 원칙(S01·S02)이 막았을 때 그 이유를 카드에 바로 적는다. */}
+            {score.policyNote && <p className="pr-note">{score.policyNote}</p>}
+            <ul className="pr-list">
+              <li className="pr-row">
+                <div className="pr-row-main">
+                  <div className="l">보낸 시각</div>
+                  <div className="s">평소 쓰는 시간은 {score.baseline.usualHours}</div>
+                </div>
+                <span className="pr-val">{tx.requestTime}</span>
+              </li>
+              <li className="pr-row">
+                <div className="pr-row-main">
+                  <div className="l">받는 계좌</div>
+                  <div className="s">{tx.isNewTargetAccount ? "처음 보는 계좌예요" : "전에도 보낸 계좌예요"}</div>
+                </div>
+                <span className="pr-val">{tx.targetAccount}</span>
+              </li>
+              <li className="pr-row">
+                <div className="pr-row-main">
+                  <div className="l">다음 단계</div>
+                  <div className="s">{pending ? `${guardian}에게 알렸어요. 승인하면 그때 나가요.` : "그대로 나갔어요"}</div>
+                </div>
+                <span className={`pr-val ${pending ? "" : "muted"}`}>{pending ? "보호자 승인" : "없어요"}</span>
+              </li>
+            </ul>
+            <div className="pr-evidence">
+              <div className="pr-no">판단 근거</div>
+              <FraudAnalysisDetails
+                report={report}
+                expanded={!!expanded[tx.transactionId]}
+                onToggle={() => onToggle(tx.transactionId)}
+              />
+            </div>
+          </article>
+        );
+      })}
     </section>
   );
 }
@@ -247,6 +274,13 @@ export default function FraudShieldDashboard() {
     return { tx, score, report };
   });
 
+  // 제출 뒤 화면의 큰 숫자. 아직 나가지 못하고 승인을 기다리는 돈이 오늘의 한 줄 요약이다.
+  const pendingRecords = records.filter((r) => r.score.status !== "ALLOW");
+  const pendingCount = pendingRecords.length;
+  const pendingAmount = pendingRecords.reduce((sum, r) => sum + r.tx.amount, 0);
+  // 이력에서 증빙을 읽어 온 경우에는 고른 항목이 없으므로 일반적인 이름으로 적는다.
+  const careLabel = careStatus || "치매·장기요양 상태";
+
   /**
    * 2026-09-07 2단계 완료 = 이력 저장소(next.ledger.v1)에 의료 증빙을 남기는 것.
    * 이 화면의 "치매·장기요양 상태 업데이트" 와 의뢰서·시뮬레이션의 "받아 둔 진단서 표시" 는 같은
@@ -327,67 +361,148 @@ export default function FraudShieldDashboard() {
           </article>
         )}
 
-        {guideStep === 2 && (
-          <article className={`protection-stage ${careStatusUpdated ? "active" : ""}`} key="level-two">
+        {/* 서류를 아직 안 알린 채로 03 에 와 있으면(이력에 증빙이 없을 때) 02 로 돌려보낸다. */}
+        {guideStep === 2 && !careStatusUpdated && (
+          <article className="protection-stage" key="level-two-wait">
             <span>03 · 2단계 · 보호자와 함께 승인</span>
-            <h3>{careStatusUpdated ? "보호가 작동하고 있어요" : "서류를 알려 주시면 보호가 시작돼요"}</h3>
-            <p>{careStatusUpdated ? "앱이 평소와 다른 거래와 투자 자산의 위험 신호를 살펴요. 본인, 보호자, 전문가에게 상황에 맞는 최종 승인을 요청해요." : "2단계에서는 함께 승인하는 방식과 평소와 다른 거래 보호를 볼 수 있어요. 먼저 02에서 치매나 장기요양 등급 서류를 알려 주세요."}</p>
-            {careStatusUpdated && (
-              <div className="level-two-scope">
-                <article><span>일상 지출</span><b>정기 지출은 원칙대로</b><p>예외 거래만 보호자와 함께 승인해요.</p></article>
-                <article><span>투자 자산</span><b>앱이 초안을 제안</b><p>사고파는 것은 보호자가 승인한 뒤 진행해요.</p></article>
-                <article><span>상속 준비</span><b>자산 이전 원칙을 기록</b><p>실제 이전은 전문가 확인과 승인을 거쳐요.</p></article>
-              </div>
-            )}
+            <h3>서류를 알려 주시면 보호가 시작돼요</h3>
+            <p>2단계에서는 함께 승인하는 방식과 평소와 다른 거래 보호를 볼 수 있어요. 먼저 02에서 치매나 장기요양 등급 서류를 알려 주세요.</p>
             <div className="protection-stage-actions">
               <button className="btn outline" onClick={() => setGuideStep(1)}>← 서류 단계로</button>
+            </div>
+          </article>
+        )}
+
+        {/* 서류를 알린 뒤의 화면. 지금 어디까지 왔고 다음에 무엇을 기다리는지가 카드 한 장에 있다. */}
+        {guideStep === 2 && careStatusUpdated && (
+          <article className="pr-card pr-stage" key="level-two">
+            <div className="pr-no">
+              <span className="pr-tag on">보호 켜짐</span>
+              <span>2단계 · 보호자와 함께 승인</span>
+            </div>
+            <h3>
+              {pendingCount > 0 ? (
+                <>오늘 <em>{won(pendingAmount)}</em>을 멈춰 두고 승인을 기다려요</>
+              ) : (
+                <>오늘 거래 <em>{records.length}건</em>이 모두 평소대로였어요</>
+              )}
+            </h3>
+            <p className="pr-lede">
+              {pendingCount > 0
+                ? "멈춘 돈은 보호자가 승인해야 나가요. 나머지 거래는 그대로 진행했어요."
+                : "앱이 오늘 거래를 모두 확인했어요. 지금 기다리는 승인은 없어요."}
+            </p>
+
+            <ol className="pr-steps" aria-label="지금까지 온 곳과 기다리는 것">
+              <li className="done">
+                <span className="dot" aria-hidden>✓</span>
+                <div>
+                  <div className="l">서류 확인</div>
+                  <div className="s">{josa(careLabel, "을를")} 알려 주셨어요</div>
+                </div>
+              </li>
+              <li className="gap"><span className="dot line" aria-hidden /><div className="s">그래서 지금은</div></li>
+              <li className="now">
+                <span className="dot" aria-hidden>2</span>
+                <div>
+                  <div className="l">앱이 거래를 지켜봐요</div>
+                  <div className="s">평소와 다른 거래와 투자 자산의 위험 신호를 살펴요</div>
+                </div>
+              </li>
+              <li className="gap"><span className="dot line" aria-hidden /><div className="s">다음에 기다리는 것</div></li>
+              <li className="wait">
+                <span className="dot" aria-hidden>3</span>
+                <div>
+                  <div className="l">{pendingCount > 0 ? `보호자 승인 ${pendingCount}건` : "기다리는 승인이 없어요"}</div>
+                  <div className="s">{pendingCount > 0 ? `${guardian}에게 알렸어요. 승인하면 바로 나가요.` : "새 거래가 들어오면 다시 알려 드려요."}</div>
+                </div>
+              </li>
+            </ol>
+
+            <div className="pr-scope">
+              <div><span className="k">일상 지출</span><span className="v">정기 지출은 원칙대로</span><p>예외 거래만 보호자와 함께 승인해요.</p></div>
+              <div><span className="k">투자 자산</span><span className="v">앱이 초안을 제안</span><p>사고파는 것은 보호자가 승인한 뒤 진행해요.</p></div>
+              <div><span className="k">상속 준비</span><span className="v">자산 이전 원칙을 기록</span><p>실제 이전은 전문가 확인과 승인을 거쳐요.</p></div>
+            </div>
+
+            <div className="pr-actions">
+              <button className="pr-link" onClick={() => setGuideStep(1)}>← 서류 단계로</button>
               {/* 헤더에서 빠진 월간 시나리오 점검 진입로. 공동 승인 원칙은 여기서 매달 고친다. */}
-              <a className="btn outline" href="/monthly-review">매달 하는 상황 점검 →</a>
-              {careStatusUpdated && <b className="protection-stage-next">바로 아래에서 오늘의 거래를 확인해 주세요</b>}
+              <a className="pr-link" href="/monthly-review">매달 하는 상황 점검 →</a>
             </div>
           </article>
         )}
       </section>
 
       {careStatusUpdated && (
-        <>
+        <div className="pr-col">
           <TodayTransactions
             records={records}
+            guardian={guardian}
             expanded={expandedReports}
             onToggle={(id) => setExpandedReports((current) => ({ ...current, [id]: !current[id] }))}
           />
 
-          <section className="fraud-learning" id="level-two-content">
-            <div><span>앱이 익힌 것</span><b>거래 계좌</b><b>이용 시간</b><b>비밀번호 입력 습관</b><b>투자 원칙</b><b>돌봄 상태</b></div>
+          <section className="pr-card" id="level-two-content" aria-labelledby="pr-learned-title">
+            <div className="pr-no">앱이 익힌 것</div>
+            <h3 id="pr-learned-title">다섯 가지를 기준으로 오늘 거래를 봤어요</h3>
+            <p className="pr-lede">인터뷰에서 정한 것과 그동안 실제로 해 온 것을 같이 봐요.</p>
+            <div className="pr-chips">
+              <span className="pr-chip">거래 계좌</span>
+              <span className="pr-chip">이용 시간</span>
+              <span className="pr-chip">비밀번호 입력 습관</span>
+              <span className="pr-chip">투자 원칙</span>
+              <span className="pr-chip">돌봄 상태</span>
+            </div>
           </section>
 
-          <section className="portfolio-report" aria-labelledby="portfolio-report-title">
-            <div className="portfolio-report-head">
-              <div>
-                <p className="eyebrow">2단계 · 보호자와 함께 승인</p>
-                <h2 id="portfolio-report-title">함께 승인하는 방식</h2>
-                <p>앱은 제안하고 위험 신호를 살피기만 해요. 투자 자산을 바꾸는 일은 상황에 맞는 사람이 최종 승인해야 진행돼요.</p>
-              </div>
-              <span className="portfolio-report-status"><i /> 지금 보호가 작동 중</span>
+          <section className="pr-card" aria-labelledby="portfolio-report-title">
+            <div className="pr-no">
+              <span className="pr-tag on">지금 보호가 작동 중</span>
+              <span>2단계 · 보호자와 함께 승인</span>
             </div>
-            <div className="portfolio-report-summary">
-              <b>앱이 제안 · 보호자가 승인 · 필요하면 전문가 확인</b>
-              <p>일상 지출, 투자 비중 조정, 상속 관련 자산 이전 모두 미리 정한 승인 원칙대로 진행해요.</p>
-              <button className="btn outline sm" onClick={() => setPortfolioExpanded((expanded) => !expanded)} aria-expanded={portfolioExpanded}>
-                {portfolioExpanded ? "간단히 보기" : "자세히 보기"}
-              </button>
-            </div>
+            <h3 id="portfolio-report-title">투자 자산은 <em>사람이 승인해야</em> 움직여요</h3>
+            <p className="pr-lede">앱은 초안을 만들고 위험 신호만 알려요. 일상 지출, 투자 비중 조정, 상속 관련 자산 이전 모두 미리 정한 승인 원칙대로 진행해요.</p>
+            <button className="pr-more" onClick={() => setPortfolioExpanded((expanded) => !expanded)} aria-expanded={portfolioExpanded}>
+              {portfolioExpanded ? "상황별 승인하는 사람 접기" : "상황별로 누가 승인하는지 보기"}
+            </button>
             {portfolioExpanded && (
-              <div className="portfolio-approval-grid">
-                <article><span>01 · 건강할 때</span><h3>본인이 정기적으로 승인</h3><p><b>AI</b> 인터뷰 답과 시장 상황을 익혀 투자 비중 조정안을 제안해요.</p><p><b>최종 승인</b> 본인이 6개월이나 1년에 한 번 보고서를 보고 적용해요.</p></article>
-                <article><span>02 · 시장이 크게 흔들릴 때</span><h3>전문가가 한 번 더 확인</h3><p><b>AI</b> 금융위기, 전쟁, 금리 급변 같은 큰 위험 신호를 찾아요.</p><p><b>최종 승인</b> 자산관리 전문가가 한 번 더 확인하고, 본인이 동의한 뒤 수정안을 적용해요.</p></article>
-                <article><span>03 · 판단이 흐려지기 시작할 때</span><h3>보호자가 투자 비중 조정을 승인</h3><p><b>AI</b> 설계서 원칙대로 안전한 자산으로 옮기는 보고서를 자동으로 만들어요.</p><p><b>최종 승인</b> 미리 정한 보호자(자녀·배우자)가 주문 전에 최종 승인해요.</p></article>
-                <article><span>04 · 중증이거나 특별한 상황</span><h3>신탁회사나 법적 후견인이 서면으로 승인</h3><p><b>AI</b> 병원비와 요양비에 필요한 현금이 얼마인지 계산해요.</p><p><b>최종 승인</b> 신탁회사나 법적 후견인이 서류를 확인한 뒤 승인해요.</p></article>
-              </div>
+              <>
+                <ul className="pr-list">
+                  <li className="pr-row">
+                    <div className="pr-row-main">
+                      <div className="l">건강할 때</div>
+                      <div className="s">앱이 인터뷰 답과 시장 상황을 익혀 투자 비중 조정안을 제안해요</div>
+                    </div>
+                    <span className="pr-val">본인이 6개월이나 1년에 한 번</span>
+                  </li>
+                  <li className="pr-row">
+                    <div className="pr-row-main">
+                      <div className="l">시장이 크게 흔들릴 때</div>
+                      <div className="s">앱이 금융위기, 전쟁, 금리 급변 같은 큰 위험 신호를 찾아요</div>
+                    </div>
+                    <span className="pr-val">자산관리 전문가가 확인한 뒤 본인이</span>
+                  </li>
+                  <li className="pr-row">
+                    <div className="pr-row-main">
+                      <div className="l">판단이 흐려지기 시작할 때</div>
+                      <div className="s">앱이 설계서 원칙대로 안전한 자산으로 옮기는 초안을 만들어요</div>
+                    </div>
+                    <span className="pr-val">미리 정한 보호자가 주문 전에</span>
+                  </li>
+                  <li className="pr-row">
+                    <div className="pr-row-main">
+                      <div className="l">중증이거나 특별한 상황</div>
+                      <div className="s">앱이 병원비와 요양비에 필요한 현금이 얼마인지 계산해요</div>
+                    </div>
+                    <span className="pr-val">신탁회사나 법적 후견인이 서면으로</span>
+                  </li>
+                </ul>
+                <p className="pr-note">투자 비중 조정과 사고파는 일은 이 서비스가 자동으로 실행하지 않아요. 필요한 승인을 거친 초안으로만 보여 드려요.</p>
+              </>
             )}
-            {portfolioExpanded && <p className="portfolio-report-note">투자 비중 조정과 사고파는 일은 이 서비스가 자동으로 실행하지 않아요. 필요한 승인을 거친 초안으로만 보여 드려요.</p>}
           </section>
-        </>
+        </div>
       )}
     </div>
   );
