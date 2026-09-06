@@ -11,8 +11,12 @@ import type { Capacity, Chapter, Profile } from "../../lib/types";
  * 게이트 = 상황 입력.
  *
  * 2026-09-03 구조 전환: 카테고리(트랙) 선택 STEP 을 없앴다. 어느 경로로 들어와도
- * 같은 게이트 → 이력 → 코어 인터뷰로 진입하고, 홈 버튼이 넘긴 ?focus= 는 코어를
+ * 같은 게이트 → 코어 인터뷰로 진입하고, 홈 버튼이 넘긴 ?focus= 는 코어를
  * 마친 뒤 챕터 제안 화면에서 그 챕터를 맨 위에 올리는 데만 쓴다.
+ *
+ * 2026-09-06: 게이트와 인터뷰 사이에 있던 이력 연동(/ledger)을 뺐다. 이력은
+ * 선택 사항인데 필수 단계처럼 보여 인터뷰 진입이 늦어졌다. 헤더 메뉴에서
+ * 언제든 들어갈 수 있고, 인터뷰 안에서도 한 줄 안내로 권한다.
  *
  * 남은 것은 옛 STEP 2 — 의사능력 3택 + 사고 발생 여부. 이것이 게이트의 전부다.
  */
@@ -93,8 +97,9 @@ export default function GateFlow() {
       chaptersCompleted: keep ? (base.chaptersCompleted ?? []) : [],
     };
     saveProfile(next);
-    // 이력 연동은 게이트 뒤에 온다. 관심 챕터는 인터뷰까지 URL 로 넘긴다.
-    router.push(focus ? `/ledger?focus=${focus}` : "/ledger");
+    // 2026-09-06: 게이트에서 인터뷰로 바로 간다 (이력 연동은 헤더 메뉴로 이동).
+    // 관심 챕터는 인터뷰까지 URL 로 넘긴다.
+    router.push(focus ? `/interview?focus=${focus}` : "/interview");
   }
 
   const blocking = capacityLevel === "diagnosed" || hasIncident === true;

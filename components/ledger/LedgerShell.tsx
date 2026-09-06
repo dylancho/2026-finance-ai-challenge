@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import LedgerChart from "./LedgerChart";
 import PersonaCard from "./PersonaCard";
 import Badge from "../common/Badge";
-import { flowMeta, isUnified } from "../../lib/questions";
+import { chapterCompleted, flowMeta, isUnified } from "../../lib/questions";
 import { demoProfile, readProfile, saveProfile } from "../../lib/profile";
 import {
   attachLedger,
@@ -27,8 +27,13 @@ import type { LedgerState, Persona, Profile } from "../../lib/types";
 /**
  * Phase 1 — 적재와 복제.
  *
- * 게이트(상황 입력) 뒤에 온다. 통합 플로우는 챕터와 무관하게 소비·고정비·베이스라인·
- * 투자 성향을 모두 뽑는다 — 투자 챕터를 나중에 답해도 대조할 이력이 있어야 한다.
+ * 선택 단계다. 2026-09-06 부터 게이트와 인터뷰 사이가 아니라 헤더의 "이력 연동"
+ * 메뉴로 들어온다 — 인터뷰 전에도, 설계서를 본 뒤에도 올 수 있어서 마지막 CTA 는
+ * 코어 완료 여부에 따라 인터뷰/설계서로 갈린다. 게이트를 거치지 않았으면(/start)
+ * 상황(capacity)이 없어 시드를 만들 수 없으므로 게이트로 돌려보낸다.
+ *
+ * 통합 플로우는 챕터와 무관하게 소비·고정비·베이스라인·투자 성향을 모두 뽑는다 —
+ * 투자 챕터를 나중에 답해도 대조할 이력이 있어야 한다.
  * 보류된 caregiver 데모는 "대리인은 대상자 마이데이터를 열 수 없다" 경고만 띄운다.
  */
 
@@ -145,6 +150,10 @@ export default function LedgerShell() {
       ? ["소비 패턴", "고정비 구조", "이상거래 베이스라인", "투자 대응 성향"]
       : ["소비 패턴", "고정비 구조", "이상거래 베이스라인"];
   const interviewHref = focus ? `/interview?focus=${encodeURIComponent(focus)}` : "/interview";
+  // 헤더에서 들어온 경우 이미 인터뷰를 마쳤을 수 있다. 코어가 끝났으면 이력은
+  // 설계서의 대조 패널에 바로 반영되므로 인터뷰 대신 설계서로 보낸다.
+  const coreDone = isUnified(profile) && chapterCompleted(profile, "core");
+  const nextHref = coreDone ? "/plan" : interviewHref;
 
   return (
     <div className="shell-wide lg">
@@ -199,8 +208,8 @@ export default function LedgerShell() {
             <button className="btn" onClick={connect} disabled={loading}>
               {loading ? "불러오는 중…" : "10년 이력 불러오기"}
             </button>
-            <Link href={interviewHref} className="btn ghost">
-              건너뛰고 인터뷰 시작
+            <Link href={nextHref} className="btn ghost">
+              {coreDone ? "설계서로 돌아가기" : "건너뛰고 인터뷰 시작"}
             </Link>
           </div>
         </div>
@@ -253,9 +262,13 @@ export default function LedgerShell() {
 
           <section className="cta-band">
             <div>
-              <h2>이제 미래의 원칙을 정할 차례입니다</h2>
+              <h2>
+                {coreDone ? "이력이 설계서에 반영됩니다" : "이제 미래의 원칙을 정할 차례입니다"}
+              </h2>
               <p>
-                인터뷰 중에 관련 문항이 나오면, 이 이력이 옆에 함께 표시됩니다.
+                {coreDone
+                  ? "이미 답하신 원칙과 이 이력이 어긋나는 지점을 설계서에서 대조해 보여드립니다."
+                  : "인터뷰 중에 관련 문항이 나오면, 이 이력이 옆에 함께 표시됩니다."}
                 {contrasts.length > 0 &&
                   ` 지금 답변 기준으로 대조할 항목이 ${contrasts.length}개 있습니다.`}
               </p>
@@ -270,8 +283,8 @@ export default function LedgerShell() {
               >
                 이력 지우기
               </button>
-              <Link href={interviewHref} className="btn">
-                인터뷰 시작
+              <Link href={nextHref} className="btn">
+                {coreDone ? "설계서 보기" : "인터뷰 시작"}
               </Link>
             </div>
           </section>

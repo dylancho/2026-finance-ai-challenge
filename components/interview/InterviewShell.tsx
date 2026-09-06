@@ -101,6 +101,11 @@ export default function InterviewShell() {
   const [proposing, setProposing] = useState(false);
   /** 설계서의 공백 카드에서 챕터 하나만 채우러 들어온 경우 — 끝나면 설계서로 복귀 */
   const [reentry, setReentry] = useState(false);
+  /**
+   * 이력 연동 권유 한 줄. 2026-09-06 부터 게이트에서 인터뷰로 바로 오므로, 이력이
+   * 없으면 여기서 한 번 권한다. 닫으면 이 세션에서만 사라진다 — 저장하지 않는다.
+   */
+  const [ledgerNudge, setLedgerNudge] = useState(true);
   const streamRef = useRef<HTMLDivElement>(null);
   /** 이미 말풍선을 붙인 질문 id. 되돌아가면 새로 붙이지 않고 그 말풍선으로 스크롤한다. */
   const askedRef = useRef<Set<string>>(new Set());
@@ -541,6 +546,23 @@ export default function InterviewShell() {
           </div>
           {current && !proposing && <Badge tone="info">{current.id}</Badge>}
         </div>
+
+        {unified && !ledgerState.ledger && ledgerNudge && (
+          <div className="iv-nudge">
+            <span>
+              10년 금융 이력을 연동하면 답변 옆에 실제 습관이 함께 표시됩니다.{" "}
+              <Link href="/ledger">이력 연동 →</Link>
+            </span>
+            <button
+              type="button"
+              className="iv-nudge-close"
+              onClick={() => setLedgerNudge(false)}
+              aria-label="이력 연동 안내 닫기"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
         <div className="iv-stream" ref={streamRef}>
           {bubbles.map((b) => (
