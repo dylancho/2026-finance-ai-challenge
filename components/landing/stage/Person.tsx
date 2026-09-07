@@ -120,13 +120,14 @@ const ELBOW_PCT = Math.round((PERSON.upper / (PERSON.upper + PERSON.fore)) * 100
 
 const SKIN = "#e9c4a6";
 const SKIN_SHADE = "#d0a585";
-const HAIR = "#6a625b";
-const HAIR_GREY = "#bab4ad";
-const CARDIGAN = "#55708e";
-const CARDIGAN_SHADE = "#46607c";
-const CARDIGAN_LIT = "#63809e";
-const SHIRT = "#f3f0ea";
-const TROUSERS = "#3f4a5c";
+const HAIR = "#6f6f70";
+const HAIR_GREY = "#c0c0c1";
+const BEARD = "#83838a";
+const CARDIGAN = "#28334b"; // 영상 인물의 남색 블루종
+const CARDIGAN_SHADE = "#1d2639";
+const CARDIGAN_LIT = "#35425f";
+const SHIRT = "#222c42"; // 스탠드 칼라 — 셔츠 깃이 아니라 재킷 깃이다
+const TROUSERS = "#3d3d44";
 const SHOE = "#2a303b";
 const BAG = "#d9c3a1";
 const BAG_SHADE = "#c2a880";
@@ -135,6 +136,19 @@ const LIT = "rgba(255,255,255,"; // 하이라이트·림라이트
 
 /** 키(viewBox 단위). 문틀 556 대비 0.72 — 50~60대 평균 ≈ 170cm 를 7등신(머리 56)으로 */
 const H = 400;
+
+/**
+ * 옆얼굴 실루엣 (머리 로컬 좌표). 이마(-29,19) → 눈썹뼈(-31.5,27) → 콧대(-30,30) → 코끝(-35.6,38.6)
+ * → 인중(-31.4,41) → 입술(-32,46) → 턱끝(-23.5,57) → 뒤통수(15.5,27).
+ * 살갗 채우기와 clipPath 가 같은 문자열을 써야 수염·그늘이 윤곽 밖으로 새지 않는다.
+ */
+const FACE_D =
+  "M-24 4 C-27 9 -29 14 -29.5 19 C-30.5 22 -31.5 25 -31.5 27" +
+  " C-31 28.5 -30.5 29.5 -29.8 30.5 C-32.5 33 -36 36.5 -35.6 38.6" +
+  " C-35 40.4 -33 41 -31.4 41.2 C-32.4 43 -32.8 45 -31.6 46.4" +
+  " C-30.6 48.4 -31.6 50 -30.6 51.6 C-29.6 54 -27 56 -23.5 57" +
+  " C-14.5 59 -5.5 57 0.5 52.5 C9.5 46 15 37.5 15.5 27" +
+  " C16 15 9 4 -3 0.5 C-11 -1.5 -19 0 -24 4 Z";
 
 /**
  * 사람 그룹. DoorScene 의 SVG 안에서 문 다음(앞)에 그린다.
@@ -158,14 +172,14 @@ export function Person() {
           <stop offset="0" stopColor={CARDIGAN_LIT} />
           <stop offset="0.5" stopColor={CARDIGAN} />
           <stop offset="0.84" stopColor={CARDIGAN_SHADE} />
-          <stop offset="0.97" stopColor="#4a6683" />
-          <stop offset="1" stopColor="#6d89a6" />
+          <stop offset="0.97" stopColor="#1a2234" />
+          <stop offset="1" stopColor="#404e6d" />
         </linearGradient>
         <linearGradient id={`${g}-trou`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#4b5668" />
+          <stop offset="0" stopColor="#4a4a52" />
           <stop offset="0.5" stopColor={TROUSERS} />
-          <stop offset="0.86" stopColor="#313a48" />
-          <stop offset="1" stopColor="#4a5566" />
+          <stop offset="0.86" stopColor="#323238" />
+          <stop offset="1" stopColor="#4d4d56" />
         </linearGradient>
         <linearGradient id={`${g}-skin`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor={SKIN_SHADE} />
@@ -178,14 +192,17 @@ export function Person() {
           <stop offset="0.55" stopColor="rgba(12,28,54,0)" />
         </linearGradient>
         <linearGradient id={`${g}-hair`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#7b736b" />
-          <stop offset="1" stopColor="#564e47" />
+          <stop offset="0" stopColor="#818184" />
+          <stop offset="1" stopColor="#5e5e60" />
         </linearGradient>
         <linearGradient id={`${g}-bag`} x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#e3cfae" />
           <stop offset="0.55" stopColor={BAG} />
           <stop offset="1" stopColor={BAG_SHADE} />
         </linearGradient>
+        <clipPath id={`${g}-face`}>
+          <path d={FACE_D} />
+        </clipPath>
         <filter id={`${g}-soft`} x="-30%" y="-80%" width="160%" height="260%">
           <feGaussianBlur stdDeviation="3" />
         </filter>
@@ -237,37 +254,61 @@ export function Person() {
         {/* 먼 쪽(오른쪽) 윤곽의 림라이트 */}
         <path d="M46 92 C51 125 49 165 47 200 C46 225 47 240 49 252" stroke={`${LIT}0.2)`} strokeWidth="2.2" strokeLinecap="round" fill="none" />
 
-        {/* ── 셔츠 깃: 뒷목을 두르는 흰 띠. 가디건 목선 위로 올라와 있다 ── */}
-        <path d="M-24 76 Q-4 60 20 72 L20 81 Q-4 70 -24 84 Z" fill={SHIRT} />
-        <path d="M-24 84 Q-4 70 20 81" stroke={`${INK}0.12)`} strokeWidth="1.2" fill="none" />
+        {/* ── 재킷 스탠드 칼라: 뒷목을 감싸고 올라선 깃 ── */}
+        <path d="M-24 72 Q-3 54 21 67 L21 80 Q-3 63 -24 82 Z" fill={SHIRT} />
+        <path d="M-24 82 Q-3 63 21 80" stroke={`${LIT}0.14)`} strokeWidth="1.4" fill="none" />
 
         {/* ── 목: 머리를 살짝 앞으로 숙여 위가 왼쪽으로 기운다. 머리카락 아래는 그늘 ── */}
-        <path d="M-15 44 C-13 54 -12 64 -13 76 L15 76 C13 64 11 54 10 44 Z" fill={`url(#${g}-skin)`} />
-        <path d="M-15 44 C-13 54 -12 64 -13 76 L15 76 C13 64 11 54 10 44 Z" fill={`url(#${g}-neck)`} />
+        <path d="M-12 46 C-11 55 -10 63 -11 74 L11 74 C10 63 9 55 8 46 Z" fill={`url(#${g}-skin)`} />
+        <path d="M-12 46 C-11 55 -10 63 -11 74 L11 74 C10 63 9 55 8 46 Z" fill={`url(#${g}-neck)`} />
 
-        {/* ── 머리: 왼쪽(문 쪽)으로 튼 뒷통수. 살갗은 볼·턱선·귀만 ── */}
-        <path d="M-38 30 C-38 12 -28 0 -12 0 C4 0 14 12 14 30 C14 44 6 54 -6 58 C-20 60 -34 50 -38 30 Z" fill={`url(#${g}-skin)`} />
-        {/* 턱선 아래 그늘 */}
-        <path d="M-30 46 C-24 54 -14 58 -6 58 C-16 60 -28 56 -30 46 Z" fill={`${INK}0.16)`} />
-        {/* 머리카락 — 짧은 커트. 정수리에서 뒷목까지 덮고 귀 뒤·관자놀이로 내려온다 */}
+        {/* ── 머리: 문 쪽(왼쪽)으로 돌린 3/4 뒷모습. 왼쪽 윤곽이 이마→코→입술→턱의 옆선이다 ──
+            좌표는 영상 시안(2.2s 프레임)의 머리 비율을 이 로컬 좌표(머리 폭 52 · 높이 61)로 환산한 값이다.
+            사실적인 얼굴은 그리지 않는다: 눈은 점 하나, 입은 선 하나, 나머지는 실루엣과 수염이 말한다. */}
+        {/* 살갗 — 두개골 + 옆얼굴. 이마(-29,18) → 눈썹뼈(-31.5,27) → 콧대(-30,30) → 코끝(-36,39)
+            → 인중(-31.5,42) → 입술(-32,47) → 턱끝(-27,56.5) */}
+        <path d={FACE_D} fill={`url(#${g}-skin)`} />
+        {/* 아래 그늘·수염은 얼굴 윤곽으로 잘라 낸다 — 실루엣 밖으로 새면 덩어리로 보인다 */}
+        <g clipPath={`url(#${g}-face)`}>
+          {/* 광대 아래·턱선 그늘 (뒤통수 쪽으로 갈수록 어둡다) */}
+          <path d="M-3 51 C5 45 11 38 14 30 C15 42 9 52 -3 56 Z" fill={`${INK}0.1)`} />
+          {/* 수염 — 구레나룻에서 턱선 아래를 통째로 덮는다. 윤곽은 clip 이 잡아 준다 */}
+          <path d="M-12 28 C-18 33 -26 39.5 -34 44 L-42 47 L-42 64 L2 64 L0 43 C-2 36 -6 30.5 -12 28 Z" fill={BEARD} />
+          {/* 콧수염 — 인중 아래 짧은 띠 */}
+          <path d="M-34 41.6 C-29 40.2 -24 40.6 -21.5 42.6 C-25 45.4 -31 46 -35 44.8 Z" fill={BEARD} />
+        </g>
+
+        {/* 눈썹 한 획과 눈 점 하나 — 코끝에서 뒤로 8 남짓 들어온 자리 */}
+        <path d="M-31 30.5 q4 -2 7.5 -0.8" stroke="#5b5b60" strokeWidth="1.9" strokeLinecap="round" fill="none" />
+        <ellipse cx="-28.4" cy="35.6" rx="1.6" ry="2" fill="#2b2b2f" />
+        <path d="M-30.4 33.6 q2.2 -1 4.2 -0.2" stroke={SKIN_SHADE} strokeWidth="1" strokeLinecap="round" fill="none" opacity="0.7" />
+        {/* 눈가 잔주름 · 이마 주름 두 줄 */}
+        <path d="M-24.5 36.5 q2.2 1 3.6 0.6" stroke={SKIN_SHADE} strokeWidth="1" strokeLinecap="round" fill="none" opacity="0.5" />
+        <path d="M-27.5 14 q5 -2 8.5 -1 M-28.6 18.5 q5 -2 8.5 -1" stroke={SKIN_SHADE} strokeWidth="1" strokeLinecap="round" fill="none" opacity="0.5" />
+
+        {/* 입 — 콧수염과 턱수염 사이로 보이는 선 하나 */}
+        <path d="M-31.4 47.8 q2.8 1.1 4.6 0.3" stroke="#8b5f57" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.75" />
+
+        {/* 귀 — 구레나룻 뒤, 눈보다 살짝 아래 */}
+        <path d="M-11.5 29.5 C-15 28.8 -16.2 33 -14.6 37.2 C-13.8 39.6 -10.8 39.6 -10 37.2 C-9.2 33.8 -10 31.2 -11.5 29.5 Z" fill={SKIN} />
+        <path d="M-12.8 32 C-14.5 33.2 -14.1 36.2 -12.4 37.1" stroke={SKIN_SHADE} strokeWidth="1.1" strokeLinecap="round" fill="none" />
+
+        {/* 머리카락 — 뒤로 넘긴 짧은 머리. 앞머리가 이마 위로 솟고, 헤어라인은 (-26,1)→(-20,23)→(-15,32) */}
         <path
-          d="M-40 28 C-40 8 -28 -3 -12 -3 C6 -3 17 10 17 30 C17 40 14 46 8 50 C0 48 -6 46 -12 48 C-22 46 -30 40 -32 32 C-34 30 -38 30 -40 28 Z"
+          d="M-26 1 C-20 -3.5 -10 -5 -1 -3 C10.5 -0.5 17.5 8 18 21
+             C18.5 29 16.5 35 13 39.5 C13.5 31 12 24.5 8.5 20
+             C2 22.5 -6 21.5 -12 18 C-16 16 -20 12 -23 8 C-25 5.5 -26 3 -26 1 Z"
           fill={`url(#${g}-hair)`}
         />
-        {/* 관자놀이·구레나룻의 흰머리 */}
-        <path d="M-40 27 C-38 20 -34 18 -30 20 C-31 27 -31 34 -30 40 C-36 38 -40 34 -40 27 Z" fill={HAIR_GREY} opacity="0.85" />
-        {/* 뒷목 언저리 희끗한 머리 결 */}
-        <path d="M-10 46 q7 -3 12 -9" stroke={HAIR_GREY} strokeWidth="2.4" strokeLinecap="round" fill="none" opacity="0.7" />
-        <path d="M0 47 q6 -2 9 -7" stroke={HAIR_GREY} strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.6" />
-        <path d="M-22 44 q4 -4 4 -9" stroke={HAIR_GREY} strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.55" />
-        {/* 정수리 근처 새치 몇 가닥 */}
-        <path d="M-24 8 q8 -7 18 -5" stroke={HAIR_GREY} strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.55" />
-        <path d="M-6 3 q9 0 14 7" stroke={HAIR_GREY} strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.45" />
+        {/* 옆머리 — 귀 위를 덮고 구레나룻으로 내려온다 */}
+        <path d="M-23 8 C-20 12 -16 16 -12 18 C-13 23 -13.5 28 -13 32.5 C-16.5 32 -20 29.5 -22 26 C-24.5 21 -24.5 13 -23 8 Z" fill={`url(#${g}-hair)`} />
+        {/* 관자놀이·뒷머리 은발 결 — 결을 따라 옅게 */}
+        <path d="M-21 13 q7 3.5 13 4.5" stroke={HAIR_GREY} strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.55" />
+        <path d="M-20 17.5 q7 3 12 3.5" stroke={HAIR_GREY} strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.45" />
+        <path d="M-12 2 q9 -1 15 5" stroke={HAIR_GREY} strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.4" />
+        <path d="M0 -1.5 q9 3.5 12.5 10" stroke={HAIR_GREY} strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.3" />
         {/* 뒷통수 윤곽의 림라이트 */}
-        <path d="M2 -1 C12 6 17 18 16 34" stroke={`${LIT}0.16)`} strokeWidth="2.4" strokeLinecap="round" fill="none" />
-        {/* 귀 — 머리카락 밖으로 나온 작은 귀. 뒤에서 보여 귓바퀴 곡선만 */}
-        <path d="M-33 27 C-39 24 -42 32 -38 39 C-36 42 -32 41 -31 38 C-30 34 -31 30 -33 27 Z" fill={SKIN} />
-        <path d="M-35 30 C-38 31 -38 36 -35 38" stroke={SKIN_SHADE} strokeWidth="1.4" strokeLinecap="round" fill="none" />
+        <path d="M3 -2.5 C12 1.5 18 11 18 24" stroke={`${LIT}0.16)`} strokeWidth="2.2" strokeLinecap="round" fill="none" />
 
         {/* ── 먼 팔(오른팔): 늘어뜨린 채 장바구니를 들고 있다. 소매는 위팔이 굵고 손목으로 가늘어진다 ── */}
         <path
